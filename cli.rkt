@@ -53,8 +53,7 @@
 (define (board-row index board [show-hidden? #f])
   (let ([row (get-row index board)])
     (string-append (board-row-role-str row show-hidden?)
-                   (board-row-player-str row show-hidden?)
-                   (board-row-revealed-str row))))
+                   (board-row-player-str row show-hidden?))))
 
 (define (strfmt-board board [show-hidden? #f])
   (string-join (flatten

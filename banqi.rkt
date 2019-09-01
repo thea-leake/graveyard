@@ -47,17 +47,14 @@
   (get-location-attr 'player piece show-hidden?))
 
 
-(define player1-roles
-  (map (lambda (role) (mkpiece 1 role))
+(define (player-roles team)
+  (map (lambda (role) (mkpiece team role))
        player-start-roles))
 
-(define player2-roles
-  (map (lambda (role) (mkpiece 2 role))
-       player-start-roles))
 
 (define initial-board
-  (shuffle (append player1-roles
-                   player2-roles)))
+  (shuffle (append (player-roles "Red")
+                   (player-roles "Black"))))
 
 (define (flip piece)
   (hash-set piece 'revealed #t))
@@ -92,12 +89,18 @@
   (list-ref board
             (get-index-coordinates coords)))
 
-(define (update-coordinates coord piece board)
-  (let* ([take-pos (get-index-coordinates coord)]
+(define (update-coordinates coords piece board)
+  (let* ([take-pos (get-index-coordinates coords)]
          [drop-pos (+ 1 take-pos)])
     (append (take board take-pos)
             (cons piece
                   (drop board drop-pos)))))
+
+(define (flip-coordinates coords board)
+  (update-coordinates coords
+                      (flip
+                       (piece-at-coordinates coords board))
+                      board))
 
 (define (empty-coordinates coord board) ;; updates location to empty
   (update-coordinates coord
