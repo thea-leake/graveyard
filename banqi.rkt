@@ -38,7 +38,7 @@
     (show-hidden? (hash-ref piece attr))
     ((location-revealed? piece)
      (hash-ref piece attr))
-    (else "Hidden")))
+    (else "X")))
 
 (define (role-name piece [show-hidden? #f])
   (get-location-attr 'role piece show-hidden?))
