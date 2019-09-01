@@ -30,14 +30,22 @@
         'role "#Empty#"
         'player #\_))
 
-(define (role-name piece)
-  (hash-ref piece 'role))
-
-(define (player-name piece)
-  (hash-ref piece 'player))
-
 (define (location-revealed? piece)
   (hash-ref piece 'revealed))
+
+(define (get-location-attr attr piece [show-hidden? #f])
+  (cond
+    (show-hidden? (hash-ref piece attr))
+    ((location-revealed? piece)
+     (hash-ref piece attr))
+    (else "Hidden")))
+
+(define (role-name piece [show-hidden? #f])
+  (get-location-attr 'role piece show-hidden?))
+
+(define (player-name piece [show-hidden? #f])
+  (get-location-attr 'player piece show-hidden?))
+
 
 (define player1-roles
   (map (lambda (role) (mkpiece 1 role))

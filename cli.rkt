@@ -18,9 +18,6 @@
       #:left-pad-string "_"
       #:right-pad-string "_"))
 
-(define (role-reveal-print-padded piece)
-  (loc-field-print-padded role-name piece))
-
 (define (print-row row-list attr-fn)
   (string-join (map attr-fn
                     row-list)
@@ -28,35 +25,44 @@
                #:before-first "\n|| "
                #:after-last " ||\n"))
 
-(define (board-reveal-row-role-str row-list)
-  (print-row row-list role-reveal-print-padded))
+(define (role-print-padded piece [show-hidden? #f])
+  (loc-field-print-padded (lambda (piece) (role-name piece show-hidden?))
+                          piece))
 
-(define (player-reveal-print-padded piece)
-  (loc-field-print-padded player-name piece))
+(define (board-row-role-str row-list [show-hidden? #f])
+  (print-row row-list (lambda (piece)
+                        (role-print-padded piece
+                                           show-hidden?))))
 
-(define (board-reveal-row-player-str row-list)
-  (print-row row-list player-reveal-print-padded))
+(define (player-print-padded piece [show-hidden? #f])
+  (loc-field-print-padded (lambda (piece)(player-name piece show-hidden? ))
+                          piece))
+
+(define (board-row-player-str row-list [show-hidden? #f])
+  (print-row row-list (lambda (piece)
+                        (player-print-padded piece
+                                             show-hidden?))))
 
 
 (define (location-revealed-print-padded piece)
   (loc-field-print-padded location-revealed? piece))
 
-(define (board-reveal-row-revealed-str row-list)
+(define (board-row-revealed-str row-list)
   (print-row row-list location-revealed-print-padded))
 
-(define (board-reveal-row index board)
+(define (board-row index board [show-hidden? #f])
   (let ([row (get-row index board)])
-    (string-append (board-reveal-row-role-str row)
-                   (board-reveal-row-player-str row)
-                   (board-reveal-row-revealed-str row))))
+    (string-append (board-row-role-str row show-hidden?)
+                   (board-row-player-str row show-hidden?)
+                   (board-row-revealed-str row))))
 
-(define (strfmt-board-reveal board)
+(define (strfmt-board board [show-hidden? #f])
   (string-join (flatten
-                (map (lambda (i) (board-reveal-row i board))
+                (map (lambda (i) (board-row i board show-hidden?))
                      (range board-rows)))
                line-break
                #:before-first line-break
                #:after-last line-break))
 
-(define (display-board-reveal board)
-  (display (strfmt-board-reveal board)))
+(define (display-board board [show-hidden? #f])
+  (display (strfmt-board board show-hidden?)))
