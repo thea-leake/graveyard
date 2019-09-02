@@ -18,8 +18,6 @@
          (make-list 5 "Soldier")
          (make-list 2 "Cannon"))))
 
-
-
 (define (mkpiece player role)
   (hash 'player player
         'revealed #f
@@ -53,10 +51,12 @@
   (map (lambda (role) (mkpiece team role))
        player-start-roles))
 
-
-(define initial-board
+(define (gen-board)
   (shuffle (append (player-roles "Red")
                    (player-roles "Black"))))
+
+(define initial-board
+  (gen-board))
 
 (define (flip piece)
   (hash-set piece 'revealed #t))
@@ -67,7 +67,7 @@
 (define (y-pos coords)
   (cadr coords))
 
-(define (get-index-coordinates coords)
+(define (get-index-from-coordinates coords)
   (let ([x (x-pos coords)]
         [y (y-pos coords)])
     (+ (* y board-columns)
@@ -87,9 +87,16 @@
                 end)
           start)))
 
+(define (index-in-range? index)
+  (and (<= 0 index)
+       (> location-count index)))
+
+(define (coords-in-range? coords)
+  (index-in-range? (get-index-from-coordinates coords)))
+
 (define (piece-at-coordinates coords board)
   (list-ref board
-            (get-index-coordinates coords)))
+            (get-index-from-coordinates coords)))
 
 (define (location-revealed? coords board)
   (piece-revealed? (piece-at-coordinates coords board)))
@@ -103,7 +110,7 @@
   (map get-coords-from-index (empty-index-list board)))
 
 (define (update-coordinates coords piece board)
-  (let* ([take-pos (get-index-coordinates coords)]
+  (let* ([take-pos (get-index-from-coordinates coords)]
          [drop-pos (+ 1 take-pos)])
     (append (take board take-pos)
             (cons piece
