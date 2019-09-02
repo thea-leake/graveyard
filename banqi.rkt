@@ -5,6 +5,8 @@
 
 (define board-rows 4)
 (define board-columns 8)
+(define location-count (* board-columns
+                          board-rows))
 
 (define player-start-roles
   (flatten
@@ -30,13 +32,13 @@
         'role "#Empty#"
         'player #\_))
 
-(define (location-revealed? piece)
+(define (piece-revealed? piece)
   (hash-ref piece 'revealed))
 
 (define (get-location-attr attr piece [show-hidden? #f])
   (cond
     (show-hidden? (hash-ref piece attr))
-    ((location-revealed? piece)
+    ((piece-revealed? piece)
      (hash-ref piece attr))
     (else "X")))
 
@@ -72,10 +74,10 @@
        x)))
 
 (define (get-coords-from-index index)
-  (let ([x (quotient index
-                     board-columns)]
-        [y (remainder index
-                      board-columns)])
+  (let ([x (remainder index
+                      board-columns)]
+        [y (quotient index
+                     board-columns)])
     (list x y)))
 
 (define (get-row index board)
@@ -88,6 +90,17 @@
 (define (piece-at-coordinates coords board)
   (list-ref board
             (get-index-coordinates coords)))
+
+(define (location-revealed? coords board)
+  (piece-revealed? (piece-at-coordinates coords board)))
+
+(define (empty-index-list board)
+  (filter (lambda (x)
+            (location-revealed? (get-coords-from-index x) board))
+          (range location-count)))
+
+(define (empty-coords-list board)
+  (map get-coords-from-index (empty-index-list board)))
 
 (define (update-coordinates coords piece board)
   (let* ([take-pos (get-index-coordinates coords)]

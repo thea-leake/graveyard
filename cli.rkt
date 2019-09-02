@@ -1,5 +1,4 @@
 #lang racket/base
-(require racket/include)
 (require racket/list)
 (require racket/format)
 (require racket/string)
@@ -45,7 +44,7 @@
 
 
 (define (location-revealed-print-padded piece)
-  (loc-field-print-padded location-revealed? piece))
+  (loc-field-print-padded piece-revealed? piece))
 
 (define (board-row-revealed-str row-list)
   (print-row row-list location-revealed-print-padded))
