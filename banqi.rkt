@@ -24,7 +24,7 @@
         'role role
         'empty #f))
 
-(define empty-pos
+(define empty-location
   (hash 'empty #t
         'revealed #t
         'role "#Empty#"
@@ -109,6 +109,15 @@
 (define (empty-coords-list board)
   (map get-coords-from-index (empty-index-list board)))
 
+(define (shift-location-coords src-coords direction count)
+  (let ([x (x-pos src-coords)]
+        [y (y-pos src-coords)])
+    (cond
+      ((eq? direction 'up) (list x (+ count y)))
+      ((eq? direction 'down) (list x (- count y)))
+      ((eq? direction 'left) (list (- count x) y))
+      ((eq? direction 'right) (list (+ count x) y)))))
+
 (define (update-coordinates coords piece board)
   (let* ([take-pos (get-index-from-coordinates coords)]
          [drop-pos (+ 1 take-pos)])
@@ -124,7 +133,7 @@
 
 (define (empty-coordinates coord board) ;; updates location to empty
   (update-coordinates coord
-                      empty-pos
+                      empty-location
                       board))
 
 (define (move-piece-clobber src-coords dest-coords board)
@@ -134,4 +143,3 @@
                                                                  board)
                                            board)
                                            ))
-
