@@ -10,7 +10,7 @@
 
 (define player-start-roles
   (flatten
-   (list (make-list 2 "General")
+   (list (make-list 1 "General")
          (make-list 2 "Advisor")
          (make-list 2 "Elephant")
          (make-list 2 "Chariot")
@@ -94,9 +94,30 @@
 (define (coords-in-range? coords)
   (index-in-range? (get-index-from-coordinates coords)))
 
+(define (coords-out-of-range? coords)
+  (not (coords-in-range? coords)))
+
 (define (piece-at-coordinates coords board)
   (list-ref board
             (get-index-from-coordinates coords)))
+
+(define (player-at-location coords board)
+  (hash-ref (piece-at-coordinates coords
+                                  board)
+            'player))
+
+(define (piece-belongs-to-player? player coords board)
+  (eq? player
+      (player-at-location coords board)))
+
+(define (role-at-location coords board)
+  (hash-ref (piece-at-coordinates coords
+                                  board)
+            'role))
+
+(define (is-piece-cannon? coords board)
+  (eq? "Cannon"
+       (role-at-location coords board)))
 
 (define (location-revealed? coords board)
   (piece-revealed? (piece-at-coordinates coords board)))
@@ -143,3 +164,32 @@
                                                                  board)
                                            board)
                                            ))
+
+(define (valid-non-cannon-move? src-coords dest-coords)
+  (let* ([src-index (get-index-from-coordinates src-coords)]
+         [dest-index (get-index-from-coordinates dest-coords)]
+         [location-difference (abs (- src-index
+                                      dest-index))])
+    (or (= board-columns location-difference)
+        (and (= 1 location-difference)
+             (= (remainder src-index board-columns)
+                (remainder src-index board-columns))))))
+
+(define (non-cannon-move-check src-coords dest-coords)
+  (cond
+    ((valid-non-cannon-move? src-coords dest-coords)
+     '(#t "Valid move."))
+    (else '(#f "Invalid Invalid move location"))))
+
+(define (valid-cannon-move? src-coords dest-coords board)
+  (cond
+    (else '(#t "Valid move"))))
+
+(define (is-valid-move? player src-coords dest-coords board)
+  (cond
+    ((coords-out-of-range? dest-coords) '(#f "Destination is off of board"))
+    ((coords-out-of-range? src-coords) '(#f "Source is off of board"))
+    ((piece-belongs-to-player? player dest-coords board ) '(#f "Cannot capture your own piece"))
+    ((is-piece-cannon? src-coords board) (valid-cannon-move? src-coords dest-coords board))
+    (else
+     (non-cannon-move-check src-coords dest-coords))))
