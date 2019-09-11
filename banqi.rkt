@@ -137,6 +137,9 @@
 (define (location-revealed? coords board)
   (piece-revealed? (piece-at-coordinates coords board)))
 
+(define (location-hidden? coords board)
+  (not (location-revealed? coords board)))
+
 (define (empty-index-list board)
   (filter (lambda (x)
             (location-revealed? (get-coords-from-index x) board))
@@ -199,8 +202,8 @@
 
 (define (cannon-move-list-check piece-count dest-coords board)
   (cond
-    ((>= 1 piece-count) '(#f "Must jump over one piece")) ;; must jump over at least 1 piece
-    ((< cannon-max-pieces piece-count) '(#f "Cannot jump over more than one piece")) ;; cannot jump over more than one 
+    ((>= 1 piece-count) '(#f "Must jump over one piece"))
+    ((< cannon-max-pieces piece-count) '(#f "Cannot jump over more than one piece"))
     ((and (= cannon-max-pieces piece-count)
           (not (location-empty? dest-coords board)))
      '(#t "Valid cannon move"))
@@ -209,7 +212,6 @@
      '(#f "Cannot capture a piece without jumping over another piece"))
     (else '(#t "Valid move"))))
 
-;; Check for when cannon move is across
 (define (cannon-row-move-check src-coords dest-coords board)
   (let* ([src-index (get-index-from-coordinates src-coords)]
          [dest-index (get-index-from-coordinates dest-coords)]
@@ -236,10 +238,8 @@
 (define (cannon-column-move-check src-coords dest-coords board)
   (let* ([src-index (get-index-from-coordinates src-coords)]
          [dest-index (get-index-from-coordinates dest-coords)]
-         [first-index (min src-index
-                           dest-index)]
-         [last-index (max src-index
-                          dest-index)]
+         [first-index (min src-index dest-index)]
+         [last-index (max src-index dest-index)]
          [column-list (column-range-list first-index
                                          last-index
                                          board
@@ -266,6 +266,8 @@
   (cond
     ((coords-out-of-range? dest-coords) '(#f "Destination is off of board"))
     ((coords-out-of-range? src-coords) '(#f "Source is off of board"))
+    ((location-hidden? dest-coords board) '(#f "Cannot capture a hidden piece"))
+    ((not (piece-belongs-to-player? player src-coords board )) '(#f "Cannot move an opponents piece"))
     ((piece-belongs-to-player? player dest-coords board ) '(#f "Cannot capture your own piece"))
     ((is-piece-cannon? src-coords board) (valid-cannon-move? src-coords dest-coords board))
     (else
