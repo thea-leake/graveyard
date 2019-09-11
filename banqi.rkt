@@ -8,6 +8,10 @@
 (define location-count (* board-columns
                           board-rows))
 
+;; number of pieces that can be involve in a cannon move
+;; cannon, piece cannon jumps over, piece cannon takes
+(define cannon-max-pieces 3)
+
 (define player-start-roles
   (flatten
    (list (make-list 1 "General")
@@ -110,6 +114,17 @@
   (eq? player
       (player-at-location coords board)))
 
+(define (location-empty? coords board)
+  (hash-ref (piece-at-coordinates coords
+                                  board)
+            'empty))
+
+(define (pieces-in-list piece-list)
+  (count (lambda (x)
+            (not (hash-ref x
+                           'empty)))
+          piece-list))
+
 (define (role-at-location coords board)
   (hash-ref (piece-at-coordinates coords
                                   board)
@@ -175,15 +190,77 @@
              (= (remainder src-index board-columns)
                 (remainder src-index board-columns))))))
 
+
 (define (non-cannon-move-check src-coords dest-coords)
   (cond
     ((valid-non-cannon-move? src-coords dest-coords)
      '(#t "Valid move."))
     (else '(#f "Invalid Invalid move location"))))
 
-(define (valid-cannon-move? src-coords dest-coords board)
+(define (cannon-move-list-check piece-count dest-coords board)
   (cond
+    ((>= 1 piece-count) '(#f "Must jump over one piece")) ;; must jump over at least 1 piece
+    ((< cannon-max-pieces piece-count) '(#f "Cannot jump over more than one piece")) ;; cannot jump over more than one 
+    ((and (= cannon-max-pieces piece-count)
+          (not (location-empty? dest-coords board)))
+     '(#t "Valid cannon move"))
+    ((= cannon-max-pieces piece-count) '(#f "Cannot jump over more than one piece"))
+    ((not (location-empty? dest-coords board))
+     '(#f "Cannot capture a piece without jumping over another piece"))
     (else '(#t "Valid move"))))
+
+;; Check for when cannon move is across
+(define (cannon-row-move-check src-coords dest-coords board)
+  (let* ([src-index (get-index-from-coordinates src-coords)]
+         [dest-index (get-index-from-coordinates dest-coords)]
+         [first-index (min src-index
+                     dest-index)]
+         [last-index (max src-index
+                    dest-index)])
+    (cannon-move-list-check (pieces-in-list (drop (take board
+                                                        (+ 1 last-index))
+                                                  first-index))
+                            dest-coords
+                            board)))
+
+(define (column-range-list start-index end-index board accum)
+  (cond
+    ((> start-index end-index) accum)
+    (else
+     (column-range-list start-index
+                        (- end-index board-columns)
+                        board
+                        (cons (list-ref board end-index)
+                              accum)))))
+
+(define (cannon-column-move-check src-coords dest-coords board)
+  (let* ([src-index (get-index-from-coordinates src-coords)]
+         [dest-index (get-index-from-coordinates dest-coords)]
+         [first-index (min src-index
+                           dest-index)]
+         [last-index (max src-index
+                          dest-index)]
+         [column-list (column-range-list first-index
+                                         last-index
+                                         board
+                                         '())])
+    (cannon-move-list-check (pieces-in-list column-list)
+                            dest-coords
+                            board)))
+
+
+(define (valid-cannon-move? src-coords dest-coords board)
+  (let* ([src-index (get-index-from-coordinates src-coords)]
+         [dest-index (get-index-from-coordinates dest-coords)]
+         [move-horizontal? (= (quotient src-index board-columns)
+                              (quotient dest-index board-columns))])
+   (cond
+     (move-horizontal? (cannon-row-move-check src-coords
+                                              dest-coords
+                                              board))
+     (else (cannon-column-move-check src-coords
+                                     dest-coords
+                                     board)))))
 
 (define (is-valid-move? player src-coords dest-coords board)
   (cond

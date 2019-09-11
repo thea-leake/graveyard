@@ -5,6 +5,8 @@
 
 (require "banqi.rkt")
 
+(provide (all-defined-out))
+
 (define max-name-len 8)
 (define cli-separator-len 91)
 (define line-break
