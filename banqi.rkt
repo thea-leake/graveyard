@@ -191,14 +191,14 @@
     (or (= board-columns location-difference)
         (and (= 1 location-difference)
              (= (remainder src-index board-columns)
-                (remainder src-index board-columns))))))
+                (remainder dest-index board-columns))))))
 
 
 (define (non-cannon-move-check src-coords dest-coords)
   (cond
     ((valid-non-cannon-move? src-coords dest-coords)
      '(#t "Valid move."))
-    (else '(#f "Invalid Invalid move location"))))
+    (else '(#f "Invalid move location"))))
 
 (define (cannon-move-list-check piece-count dest-coords board)
   (cond
