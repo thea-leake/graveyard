@@ -52,11 +52,6 @@
                              (car remaining-roles)
                              incr))))))
 
-(define hierarchical-exceptions
-  (list (hash 'role "Cannon"
-              'immune-from (car hierarchical-roles)
-              'vulerable-to (cdr hierarchical-roles)
-              'can-capture hierarchical-roles)))
 
 (define (piece-revealed? piece)
   (hash-ref piece 'revealed))
