@@ -34,6 +34,30 @@
         'role "#Empty#"
         'player #\_))
 
+;; it is worth noting that this is not referenced when the cannon is capturing
+;; cannons can capture any unit, and any unit except soldier can capture the cannon
+(define hierarchical-roles
+  '("General" "Advisor" "Elephant" "Chariot" "Horse" "Cannon" "Soldier"))
+
+
+(define role-hierarchy
+  (let build ([remaining-roles hierarchical-roles]
+              [incr 0]
+              [accum (hash)])
+    (cond
+      ((null? remaining-roles) accum)
+      (else (build (cdr remaining-roles)
+                   (add1 incr)
+                   (hash-set accum
+                             (car remaining-roles)
+                             incr))))))
+
+(define hierarchical-exceptions
+  (list (hash 'role "Cannon"
+              'immune-from (car hierarchical-roles)
+              'vulerable-to (cdr hierarchical-roles)
+              'can-capture hierarchical-roles)))
+
 (define (piece-revealed? piece)
   (hash-ref piece 'revealed))
 
@@ -159,7 +183,7 @@
 
 (define (update-coordinates coords piece board)
   (let* ([take-pos (get-index-from-coordinates coords)]
-         [drop-pos (+ 1 take-pos)])
+         [drop-pos (add1 take-pos)])
     (append (take board take-pos)
             (cons piece
                   (drop board drop-pos)))))
@@ -183,6 +207,22 @@
                                            board)
                                            ))
 
+
+(define (piece-in-hierarchy? role)
+  (findf (lambda (x)
+           (eq? x role))
+         hierarchical-roles))
+
+
+(define (hierarchy-value role)
+  (hash-ref role-hierarchy role))
+
+
+(define (hierarchal-able-to-capture? capturing-role defending-role)
+   (<= (hierarchy-value capturing-role)
+       (hierarchy-value defending-role)))
+
+
 (define (valid-non-cannon-move? src-coords dest-coords)
   (let* ([src-index (get-index-from-coordinates src-coords)]
          [dest-index (get-index-from-coordinates dest-coords)]
@@ -194,11 +234,16 @@
                 (remainder dest-index board-columns))))))
 
 
-(define (non-cannon-move-check src-coords dest-coords)
-  (cond
-    ((valid-non-cannon-move? src-coords dest-coords)
-     '(#t "Valid move."))
-    (else '(#f "Invalid move location"))))
+(define (non-cannon-move-check src-coords dest-coords board)
+  (let* ([role? (lambda (x) (role-at-location x board))]
+         [capturable? (hierarchal-able-to-capture? (role? src-coords)
+                                                   (role? dest-coords))])
+    (cond
+      ((not capturable?) '(#f "Target piece too powerful to capture"))
+      ((valid-non-cannon-move? src-coords dest-coords)
+       '(#t "Valid move."))
+      (else '(#f "Invalid move location")))))
+
 
 (define (cannon-move-list-check piece-count dest-coords board)
   (cond
@@ -212,6 +257,7 @@
      '(#f "Cannot capture a piece without jumping over another piece"))
     (else '(#t "Valid move"))))
 
+
 (define (cannon-row-move-check src-coords dest-coords board)
   (let* ([src-index (get-index-from-coordinates src-coords)]
          [dest-index (get-index-from-coordinates dest-coords)]
@@ -220,10 +266,11 @@
          [last-index (max src-index
                     dest-index)])
     (cannon-move-list-check (pieces-in-list (drop (take board
-                                                        (+ 1 last-index))
+                                                        (add1 last-index))
                                                   first-index))
                             dest-coords
                             board)))
+
 
 (define (column-range-list start-index end-index board accum)
   (cond
@@ -234,6 +281,7 @@
                         board
                         (cons (list-ref board end-index)
                               accum)))))
+
 
 (define (cannon-column-move-check src-coords dest-coords board)
   (let* ([src-index (get-index-from-coordinates src-coords)]
@@ -262,6 +310,8 @@
                                      dest-coords
                                      board)))))
 
+
+
 (define (is-valid-move? player src-coords dest-coords board)
   (cond
     ((coords-out-of-range? dest-coords) '(#f "Destination is off of board"))
@@ -271,4 +321,4 @@
     ((piece-belongs-to-player? player dest-coords board ) '(#f "Cannot capture your own piece"))
     ((is-piece-cannon? src-coords board) (valid-cannon-move? src-coords dest-coords board))
     (else
-     (non-cannon-move-check src-coords dest-coords))))
+     (non-cannon-move-check src-coords dest-coords board))))
