@@ -1,5 +1,6 @@
 #lang racket/base
 (require racket/list)
+(require racket/hash)
 
 (provide (all-defined-out))
 
@@ -7,6 +8,7 @@
 (define board-columns 8)
 (define location-count (* board-columns
                           board-rows))
+(define board-indexes (range location-count))
 
 ;; number of pieces that can be involve in a cannon move
 ;; cannon, piece cannon jumps over, piece cannon takes
@@ -151,10 +153,15 @@
 (define (location-hidden? coords board)
   (not (location-revealed? coords board)))
 
+(define (hidden-coordinates board)
+  (filter (lambda (coords)
+            (not (location-revealed? coords board)))
+          board-indexes))
+
 (define (empty-index-list board)
   (filter (lambda (x)
             (location-revealed? (get-coords-from-index x) board))
-          (range location-count)))
+          board-indexes))
 
 (define (empty-coords-list board)
   (map get-coords-from-index (empty-index-list board)))
@@ -197,8 +204,7 @@
   (let ([captured-piece (piece-at-coordinates src-coords board)]
         [updated-board (move-piece-clobber src-coords
                                            dest-coords
-                                           board)]
-        )
+                                           board)])
     (list captured-piece updated-board)))
 
 (define (hierarchy-value role)
@@ -309,3 +315,42 @@
     ((is-piece-cannon? src-coords board) (valid-cannon-move? src-coords dest-coords board))
     (else
      (non-cannon-move-check src-coords dest-coords board))))
+
+
+(define (valid-moves-for-location player src-coords board)
+  (map get-coords-from-index
+       (filter (lambda (dest-index)
+                 (car (is-valid-move? player
+                                      src-coords
+                                      (get-coords-from-index dest-index)
+                                      board)))
+               board-indexes)))
+
+
+(define (valid-moves-for-player player board)
+  (filter (lambda (locations) (not (null? (hash-ref locations 'dest-coords))))
+          (map (lambda (src-index)(hash 'src-coords (get-coords-from-index src-index)
+                                        'dest-coords (valid-moves-for-location player
+                                                                               (get-coords-from-index src-index)
+                                                                               board)))
+               board-indexes)))
+
+
+(define (player-move player src-coords dest-coords board)
+  (let* ([move-check (is-valid-move? player
+                                     src-coords
+                                     dest-coords
+                                     board)]
+         [move-response-init (hash 'valid? (car move-check)
+                                   'message (cdr move-check))])
+    (cond
+      ((hash-ref move-response-init 'valid?)
+       (hash-union (hash 'player (toggle-player player)
+                         'board (move-piece-clobber src-coords dest-coords board)
+                         'captured (piece-at-coordinates src-coords board))
+                   move-response-init))
+      (else
+       (hash-union (hash 'player player
+                         'board board
+                         'captured empty-location)
+                   move-response-init)))))
