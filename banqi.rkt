@@ -36,21 +36,8 @@
 
 ;; it is worth noting that this is not referenced when the cannon is capturing
 ;; cannons can capture any unit, and any unit except soldier can capture the cannon
-(define hierarchical-roles
-  '("General" "Advisor" "Elephant" "Chariot" "Horse" "Cannon" "Soldier"))
-
-
 (define role-hierarchy
-  (let build ([remaining-roles hierarchical-roles]
-              [incr 0]
-              [accum (hash)])
-    (cond
-      ((null? remaining-roles) accum)
-      (else (build (cdr remaining-roles)
-                   (add1 incr)
-                   (hash-set accum
-                             (car remaining-roles)
-                             incr))))))
+  '("General" "Advisor" "Elephant" "Chariot" "Horse" "Cannon" "Soldier" "#Empty#"))
 
 
 (define (piece-revealed? piece)
@@ -80,6 +67,11 @@
 
 (define initial-board
   (gen-board))
+
+(define (toggle-player player)
+  (if (eq? player "Red")
+      "Black"
+      "Red"))
 
 (define (flip piece)
   (hash-set piece 'revealed #t))
@@ -199,23 +191,23 @@
                        (update-coordinates dest-coords
                                            (piece-at-coordinates src-coords
                                                                  board)
-                                           board)
-                                           ))
+                                           board)))
 
-
-(define (piece-in-hierarchy? role)
-  (findf (lambda (x)
-           (eq? x role))
-         hierarchical-roles))
-
+(define (move-piece src-coords dest-coords board)
+  (let ([captured-piece (piece-at-coordinates src-coords board)]
+        [updated-board (move-piece-clobber src-coords
+                                           dest-coords
+                                           board)]
+        )
+    (list captured-piece updated-board)))
 
 (define (hierarchy-value role)
-  (hash-ref role-hierarchy role))
+  (index-of role-hierarchy role))
 
 
 (define (hierarchal-able-to-capture? capturing-role defending-role)
-   (<= (hierarchy-value capturing-role)
-       (hierarchy-value defending-role)))
+  (<= (hierarchy-value capturing-role)
+      (hierarchy-value defending-role)))
 
 
 (define (valid-non-cannon-move? src-coords dest-coords)
@@ -225,8 +217,8 @@
                                       dest-index))])
     (or (= board-columns location-difference)
         (and (= 1 location-difference)
-             (= (remainder src-index board-columns)
-                (remainder dest-index board-columns))))))
+             (= (quotient src-index board-columns)
+                (quotient dest-index board-columns))))))
 
 
 (define (non-cannon-move-check src-coords dest-coords board)
