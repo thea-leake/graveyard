@@ -1,6 +1,7 @@
 #lang racket/base
 (require racket/list)
 (require racket/hash)
+(require memoize)
 
 (provide (all-defined-out))
 
@@ -84,34 +85,34 @@
 (define (y-pos coords)
   (cadr coords))
 
-(define (get-index-from-coordinates coords)
+(define/memo (get-index-from-coordinates coords)
   (let ([x (x-pos coords)]
         [y (y-pos coords)])
     (+ (* y board-columns)
        x)))
 
-(define (get-coords-from-index index)
+(define/memo (get-coords-from-index index)
   (let ([x (remainder index
                       board-columns)]
         [y (quotient index
                      board-columns)])
     (list x y)))
 
-(define (get-row index board)
+(define/memo (get-row index board)
   (let* ([start (* index board-columns)]
          [end (+ start board-columns)])
     (drop (take board
                 end)
           start)))
 
-(define (index-in-range? index)
+(define/memo (index-in-range? index)
   (and (<= 0 index)
        (> location-count index)))
 
-(define (coords-in-range? coords)
+(define/memo (coords-in-range? coords)
   (index-in-range? (get-index-from-coordinates coords)))
 
-(define (coords-out-of-range? coords)
+(define/memo (coords-out-of-range? coords)
   (not (coords-in-range? coords)))
 
 (define (piece-at-coordinates coords board)
@@ -155,7 +156,8 @@
 
 (define (hidden-coordinates board)
   (filter (lambda (coords)
-            (not (location-revealed? coords board)))
+            (location-hidden? (get-coords-from-index coords)
+                              board))
           board-indexes))
 
 (define (empty-index-list board)
@@ -207,16 +209,16 @@
                                            board)])
     (list captured-piece updated-board)))
 
-(define (hierarchy-value role)
+(define/memo (hierarchy-value role)
   (index-of role-hierarchy role))
 
 
-(define (hierarchal-able-to-capture? capturing-role defending-role)
+(define/memo (hierarchal-able-to-capture? capturing-role defending-role)
   (<= (hierarchy-value capturing-role)
       (hierarchy-value defending-role)))
 
 
-(define (valid-non-cannon-move? src-coords dest-coords)
+(define/memo (valid-non-cannon-move? src-coords dest-coords)
   (let* ([src-index (get-index-from-coordinates src-coords)]
          [dest-index (get-index-from-coordinates dest-coords)]
          [location-difference (abs (- src-index
@@ -310,6 +312,7 @@
     ((coords-out-of-range? dest-coords) '(#f "Destination is off of board"))
     ((coords-out-of-range? src-coords) '(#f "Source is off of board"))
     ((location-hidden? dest-coords board) '(#f "Cannot capture a hidden piece"))
+    ((location-hidden? src-coords board) '(#f "Cannot move a hidden piece"))
     ((not (piece-belongs-to-player? player src-coords board )) '(#f "Cannot move an opponents piece"))
     ((piece-belongs-to-player? player dest-coords board ) '(#f "Cannot capture your own piece"))
     ((is-piece-cannon? src-coords board) (valid-cannon-move? src-coords dest-coords board))
@@ -318,23 +321,36 @@
 
 
 (define (valid-moves-for-location player src-coords board)
-  (map get-coords-from-index
-       (filter (lambda (dest-index)
-                 (car (is-valid-move? player
-                                      src-coords
-                                      (get-coords-from-index dest-index)
-                                      board)))
-               board-indexes)))
+  (filter-map (lambda (dest-index)
+                (and (car (is-valid-move? player
+                                          src-coords
+                                          (get-coords-from-index dest-index)
+                                          board))
+                     (get-coords-from-index dest-index)))
+              board-indexes))
 
+
+(define (not-null? lst)
+  (not (null? lst)))
 
 (define (valid-moves-for-player player board)
-  (filter (lambda (locations) (not (null? (hash-ref locations 'dest-coords))))
-          (map (lambda (src-index)(hash 'src-coords (get-coords-from-index src-index)
-                                        'dest-coords (valid-moves-for-location player
-                                                                               (get-coords-from-index src-index)
-                                                                               board)))
-               board-indexes)))
+  (filter-map (lambda (src-index)
+                     (let* ([index (get-coords-from-index src-index)]
+                           [valid-destinations (valid-moves-for-location player
+                                                                         index
+                                                                         board)])
+                       (and (not-null? valid-destinations)
+                            (list index valid-destinations))))
+                   board-indexes))
 
+
+(define (valid-player-turns player board)
+  (let ([moves (valid-moves-for-player player board)]
+        [flips (hidden-coordinates board)])
+    (hash 'moves (make-hash moves )
+          'flips flips
+          'actions-available? (or (not-null? moves)
+                                  (not-null? flips)))))
 
 (define (player-move player src-coords dest-coords board)
   (let* ([move-check (is-valid-move? player
