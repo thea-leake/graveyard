@@ -15,6 +15,11 @@
 ;; cannon, piece cannon jumps over, piece cannon takes
 (define cannon-max-pieces 3)
 
+;; it is worth noting that this is not referenced when the cannon is capturing
+;; cannons can capture any unit, and any unit except soldier can capture the cannon
+(define role-hierarchy
+  '("General" "Advisor" "Elephant" "Chariot" "Horse" "Cannon" "Soldier" "#Empty#"))
+
 (define player-start-roles
   (flatten
    (list (make-list 1 "General")
@@ -37,14 +42,10 @@
         'role "#Empty#"
         'player #\_))
 
-;; it is worth noting that this is not referenced when the cannon is capturing
-;; cannons can capture any unit, and any unit except soldier can capture the cannon
-(define role-hierarchy
-  '("General" "Advisor" "Elephant" "Chariot" "Horse" "Cannon" "Soldier" "#Empty#"))
-
 
 (define (piece-revealed? piece)
   (hash-ref piece 'revealed))
+
 
 (define (get-location-attr attr piece [show-hidden? #f])
   (cond
@@ -56,6 +57,7 @@
 (define (role-name piece [show-hidden? #f])
   (get-location-attr 'role piece show-hidden?))
 
+
 (define (player-name piece [show-hidden? #f])
   (get-location-attr 'player piece show-hidden?))
 
@@ -64,12 +66,11 @@
   (map (lambda (role) (mkpiece team role))
        player-start-roles))
 
+
 (define (gen-board)
   (shuffle (append (player-roles "Red")
                    (player-roles "Black"))))
 
-(define initial-board
-  (gen-board))
 
 (define (toggle-player player)
   (if (eq? player "Red")
@@ -91,12 +92,14 @@
     (+ (* y board-columns)
        x)))
 
+
 (define/memo (get-coords-from-index index)
   (let ([x (remainder index
                       board-columns)]
         [y (quotient index
                      board-columns)])
     (list x y)))
+
 
 (define/memo (get-row index board)
   (let* ([start (* index board-columns)]
@@ -105,19 +108,24 @@
                 end)
           start)))
 
+
 (define/memo (index-in-range? index)
   (and (<= 0 index)
        (> location-count index)))
 
+
 (define/memo (coords-in-range? coords)
   (index-in-range? (get-index-from-coordinates coords)))
+
 
 (define/memo (coords-out-of-range? coords)
   (not (coords-in-range? coords)))
 
+
 (define (piece-at-coordinates coords board)
   (list-ref board
             (get-index-from-coordinates coords)))
+
 
 (define (player-at-location coords board)
   (hash-ref (piece-at-coordinates coords
@@ -144,21 +152,27 @@
                                   board)
             'role))
 
+
 (define (is-piece-cannon? coords board)
   (eq? "Cannon"
        (role-at-location coords board)))
 
+
 (define (location-revealed? coords board)
   (piece-revealed? (piece-at-coordinates coords board)))
+
 
 (define (location-hidden? coords board)
   (not (location-revealed? coords board)))
 
+
 (define (hidden-coordinates board)
-  (filter (lambda (coords)
-            (location-hidden? (get-coords-from-index coords)
-                              board))
+  (filter-map (lambda (coords)
+            (and (location-hidden? (get-coords-from-index coords)
+                                   board)
+                 (get-coords-from-index coords)))
           board-indexes))
+
 
 (define (empty-index-list board)
   (filter (lambda (x)
@@ -168,14 +182,6 @@
 (define (empty-coords-list board)
   (map get-coords-from-index (empty-index-list board)))
 
-(define (shift-location-coords src-coords direction count)
-  (let ([x (x-pos src-coords)]
-        [y (y-pos src-coords)])
-    (cond
-      ((eq? direction 'up) (list x (+ count y)))
-      ((eq? direction 'down) (list x (- count y)))
-      ((eq? direction 'left) (list (- count x) y))
-      ((eq? direction 'right) (list (+ count x) y)))))
 
 (define (update-coordinates coords piece board)
   (let* ([take-pos (get-index-from-coordinates coords)]
@@ -184,16 +190,19 @@
             (cons piece
                   (drop board drop-pos)))))
 
+
 (define (flip-coordinates coords board)
   (update-coordinates coords
                       (flip
                        (piece-at-coordinates coords board))
                       board))
 
+
 (define (empty-coordinates coord board) ;; updates location to empty
   (update-coordinates coord
                       empty-location
                       board))
+
 
 (define (move-piece-clobber src-coords dest-coords board)
     (empty-coordinates src-coords
@@ -201,6 +210,7 @@
                                            (piece-at-coordinates src-coords
                                                                  board)
                                            board)))
+
 
 (define (move-piece src-coords dest-coords board)
   (let ([captured-piece (piece-at-coordinates src-coords board)]
@@ -333,21 +343,22 @@
 (define (not-null? lst)
   (not (null? lst)))
 
+
 (define (valid-moves-for-player player board)
   (filter-map (lambda (src-index)
-                     (let* ([index (get-coords-from-index src-index)]
-                           [valid-destinations (valid-moves-for-location player
-                                                                         index
-                                                                         board)])
-                       (and (not-null? valid-destinations)
-                            (list index valid-destinations))))
-                   board-indexes))
+                (let* ([index (get-coords-from-index src-index)]
+                       [valid-destinations (valid-moves-for-location player
+                                                                     index
+                                                                     board)])
+                  (and (not-null? valid-destinations)
+                       (list index valid-destinations))))
+              board-indexes))
 
 
 (define (valid-player-turns player board)
   (let ([moves (valid-moves-for-player player board)]
         [flips (hidden-coordinates board)])
-    (hash 'moves (make-hash moves )
+    (hash 'moves (make-immutable-hash moves )
           'flips flips
           'actions-available? (or (not-null? moves)
                                   (not-null? flips)))))
