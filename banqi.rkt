@@ -351,7 +351,7 @@
                                                                      index
                                                                      board)])
                   (and (not-null? valid-destinations)
-                       (list index valid-destinations))))
+                       (cons index valid-destinations))))
               board-indexes))
 
 
