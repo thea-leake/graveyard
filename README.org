@@ -1,0 +1,10 @@
+Graveyard - the game where 2 necromancers battle raised dead in a graveyard until one of them can no longer move!
+
+This is an implementation of the game [[https://en.wikipedia.org/wiki/Banqi][Banshi]] with a Halloween veneer. 
+(currently using banshi role names etc, that may change)
+
+
+It's currently a work in progress, and is only playable through the repl at the moment, with some manual work.
+There is a cli interface that is being worked on to build out functionality, and a GUI planned later.
+
+The README will be more filled out as the project becomes more usable.

@@ -1,7 +1,7 @@
 #lang racket/base
 ;; repl scratch pad - a few test maps, some repl session tidbits saved for referende later 
 (require "banqi.rkt")
-(require "cli.rkt")
+(require "cli-utils.rkt")
 
 ;; generated w/ (gen-board) from banqi.rkt
 (define test-board '(#hash((role . "Soldier") (player . "Black") (empty . #f) (revealed . #f))
