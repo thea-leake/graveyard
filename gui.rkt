@@ -2,10 +2,23 @@
 (require racket/gui/base)
 (require racket/format)
 (require table-panel)
-;; using: gen-board board-indexes role-name board-rows board-columns piece-revealed? piece-empty?
+;; using: gen-board board-indexes role-name board-rows board-columns piece-revealed? piece-empty? player-move get-coords-from-index
+;; location-hidden? flip-coordinates
 (require "banqi.rkt")
 
 (provide (all-defined-out))
+
+
+
+(define partial-turn (make-parameter #f))
+(define src-index (make-parameter -1))
+(define dest-index (make-parameter -1))
+(define board (make-parameter (gen-board)))
+(define current-player (make-parameter "Undecided"))
+(define current-message (make-parameter "First player: pick a corpse to raise!"))
+(define captured-red-pieces (make-parameter '()))
+(define captured-black-pieces (make-parameter '()))
+
 
 (define game-window (new frame% [label "Graveyard"]))
 (define start-game-msg (new message%
@@ -15,13 +28,32 @@
 
 (define board-container game-window) ;; we'll likely be putting this into a canvas etc.. making it easier to change later
 
+(define player-display-table
+  (new table-panel%
+       [parent board-container]
+       [dimensions '(1 2)]
+       [column-stretchability #t]
+       [row-stretchability #t]))
+
+
+(define player-display
+  (new message%
+       [parent player-display-table]
+       [label (string-join (list
+                            "Current Player:" (current-player)))]))
+
+
+(define player-message
+  (new message%
+       [parent player-display-table]
+       [label (current-message)]))
+
 (define board-table
   (new table-panel%
        [parent board-container]
        [border 2]
        [dimensions (list board-rows board-columns)]))
 
-(define init-board (gen-board))
 
 (define (get-button-label piece)
   (cond
@@ -29,12 +61,23 @@
     ((piece-revealed? piece) (~a "Role:" (role-name piece)
                                  "\n"
                                  "Player: " (player-name piece)))
-    (else (~a "Still buried\nClick to raise!"))))
+    (else (~a (string-join  (list "----------"
+                             "/  Still buried  \\"
+                             "|Click to raise!|"
+                             "|    @>-`-,-     |"
+                             "| ####-#### |"
+                             (make-string 18 #\"))
+                           "\n")))))
 
-(define (make-button piece)
+(define (make-button piece index)
   (new button%
        [parent board-table]
-       [label (get-button-label piece)]))
+       [label (get-button-label piece)]
+       [callback (lambda (button event)
+                   (println button)
+                   (println event)
+                   (println index)
+                   (handle-button-click index))]))
 
 (define (update-button button-piece)
   (println button-piece)
@@ -43,44 +86,37 @@
 
 (define button-list
   (map make-button
-            init-board))
+       (board)
+       board-indexes))
 
-(define (update-board board)
+(define (update-board)
   (for-each update-button
             (map cons
                  button-list
-                 board)))
+                 (board))))
 
-;; ;; Using parameters here, we're going with a more message passing style for GUI code
-;; (define board (make-parameter (gen-board)))
+(define (update-ui)
+  (update-board)
+  (send player-display set-label (current-player))
+  (send player-message set-label (current-message)))
 
-;; (define (build-location-panel row-index column-index row-panel)
-;;     (new panel%
-;;          [parent row-panel]
-;;          [border 2]))
+(define (finish-move-turn location-index)
+  (let ([updated-game (player-move current-player
+                                   (get-coords-from-index (src-index))
+                                   (get-coords-from-index location-index)
+                                   (board))])
+    (parameterize ([current-player (hash-ref updated-game 'player)]
+                   [partial-turn (not (hash-ref updated-game 'valid?))]
+                   [src-index -1]
+                   [current-message (hash-ref updated-game 'message)])
+      (update-board))))
 
-;; (define (add-location-button row-index column-index location-panel)
-;;   (new button%
-;;        [label (~a "Column" column-index
-;;                   "Row" row-index
-;;                   #:separator "-")]
-;;        [parent location-panel]))
+(define (handle-button-click location-index)
+  (cond
+    ((partial-turn) (finish-move-turn location-index))
+    ((location-hidden? (get-coords-from-index location-index) (board))
+     (flip-coordinates (get-coords-from-index location-index) (board)))
+    ))
 
-;; (define (build-row-panel row-index)
-;;     (new horizontal-panel%
-;;           [parent row-container]))
-
-;; (define (build-row row-index)
-;;   (let* ([row (build-row-panel row-index)]
-;;         [build-location (lambda (column-index)
-;;                           (add-location-button row-index
-;;                                                column-index
-;;                                                (build-location-panel row-index
-;;                                                                      column-index
-;;                                                                      row)))])
-;;     (map build-location (range board-columns))))
-
-;; (define rows
-;;   (map build-row (range board-rows)))
 
 (send game-window show #t)
