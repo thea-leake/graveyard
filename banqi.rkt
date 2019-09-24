@@ -46,6 +46,8 @@
 (define (piece-revealed? piece)
   (hash-ref piece 'revealed))
 
+(define (piece-empty? piece)
+  (hash-ref piece 'empty))
 
 (define (get-location-attr attr piece [show-hidden? #f])
   (cond
@@ -60,7 +62,6 @@
 
 (define (player-name piece [show-hidden? #f])
   (get-location-attr 'player piece show-hidden?))
-
 
 (define (player-roles team)
   (map (lambda (role) (mkpiece team role))
@@ -363,6 +364,7 @@
           'actions-available? (or (not-null? moves)
                                   (not-null? flips)))))
 
+
 (define (player-move player src-coords dest-coords board)
   (let* ([move-check (is-valid-move? player
                                      src-coords
@@ -381,3 +383,6 @@
                          'board board
                          'captured empty-location)
                    move-response-init)))))
+
+;; maybe return valid-player-turns for next turn to determine whether game was won
+;; if so add player to next-turn hash when merged into player-move

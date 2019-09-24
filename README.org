@@ -8,3 +8,9 @@ It's currently a work in progress, and is only playable through the repl at the 
 There is a cli interface that is being worked on to build out functionality, and a GUI planned later.
 
 The README will be more filled out as the project becomes more usable.
+
+
+** Dependencies:
+To install the packages this currently depends on run:
+ - raco pkg install memoize
+ - raco pkg install table-panel
