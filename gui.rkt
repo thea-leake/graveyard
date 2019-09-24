@@ -19,6 +19,7 @@
 (define captured-red-pieces (make-parameter '()))
 (define captured-black-pieces (make-parameter '()))
 
+(define button-event (make-channel))
 
 (define game-window (new frame% [label "Graveyard"]))
 (define start-game-msg (new message%
@@ -75,7 +76,7 @@
        [label (get-button-label piece)]
        [callback (lambda (button event)
                    (println index)
-                   (handle-button-click index))]))
+                   (channel-put button-event index))]))
 
 (define (update-button button-piece)
   (println button-piece)
@@ -107,14 +108,16 @@
                    [partial-turn (not (hash-ref updated-game 'valid?))]
                    [src-index -1]
                    [current-message (hash-ref updated-game 'message)])
-      (update-ui))))
+      (update-ui)
+      (next-event))))
 
 (define (raise-location location-coords)
   (parameterize ([first-turn #f]
                  [board (flip-coordinates location-coords (board))]
                  [current-player (string-join (list "Current Player:" (toggle-player (player-at-location location-coords (board)))))]
                  [current-message (string-join (list "Raised a " (role-at-location location-coords (board))))])
-    (update-ui)))
+    (update-ui)
+    (next-event)))
 
 
 (define (handle-button-click location-index)
@@ -126,4 +129,12 @@
     ))
 
 
+(define (next-event [continue? #t])
+  (let ([button-value (channel-get button-event) ])
+   (cond
+     (continue? (handle-button-click  button-value))
+     (else (println "done")))))
+
 (send game-window show #t)
+
+(thread next-event)
