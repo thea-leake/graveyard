@@ -3,17 +3,17 @@
 (require racket/format)
 (require table-panel)
 ;; using: gen-board board-indexes role-name board-rows board-columns piece-revealed? piece-empty? player-move get-coords-from-index
-;; location-hidden? flip-coordinates
+;; location-hidden? flip-coordinates toggle-player role-at-location player-at-location
 (require "banqi.rkt")
 
 (provide (all-defined-out))
-
 
 
 (define partial-turn (make-parameter #f))
 (define src-index (make-parameter -1))
 (define dest-index (make-parameter -1))
 (define board (make-parameter (gen-board)))
+(define first-turn (make-parameter #t))
 (define current-player (make-parameter "Undecided"))
 (define current-message (make-parameter "First player: pick a corpse to raise!"))
 (define captured-red-pieces (make-parameter '()))
@@ -74,8 +74,6 @@
        [parent board-table]
        [label (get-button-label piece)]
        [callback (lambda (button event)
-                   (println button)
-                   (println event)
                    (println index)
                    (handle-button-click index))]))
 
@@ -109,13 +107,22 @@
                    [partial-turn (not (hash-ref updated-game 'valid?))]
                    [src-index -1]
                    [current-message (hash-ref updated-game 'message)])
-      (update-board))))
+      (update-ui))))
+
+(define (raise-location location-coords)
+  (parameterize ([first-turn #f]
+                 [board (flip-coordinates location-coords (board))]
+                 [current-player (string-join (list "Current Player:" (toggle-player (player-at-location location-coords (board)))))]
+                 [current-message (string-join (list "Raised a " (role-at-location location-coords (board))))])
+    (update-ui)))
+
 
 (define (handle-button-click location-index)
   (cond
     ((partial-turn) (finish-move-turn location-index))
     ((location-hidden? (get-coords-from-index location-index) (board))
-     (flip-coordinates (get-coords-from-index location-index) (board)))
+     (raise-location (get-coords-from-index location-index)))
+    (else (println "grrrrr"))
     ))
 
 
