@@ -74,12 +74,21 @@
        [dimensions (list board-rows board-columns)]))
 
 
+(define (risen-label piece)
+  (~a "Role:" (role-name piece)
+      "\n"
+      "Player: " (player-name piece)))
+
 (define (get-button-label piece coords)
   (cond
     ((piece-empty? piece) "An empty Plot!")
-    ((piece-revealed? piece) (~a "Role:" (role-name piece)
-                                 "\n"
-                                 "Player: " (player-name piece)))
+    ((and (equal? coords (src-coords))
+          (piece-revealed? piece))
+     (string-join (list (risen-label piece)
+                        "--%--"
+                        "[xx|=selected=>")
+                  "\n"))
+    ((piece-revealed? piece) (risen-label piece))
     (else (~a (string-join  (list "----------"
                                   "/  Still buried  \\"
                                   "|Click to raise!|"
@@ -153,12 +162,20 @@
     (update-ui)
     (next-event)))
 
+(define (wrong-player)
+  (parameterize ([current-message "Selected other players piece."])
+    (update-ui)
+    (next-event)))
+
 (define (handle-button-click location-coords)
   (cond
     ((partial-turn) (finish-move-turn location-coords))
     ((location-hidden? location-coords (board))
      (raise-location location-coords))
-    (else (move-src-event location-coords))
+    ((eq? (current-player)
+          (player-at-location location-coords (board)))
+     (move-src-event location-coords))
+    (else (wrong-player))
     ))
 
 
