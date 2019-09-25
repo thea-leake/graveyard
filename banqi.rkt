@@ -383,7 +383,8 @@
 
 
 (define (player-move player src-coords dest-coords board)
-  (let* ([move-check (is-valid-move? player
+  (let* ([piece-at-dest (piece-at-coordinates dest-coords board)]
+         [move-check (is-valid-move? player
                                      src-coords
                                      dest-coords
                                      board)]
@@ -393,7 +394,7 @@
       ((hash-ref move-response-init 'valid?)
        (hash-union (hash 'player (toggle-player player)
                          'board (move-piece-clobber src-coords dest-coords board)
-                         'captured (piece-at-coordinates src-coords board))
+                         'captured piece-at-dest)
                    move-response-init))
       (else
        (hash-union (hash 'player player

@@ -127,13 +127,24 @@
   (send player-message set-label (current-message))
   (send location-selected set-label (location-format)))
 
+
+(define (finish-move-message updated-game location-coords)
+  (let ([captured-piece (hash-ref updated-game 'captured)])
+    (if (piece-empty? captured-piece)
+        (hash-ref updated-game 'message)
+        (string-join (list "Captured "
+                           (player-name captured-piece)
+                           (role-name captured-piece))))))
+
 (define (finish-move-turn location-coords)
-  (let ([updated-game (player-move (current-player)
-                                   (src-coords)
-                                   location-coords
-                                   (board))])
+  (let* ([updated-game (player-move (current-player)
+                                    (src-coords)
+                                    location-coords
+                                    (board))]
+         [message (finish-move-message updated-game
+                                       location-coords)])
     (parameterize ([current-player (hash-ref updated-game 'player)]
-                   [current-message (hash-ref updated-game 'message)]
+                   [current-message message]
                    [board (hash-ref updated-game 'board)]
                    [partial-turn #f]
                    [src-coords #f])
