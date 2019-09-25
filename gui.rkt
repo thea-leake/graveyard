@@ -2,7 +2,7 @@
 (require racket/gui/base)
 (require racket/format)
 (require table-panel)
-;; using: gen-board board-coordinates role-name board-rows board-columns piece-revealed? piece-empty? player-move 
+;; using: gen-board board-coordinates role-name board-rows board-columns piece-revealed? piece-empty? player-move
 ;; location-hidden? flip-coordinates toggle-player role-at-location player-at-location
 (require "banqi.rkt")
 

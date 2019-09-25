@@ -6,6 +6,7 @@ This is an implementation of the game [[https://en.wikipedia.org/wiki/Banqi][Ban
 
 
 It's currently a work in progress - but has a playable GUI.
+ - note: the dimensions are waaay off on windows, possibly Linux.  OSX is fine though.
 
 ** Dependencies:
 Racket - you can download [[https://download.racket-lang.org][here]]
