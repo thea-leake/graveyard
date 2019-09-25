@@ -84,11 +84,7 @@
                                   "/  Still buried  \\"
                                   "|Click to raise!|"
                                   "|    @>-`-,-     |"
-                                  (string-join
-                                   (list "| ###" (~a (x-pos coords))
-                                         "-"
-                                         "###" (~a (y-pos coords)) " |")
-                                   "")
+                                   "| ####-#### |"
                                   (make-string 18 #\"))
                             "\n")))))
 
