@@ -1,16 +1,22 @@
 Graveyard - the game where 2 necromancers battle raised dead in a graveyard until one of them can no longer move!
 
-This is an implementation of the game [[https://en.wikipedia.org/wiki/Banqi][Banshi]] with a Halloween veneer. 
-(currently using banshi role names etc, that may change)
+This is an implementation of the game [[https://en.wikipedia.org/wiki/Banqi][Banqi]] with a Halloween veneer. 
+(currently using banqi role names etc, that may change)
 
 
-It's currently a work in progress, and is only playable through the repl at the moment, with some manual work.
-There is a cli interface that is being worked on to build out functionality, and a GUI planned later.
+
+It's currently a work in progress - but has a playable GUI.
+
+** Dependencies:
+Racket - you can download [[https://download.racket-lang.org][here]]
+
+Run the following to install library dependencies:
+ - =raco pkg install memoize=
+ - =raco pkg install table-panel=
+ 
+** To play:
+ - run: =racket gui.rkt= in this directory
 
 The README will be more filled out as the project becomes more usable.
 
 
-** Dependencies:
-To install the packages this currently depends on run:
- - raco pkg install memoize
- - raco pkg install table-panel
