@@ -9,6 +9,7 @@
 (provide (all-defined-out))
 
 (define display-panel-min-width 350)
+(define display-panel-min-height 100)
 
 (define partial-turn (make-parameter #f))
 (define src-coords (make-parameter #f))
@@ -31,9 +32,10 @@
 (define player-display-table
   (new table-panel%
        [parent board-container]
-       [dimensions '(1 3)]
+       [dimensions '(2 2)]
        [column-stretchability #t]
-       [row-stretchability #t]))
+       [row-stretchability #t]
+       [min-height display-panel-min-height]))
 
 
 (define player-display
@@ -42,6 +44,14 @@
        [label (string-join (list
                             "Current Player:" (current-player)))]
        [min-width display-panel-min-width]))
+
+
+(define player-message
+  (new message%
+       [parent player-display-table]
+       [label (current-message)]
+       [min-width display-panel-min-width]))
+
 
 (define (location-format)
   (if (src-coords)
@@ -57,12 +67,6 @@
        [label (location-format)]
        [min-width display-panel-min-width]))
 
-(define player-message
-  (new message%
-       [parent player-display-table]
-       [label (current-message)]
-       [min-width display-panel-min-width]))
-
 (define board-table
   (new table-panel%
        [parent board-container]
@@ -70,7 +74,7 @@
        [dimensions (list board-rows board-columns)]))
 
 
-(define (get-button-label piece)
+(define (get-button-label piece coords)
   (cond
     ((piece-empty? piece) "An empty Plot!")
     ((piece-revealed? piece) (~a "Role:" (role-name piece)
@@ -80,20 +84,25 @@
                                   "/  Still buried  \\"
                                   "|Click to raise!|"
                                   "|    @>-`-,-     |"
-                                  "| ####-#### |"
+                                  (string-join
+                                   (list "| ###" (~a (x-pos coords))
+                                         "-"
+                                         "###" (~a (y-pos coords)) " |")
+                                   "")
                                   (make-string 18 #\"))
                             "\n")))))
 
-(define (make-button piece index)
+(define (make-button piece coords)
   (new button%
        [parent board-table]
-       [label (get-button-label piece)]
+       [label (get-button-label piece coords)]
        [callback (lambda (button event)
-                   (channel-put button-event index))]))
+                   (channel-put button-event coords))]))
 
 (define (update-button button-piece)
   (send (car button-piece)
-        set-label (get-button-label (cdr button-piece))))
+        set-label (get-button-label (cadr button-piece)
+                                    (caddr button-piece))))
 
 (define button-list
   (map make-button
@@ -102,9 +111,10 @@
 
 (define (update-board)
   (for-each update-button
-            (map cons
+            (map list
                  button-list
-                 (board))))
+                 (board)
+                 board-coordinates)))
 
 (define (update-ui)
   (update-board)
