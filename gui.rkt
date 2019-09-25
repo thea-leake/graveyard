@@ -112,12 +112,11 @@
   (let ([player (if (first-turn)
                     (player-at-location location-coords (board))
                     (current-player))])
-    (println "Current player")
-    (println (current-player))
     (parameterize ([board (flip-coordinates location-coords (board))]
                    [current-player (toggle-player player)]
                    [current-message (string-join (list "Raised a " (role-at-location location-coords (board))))]
-                   [first-turn #f])
+                   [first-turn #f]
+                   [partial-turn #f])
       (update-ui)
       (next-event))))
 
