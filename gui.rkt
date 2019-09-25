@@ -11,7 +11,6 @@
 
 (define partial-turn (make-parameter #f))
 (define src-index (make-parameter -1))
-(define dest-index (make-parameter -1))
 (define board (make-parameter (gen-board)))
 (define first-turn (make-parameter #t))
 (define current-player (make-parameter "Undecided"))
@@ -75,11 +74,9 @@
        [parent board-table]
        [label (get-button-label piece)]
        [callback (lambda (button event)
-                   (println index)
                    (channel-put button-event index))]))
 
 (define (update-button button-piece)
-  (println button-piece)
   (send (car button-piece)
         set-label (get-button-label (cdr button-piece))))
 
@@ -96,36 +93,49 @@
 
 (define (update-ui)
   (update-board)
-  (send player-display set-label (current-player))
+  (send player-display set-label (string-join (list "Current Player:" (current-player))))
   (send player-message set-label (current-message)))
 
 (define (finish-move-turn location-index)
-  (let ([updated-game (player-move current-player
+  (let ([updated-game (player-move (current-player)
                                    (get-coords-from-index (src-index))
                                    (get-coords-from-index location-index)
                                    (board))])
     (parameterize ([current-player (hash-ref updated-game 'player)]
                    [partial-turn (not (hash-ref updated-game 'valid?))]
-                   [src-index -1]
-                   [current-message (hash-ref updated-game 'message)])
+                   [current-message (hash-ref updated-game 'message)]
+                   [board (hash-ref updated-game 'board)])
       (update-ui)
       (next-event))))
 
 (define (raise-location location-coords)
-  (parameterize ([first-turn #f]
-                 [board (flip-coordinates location-coords (board))]
-                 [current-player (string-join (list "Current Player:" (toggle-player (player-at-location location-coords (board)))))]
-                 [current-message (string-join (list "Raised a " (role-at-location location-coords (board))))])
+  (let ([player (if (first-turn)
+                    (player-at-location location-coords (board))
+                    (current-player))])
+    (println "Current player")
+    (println (current-player))
+    (parameterize ([board (flip-coordinates location-coords (board))]
+                   [current-player (toggle-player player)]
+                   [current-message (string-join (list "Raised a " (role-at-location location-coords (board))))]
+                   [first-turn #f])
+      (update-ui)
+      (next-event))))
+
+(define (move-src-event location-index)
+  (parameterize ([src-index location-index]
+                 [current-message (string-join (list
+                                                (~a location-index)
+                                                "selected, choose destination"))]
+                 [partial-turn #t])
     (update-ui)
     (next-event)))
 
-
 (define (handle-button-click location-index)
   (cond
-    ((partial-turn) (finish-move-turn location-index))
     ((location-hidden? (get-coords-from-index location-index) (board))
      (raise-location (get-coords-from-index location-index)))
-    (else (println "grrrrr"))
+    ((partial-turn) (finish-move-turn location-index))
+    (else (move-src-event location-index))
     ))
 
 
