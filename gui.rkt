@@ -24,8 +24,7 @@
 (define game-window (new frame% [label "Graveyard"]))
 (define start-game-msg (new message%
                             [parent game-window]
-                            [label "Welcome to Queen of the Graveyard!"]
-                            ))
+                            [label "Welcome to Queen of the Graveyard!"]))
 
 (define board-container game-window) ;; we'll likely be putting this into a canvas etc.. making it easier to change later
 
@@ -78,12 +77,12 @@
                                  "\n"
                                  "Player: " (player-name piece)))
     (else (~a (string-join  (list "----------"
-                             "/  Still buried  \\"
-                             "|Click to raise!|"
-                             "|    @>-`-,-     |"
-                             "| ####-#### |"
-                             (make-string 18 #\"))
-                           "\n")))))
+                                  "/  Still buried  \\"
+                                  "|Click to raise!|"
+                                  "|    @>-`-,-     |"
+                                  "| ####-#### |"
+                                  (make-string 18 #\"))
+                            "\n")))))
 
 (define (make-button piece index)
   (new button%
@@ -159,9 +158,9 @@
 
 (define (next-event [continue? #t])
   (let ([button-value (channel-get button-event) ])
-   (cond
-     (continue? (handle-button-click  button-value))
-     (else (exit)))))
+    (cond
+      (continue? (handle-button-click  button-value))
+      (else (exit)))))
 
 (send game-window show #t)
 
