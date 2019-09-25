@@ -75,9 +75,9 @@
 
 
 (define (risen-label piece)
-  (~a "Role:" (role-name piece)
-      "\n"
-      "Player: " (player-name piece)))
+  (~a (player-name piece)
+      "\n---\n"
+      (role-name piece)))
 
 (define (get-button-label piece coords)
   (cond
