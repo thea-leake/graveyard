@@ -384,7 +384,7 @@
                                      dest-coords
                                      board)]
          [move-response-init (hash 'valid? (car move-check)
-                                   'message (cdr move-check))])
+                                   'message (cadr move-check))])
     (cond
       ((hash-ref move-response-init 'valid?)
        (hash-union (hash 'player (toggle-player player)
