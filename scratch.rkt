@@ -1,5 +1,6 @@
 #lang racket/base
 ;; repl scratch pad - a few test maps, some repl session tidbits saved for referende later 
+(require racket/format)
 (require "banqi.rkt")
 (require "cli-utils.rkt")
 (require "gui.rkt")

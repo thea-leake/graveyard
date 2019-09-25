@@ -8,6 +8,7 @@
 
 (provide (all-defined-out))
 
+(define display-panel-min-width 350)
 
 (define partial-turn (make-parameter #f))
 (define src-coords (make-parameter #f))
@@ -40,11 +41,12 @@
   (new message%
        [parent player-display-table]
        [label (string-join (list
-                            "Current Player:" (current-player)))]))
+                            "Current Player:" (current-player)))]
+       [min-width display-panel-min-width]))
 
 (define (location-format)
   (if (src-coords)
-      (string-join (list "Source square:"
+      (string-join (list "Selected Square:"
                          (~a (x-pos (src-coords)))
                          ","
                          (~a (y-pos (src-coords)))))
@@ -52,13 +54,15 @@
 
 (define location-selected
   (new message%
-       [parent board-container]
-       [label (location-format)]))
+       [parent player-display-table]
+       [label (location-format)]
+       [min-width display-panel-min-width]))
 
 (define player-message
   (new message%
        [parent player-display-table]
-       [label (current-message)]))
+       [label (current-message)]
+       [min-width display-panel-min-width]))
 
 (define board-table
   (new table-panel%
@@ -137,7 +141,8 @@
 (define (move-src-event location-coords)
   (parameterize ([src-coords location-coords]
                  [current-message (string-join (list
-                                                (~a location-coords)
+                                                (player-at-location location-coords (board))
+                                                (role-at-location location-coords (board))
                                                 "selected, choose destination"))]
                  [partial-turn #t])
     (update-ui)
