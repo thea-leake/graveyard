@@ -9,7 +9,30 @@
 (define board-columns 8)
 (define location-count (* board-columns
                           board-rows))
+
+(define (x-pos coords)
+  (car coords))
+
+(define (y-pos coords)
+  (cadr coords))
+
+(define/memo (get-index-from-coordinates coords)
+  (let ([x (x-pos coords)]
+        [y (y-pos coords)])
+    (+ (* y board-columns)
+       x)))
+
+
+(define/memo (get-coords-from-index index)
+  (let ([x (remainder index
+                      board-columns)]
+        [y (quotient index
+                     board-columns)])
+    (list x y)))
+
+
 (define board-indexes (range location-count))
+(define board-coordinates (map get-coords-from-index board-indexes))
 
 ;; number of pieces that can be involve in a cannon move
 ;; cannon, piece cannon jumps over, piece cannon takes
@@ -87,25 +110,6 @@
 (define (flip piece)
   (hash-set piece 'revealed #t))
 
-(define (x-pos coords)
-  (car coords))
-
-(define (y-pos coords)
-  (cadr coords))
-
-(define/memo (get-index-from-coordinates coords)
-  (let ([x (x-pos coords)]
-        [y (y-pos coords)])
-    (+ (* y board-columns)
-       x)))
-
-
-(define/memo (get-coords-from-index index)
-  (let ([x (remainder index
-                      board-columns)]
-        [y (quotient index
-                     board-columns)])
-    (list x y)))
 
 
 (define/memo (get-row index board)
