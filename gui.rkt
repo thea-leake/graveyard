@@ -203,10 +203,13 @@
 (define (event-loop init-state)
   (let loop ([state init-state]
              [continue? #t])
-    (let ([click-coords (channel-get button-event)])
+    (let* ([click-coords (channel-get button-event)]
+           [event-result (handle-button-click state click-coords)]
+           [next-player-lost? (player-lost? (turn-player event-result)
+                                            (turn-board event-result))]) ;; checking to see if next player lost based off event handling
       (cond
-        (continue? (loop (handle-button-click state click-coords)
-                         #t))
+        (continue? (loop event-result
+                         (not next-player-lost?)))
         (else (exit))))))
 
 (send game-window show #t)
