@@ -11,7 +11,6 @@
 (define display-panel-min-width 350)
 (define display-panel-min-height 100)
 
-(define partial-turn (make-parameter #f))
 (define src-coords (make-parameter #f))
 (define board (make-parameter (gen-board)))
 (define first-turn (make-parameter #t))
@@ -146,7 +145,6 @@
     (parameterize ([current-player (hash-ref updated-game 'player)]
                    [current-message message]
                    [board (hash-ref updated-game 'board)]
-                   [partial-turn #f]
                    [src-coords #f])
       (update-ui)
       (next-event))))
@@ -159,7 +157,7 @@
                    [current-player (toggle-player player)]
                    [current-message (string-join (list "Raised a " (role-at-location location-coords (board))))]
                    [first-turn #f]
-                   [partial-turn #f])
+                   [src-coords #f])
       (update-ui)
       (next-event))))
 
@@ -168,8 +166,7 @@
                  [current-message (string-join (list
                                                 (player-at-location location-coords (board))
                                                 (role-at-location location-coords (board))
-                                                "selected, choose destination"))]
-                 [partial-turn #t])
+                                                "selected, choose destination"))])
     (update-ui)
     (next-event)))
 
@@ -180,7 +177,7 @@
 
 (define (handle-button-click location-coords)
   (cond
-    ((partial-turn) (finish-move-turn location-coords))
+    ((src-coords) (finish-move-turn location-coords))
     ((location-hidden? location-coords (board))
      (raise-location location-coords))
     ((eq? (current-player)
