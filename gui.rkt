@@ -11,13 +11,21 @@
 (define display-panel-min-width 350)
 (define display-panel-min-height 100)
 
-(define src-coords (make-parameter #f))
-(define board (make-parameter (gen-board)))
+(struct turn
+  (selected-coords
+   board
+   player
+   message))
+
+(define init-turn
+  (turn
+   #f          ;; selected-coords
+   (gen-board) ;; board
+   "Undecided" ;; player
+   "First player: pick a corpse to raise!" ;; message
+   ))
+
 (define first-turn (make-parameter #t))
-(define current-player (make-parameter "Undecided"))
-(define current-message (make-parameter "First player: pick a corpse to raise!"))
-(define captured-red-pieces (make-parameter '()))
-(define captured-black-pieces (make-parameter '()))
 
 (define button-event (make-channel))
 
@@ -41,29 +49,31 @@
   (new message%
        [parent player-display-table]
        [label (string-join (list
-                            "Current Player:" (current-player)))]
+                            "Current Player:" (turn-player init-turn)))]
        [min-width display-panel-min-width]))
 
 
 (define player-message
   (new message%
        [parent player-display-table]
-       [label (current-message)]
+       [label (turn-message init-turn)]
        [min-width display-panel-min-width]))
 
 
-(define (location-format)
-  (if (src-coords)
-      (string-join (list "Selected Square:"
-                         (~a (x-pos (src-coords)))
-                         ","
-                         (~a (y-pos (src-coords)))))
-      "Nothing Selected"))
+(define (location-format state)
+  (let ([selected-coords (turn-selected-coords state)])
+    (if selected-coords
+        (string-join (list "Selected Square:"
+                           (~a selected-coords)
+                           ","
+                           (~a selected-coords)))
+        "Nothing Selected")))
+
 
 (define location-selected
   (new message%
        [parent player-display-table]
-       [label (location-format)]
+       [label (location-format init-turn)]
        [min-width display-panel-min-width]))
 
 (define board-table
@@ -78,10 +88,10 @@
       "\n---\n"
       (role-name piece)))
 
-(define (get-button-label piece coords)
+(define (get-button-label state piece coords)
   (cond
     ((piece-empty? piece) "An empty Plot!")
-    ((and (equal? coords (src-coords))
+    ((and (equal? coords (turn-selected-coords state))
           (piece-revealed? piece))
      (string-join (list (risen-label piece)
                         "--%--"
@@ -92,40 +102,45 @@
                                   "/  Still buried  \\"
                                   "|Click to raise!|"
                                   "|    @>-`-,-     |"
-                                   "| ####-#### |"
+                                  "| ####-#### |"
                                   (make-string 18 #\"))
                             "\n")))))
 
 (define (make-button piece coords)
   (new button%
        [parent board-table]
-       [label (get-button-label piece coords)]
+       [label (get-button-label init-turn piece coords)]
        [callback (lambda (button event)
                    (channel-put button-event coords))]))
 
-(define (update-button button-piece)
+(define (update-button state button-piece)
   (send (car button-piece)
-        set-label (get-button-label (cadr button-piece)
+        set-label (get-button-label state
+                                    (cadr button-piece)
                                     (caddr button-piece))))
 
 (define button-list
   (map make-button
-       (board)
+       (turn-board init-turn)
        board-coordinates))
 
-(define (update-board)
-  (for-each update-button
+(define (update-board state)
+  (for-each (lambda (button-piece)
+              (update-button state button-piece) )
             (map list
                  button-list
-                 (board)
+                 (turn-board state)
                  board-coordinates)))
 
-(define (update-ui)
-  (update-board)
-  (send player-display set-label (string-join (list "Current Player:" (current-player))))
-  (send player-message set-label (current-message))
-  (send location-selected set-label (location-format)))
+(define (update-ui state)
+  (update-board state)
+  (send player-display set-label (string-join (list "Current Player:" (turn-player state))))
+  (send player-message set-label (turn-message state))
+  (send location-selected set-label (location-format state)))
 
+(define (event-handled state)
+  (update-ui state)
+  state)
 
 (define (finish-move-message updated-game location-coords)
   (let ([captured-piece (hash-ref updated-game 'captured)])
@@ -135,64 +150,67 @@
                            (player-name captured-piece)
                            (role-name captured-piece))))))
 
-(define (finish-move-turn location-coords)
-  (let* ([updated-game (player-move (current-player)
-                                    (src-coords)
+(define (finish-move-turn state location-coords)
+  (let* ([updated-game (player-move (turn-player state)
+                                    (turn-selected-coords state)
                                     location-coords
-                                    (board))]
+                                    (turn-board state))]
          [message (finish-move-message updated-game
                                        location-coords)])
-    (parameterize ([current-player (hash-ref updated-game 'player)]
-                   [current-message message]
-                   [board (hash-ref updated-game 'board)]
-                   [src-coords #f])
-      (update-ui)
-      (next-event))))
+    (event-handled (struct-copy turn state
+                                [player (hash-ref updated-game 'player)]
+                                [message message]
+                                [board (hash-ref updated-game 'board)]
+                                [selected-coords #f]))))
 
-(define (raise-location location-coords)
+(define (raise-location state location-coords)
   (let ([player (if (first-turn)
-                    (player-at-location location-coords (board))
-                    (current-player))])
-    (parameterize ([board (flip-coordinates location-coords (board))]
-                   [current-player (toggle-player player)]
-                   [current-message (string-join (list "Raised a " (role-at-location location-coords (board))))]
-                   [first-turn #f]
-                   [src-coords #f])
-      (update-ui)
-      (next-event))))
+                    (player-at-location location-coords (turn-board state))
+                    (turn-player state))])
+    (parameterize ([first-turn #f])
+      (event-handled (struct-copy turn state
+                                  [board (flip-coordinates location-coords (turn-board state))]
+                                  [player (toggle-player player)]
+                                  [message (string-join (list "Raised a " (role-at-location location-coords (turn-board state))))]
+                                  [selected-coords #f])))))
 
-(define (move-src-event location-coords)
-  (parameterize ([src-coords location-coords]
-                 [current-message (string-join (list
-                                                (player-at-location location-coords (board))
-                                                (role-at-location location-coords (board))
-                                                "selected, choose destination"))])
-    (update-ui)
-    (next-event)))
+(define (move-message state location-coords)
+  (string-join (list
+                (player-at-location location-coords (turn-board state))
+                (role-at-location location-coords (turn-board state))
+                "selected, choose destination")))
 
-(define (wrong-player)
-  (parameterize ([current-message "Selected other players piece."])
-    (update-ui)
-    (next-event)))
+(define (move-src-event state location-coords)
+  (event-handled (struct-copy turn state
+                              [selected-coords location-coords]
+                              [message (move-message state location-coords)])))
 
-(define (handle-button-click location-coords)
+(define (wrong-player state)
+  (event-handled (struct-copy turn state
+                              [message "Selected other players piece."])))
+
+(define (handle-button-click state location-coords)
   (cond
-    ((src-coords) (finish-move-turn location-coords))
-    ((location-hidden? location-coords (board))
-     (raise-location location-coords))
-    ((eq? (current-player)
-          (player-at-location location-coords (board)))
-     (move-src-event location-coords))
-    (else (wrong-player))
-    ))
+    ((turn-selected-coords state) (finish-move-turn state location-coords))
+    ((location-hidden? location-coords (turn-board state))
+     (raise-location state location-coords))
+    ((eq? (turn-player state)
+          (player-at-location location-coords (turn-board state)))
+     (move-src-event state location-coords))
+    (else (wrong-player state))))
 
 
-(define (next-event [continue? #t])
-  (let ([button-value (channel-get button-event) ])
-    (cond
-      (continue? (handle-button-click  button-value))
-      (else (exit)))))
+(define (event-loop init-state)
+  (let loop ([state init-state]
+             [continue? #t])
+    (let ([click-coords (channel-get button-event)])
+      ;; (collect-garbage 'major)
+      (cond
+        (continue? (loop (handle-button-click state click-coords)
+                         #t))
+        (else (exit))))))
 
 (send game-window show #t)
 
-(thread next-event)
+(thread
+ (lambda () ( event-loop init-turn )))

@@ -381,6 +381,9 @@
           'actions-available? (or (not-null? moves)
                                   (not-null? flips)))))
 
+(define (player-lost? player board)
+  (hash-ref (valid-player-turns player board)
+            'actions-available?))
 
 (define (player-move player src-coords dest-coords board)
   (let* ([piece-at-dest (piece-at-coordinates dest-coords board)]
