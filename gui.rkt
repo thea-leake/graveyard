@@ -204,7 +204,6 @@
   (let loop ([state init-state]
              [continue? #t])
     (let ([click-coords (channel-get button-event)])
-      ;; (collect-garbage 'major)
       (cond
         (continue? (loop (handle-button-click state click-coords)
                          #t))
