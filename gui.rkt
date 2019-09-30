@@ -83,6 +83,15 @@
        [dimensions (list board-rows board-columns)]))
 
 
+(define end-game-dialog
+  (new dialog% [label "Game Over!"]
+       [parent #f]
+       [style '(close-button)]
+       [enabled #f]
+       [width 200]
+       [height 50]))
+
+
 (define (risen-label piece)
   (~a (player-name piece)
       "\n---\n"
@@ -200,17 +209,25 @@
     (else (wrong-player state))))
 
 
+(define (player-won state)
+  (send end-game-dialog set-label
+        (string-join (list "Player"
+                           (toggle-player (turn-player state))
+                           "Won!")))
+  (send end-game-dialog show #t))
+
 (define (event-loop init-state)
   (let loop ([state init-state]
              [continue? #t])
-    (let* ([click-coords (channel-get button-event)]
-           [event-result (handle-button-click state click-coords)]
-           [next-player-lost? (player-lost? (turn-player event-result)
-                                            (turn-board event-result))]) ;; checking to see if next player lost based off event handling
-      (cond
-        (continue? (loop event-result
-                         (not next-player-lost?)))
-        (else (exit))))))
+    (cond
+      (continue? (let* ([click-coords (channel-get button-event)]
+                        [event-result (handle-button-click state click-coords)]
+                        [next-player-lost? (player-lost? (turn-player event-result)
+                                                         (turn-board event-result))]) ;; checking to see if next player lost based off event handling
+                   (loop event-result
+                         (not next-player-lost?))))
+                 (else (player-won state))))
+    (exit))
 
 (send game-window show #t)
 
