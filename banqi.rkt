@@ -3,7 +3,22 @@
 (require racket/hash)
 (require memoize)
 
-(provide (all-defined-out))
+(provide board-coordinates
+         board-columns
+         board-rows
+         gen-board
+         role-name
+         player-name
+         get-row
+         piece-revealed?
+         piece-empty?
+         player-move
+         location-hidden?
+         flip-coordinates
+         toggle-player
+         role-at-location
+         player-at-location
+         player-lost?)
 
 (define board-rows 4)
 (define board-columns 8)
@@ -386,6 +401,7 @@
    (hash-ref (valid-player-turns player
                                  board)
              'actions-available?)))
+
 
 (define (player-move player src-coords dest-coords board)
   (let* ([piece-at-dest (piece-at-coordinates dest-coords board)]
