@@ -5,7 +5,7 @@
 
 (require "banqi.rkt")
 
-(provide (all-defined-out))
+(provide (prefix-out cli: (all-defined-out)) )
 
 (define max-name-len 8)
 (define cli-separator-len 91)

@@ -2,11 +2,10 @@
 (require racket/gui/base)
 (require racket/format)
 (require table-panel)
-;; using: gen-board board-coordinates role-name board-rows board-columns piece-revealed? piece-empty? player-move
-;; location-hidden? flip-coordinates toggle-player role-at-location player-at-location
-(require "banqi.rkt")
 
-(provide (all-defined-out))
+(require (prefix-in b: "banqi.rkt"))
+
+(provide (prefix-out gui: (all-defined-out)))
 
 (define display-panel-min-width 350)
 (define display-panel-min-height 100)
@@ -20,7 +19,7 @@
 (define init-turn
   (turn
    #f          ;; selected-coords
-   (gen-board) ;; board
+   (b:gen-board) ;; board
    "Undecided" ;; player
    "First player: pick a corpse to raise!" ;; message
    ))
@@ -80,7 +79,7 @@
   (new table-panel%
        [parent board-container]
        [border 2]
-       [dimensions (list board-rows board-columns)]))
+       [dimensions (list b:board-rows b:board-columns)]))
 
 
 (define end-game-dialog
@@ -93,20 +92,20 @@
 
 
 (define (risen-label piece)
-  (~a (player-name piece)
+  (~a (b:player-name piece)
       "\n---\n"
-      (role-name piece)))
+      (b:role-name piece)))
 
 (define (get-button-label state piece coords)
   (cond
-    ((piece-empty? piece) "An empty Plot!")
+    ((b:piece-empty? piece) "An empty Plot!")
     ((and (equal? coords (turn-selected-coords state))
-          (piece-revealed? piece))
+          (b:piece-revealed? piece))
      (string-join (list (risen-label piece)
                         "--%--"
                         "[xx|=selected=>")
                   "\n"))
-    ((piece-revealed? piece) (risen-label piece))
+    ((b:piece-revealed? piece) (risen-label piece))
     (else (~a (string-join  (list "----------"
                                   "/  Still buried  \\"
                                   "|Click to raise!|"
@@ -131,7 +130,7 @@
 (define button-list
   (map make-button
        (turn-board init-turn)
-       board-coordinates))
+       b:board-coordinates))
 
 (define (update-board state)
   (for-each (lambda (button-piece)
@@ -139,7 +138,7 @@
             (map list
                  button-list
                  (turn-board state)
-                 board-coordinates)))
+                 b:board-coordinates)))
 
 (define (update-ui state)
   (update-board state)
@@ -153,14 +152,14 @@
 
 (define (finish-move-message updated-game location-coords)
   (let ([captured-piece (hash-ref updated-game 'captured)])
-    (if (piece-empty? captured-piece)
+    (if (b:piece-empty? captured-piece)
         (hash-ref updated-game 'message)
         (string-join (list "Captured "
-                           (player-name captured-piece)
-                           (role-name captured-piece))))))
+                           (b:player-name captured-piece)
+                           (b:role-name captured-piece))))))
 
 (define (finish-move-turn state location-coords)
-  (let* ([updated-game (player-move (turn-player state)
+  (let* ([updated-game (b:player-move (turn-player state)
                                     (turn-selected-coords state)
                                     location-coords
                                     (turn-board state))]
@@ -174,19 +173,19 @@
 
 (define (raise-location state location-coords)
   (let ([player (if (first-turn)
-                    (player-at-location location-coords (turn-board state))
+                    (b:player-at-location location-coords (turn-board state))
                     (turn-player state))])
     (parameterize ([first-turn #f])
       (event-handled (struct-copy turn state
-                                  [board (flip-coordinates location-coords (turn-board state))]
-                                  [player (toggle-player player)]
-                                  [message (string-join (list "Raised a " (role-at-location location-coords (turn-board state))))]
+                                  [board (b:flip-coordinates location-coords (turn-board state))]
+                                  [player (b:toggle-player player)]
+                                  [message (string-join (list "Raised a " (b:role-at-location location-coords (turn-board state))))]
                                   [selected-coords #f])))))
 
 (define (move-message state location-coords)
   (string-join (list
-                (player-at-location location-coords (turn-board state))
-                (role-at-location location-coords (turn-board state))
+                (b:player-at-location location-coords (turn-board state))
+                (b:role-at-location location-coords (turn-board state))
                 "selected, choose destination")))
 
 (define (move-src-event state location-coords)
@@ -201,10 +200,10 @@
 (define (handle-button-click state location-coords)
   (cond
     ((turn-selected-coords state) (finish-move-turn state location-coords))
-    ((location-hidden? location-coords (turn-board state))
+    ((b:location-hidden? location-coords (turn-board state))
      (raise-location state location-coords))
     ((eq? (turn-player state)
-          (player-at-location location-coords (turn-board state)))
+          (b:player-at-location location-coords (turn-board state)))
      (move-src-event state location-coords))
     (else (wrong-player state))))
 
@@ -212,7 +211,7 @@
 (define (player-won state)
   (send end-game-dialog set-label
         (string-join (list "Player"
-                           (toggle-player (turn-player state))
+                           (b:toggle-player (turn-player state))
                            "Won!")))
   (send end-game-dialog show #t))
 
@@ -222,7 +221,7 @@
     (cond
       (continue? (let* ([click-coords (channel-get button-event)]
                         [event-result (handle-button-click state click-coords)]
-                        [next-player-lost? (player-lost? (turn-player event-result)
+                        [next-player-lost? (b:player-lost? (turn-player event-result)
                                                          (turn-board event-result))]) ;; checking to see if next player lost based off event handling
                    (loop event-result
                          (not next-player-lost?))))
