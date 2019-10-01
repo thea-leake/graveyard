@@ -5,7 +5,6 @@
 
 (require (prefix-in b: "banqi.rkt"))
 
-(provide (prefix-out gui: (all-defined-out)))
 
 (define display-panel-min-width 350)
 (define display-panel-min-height 100)
