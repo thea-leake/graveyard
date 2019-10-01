@@ -18,12 +18,37 @@
          toggle-player
          role-at-location
          player-at-location
-         player-lost?)
+         player-lost?
+         gen-init-turn
+         (struct-out turn))
+
+
+(struct turn
+  (board
+   player
+   message
+   first?
+   captured
+   src-coords
+   valid?))
 
 (define board-rows 4)
 (define board-columns 8)
 (define location-count (* board-columns
                           board-rows))
+
+
+(define (gen-init-turn message)
+  (turn (gen-board) ;; board
+        "Undecided" ;; player
+        message     ;; message
+        #t          ;; first-turn
+        ;; Default values not used yet
+        #f  ;; captured
+        #f  ;; selected-coords
+        #f  ;; valid? - was move valid?
+        ))
+
 
 (define (x-pos coords)
   (car coords))
@@ -350,25 +375,27 @@
 
 
 
-(define (is-valid-move? player src-coords dest-coords board)
-  (cond
-    ((coords-out-of-range? dest-coords) '(#f "Destination is off of board"))
-    ((coords-out-of-range? src-coords) '(#f "Source is off of board"))
-    ((location-hidden? dest-coords board) '(#f "Cannot capture a hidden piece"))
-    ((location-hidden? src-coords board) '(#f "Cannot move a hidden piece"))
-    ((not (piece-belongs-to-player? player src-coords board )) '(#f "Cannot move an opponents piece"))
-    ((piece-belongs-to-player? player dest-coords board ) '(#f "Cannot capture your own piece"))
-    ((is-piece-cannon? src-coords board) (valid-cannon-move? src-coords dest-coords board))
-    (else
-     (non-cannon-move-check src-coords dest-coords board))))
+(define (is-valid-move? state dest-coords)
+  (let ([board (turn-board state)]
+        [src-coords (turn-src-coords state)]
+        [player (turn-player state)])
+   (cond
+     ((coords-out-of-range? dest-coords) '(#f "Destination is off of board"))
+     ((coords-out-of-range? src-coords) '(#f "Source is off of board"))
+     ((location-hidden? dest-coords board) '(#f "Cannot capture a hidden piece"))
+     ((location-hidden? src-coords board) '(#f "Cannot move a hidden piece"))
+     ((not (piece-belongs-to-player? player src-coords board )) '(#f "Cannot move an opponents piece"))
+     ((piece-belongs-to-player? player dest-coords board ) '(#f "Cannot capture your own piece"))
+     ((is-piece-cannon? src-coords board) (valid-cannon-move? src-coords dest-coords board))
+     (else
+      (non-cannon-move-check src-coords dest-coords board))))
+  )
 
 
-(define (valid-moves-for-location player src-coords board)
+(define (valid-moves-for-location state)
   (filter-map (lambda (dest-index)
-                (and (car (is-valid-move? player
-                                          src-coords
-                                          (get-coords-from-index dest-index)
-                                          board))
+                (and (car (is-valid-move? state
+                                          (get-coords-from-index dest-index)))
                      (get-coords-from-index dest-index)))
               board-indexes))
 
@@ -377,51 +404,49 @@
   (not (null? lst)))
 
 
-(define (valid-moves-for-player player board)
+(define (valid-moves-for-player state)
   (filter-map (lambda (src-index)
-                (let* ([index (get-coords-from-index src-index)]
-                       [valid-destinations (valid-moves-for-location player
-                                                                     index
-                                                                     board)])
+                (let* ([coords (get-coords-from-index src-index)]
+                       [location-check (struct-copy turn state
+                                                    [src-coords coords])]
+                       [valid-destinations (valid-moves-for-location location-check)])
                   (and (not-null? valid-destinations)
-                       (cons index valid-destinations))))
+                       (cons coords valid-destinations))))
               board-indexes))
 
 
-(define (valid-player-turns player board)
-  (let ([moves (valid-moves-for-player player board)]
-        [flips (hidden-coordinates board)])
+(define (valid-player-turns state)
+  (let* ([moves (valid-moves-for-player state)]
+         [flips (hidden-coordinates (turn-board state))])
     (hash 'moves (make-immutable-hash moves )
           'flips flips
           'actions-available? (or (not-null? moves)
                                   (not-null? flips)))))
 
-(define (player-lost? player board)
+(define (player-lost? state)
   (not
-   (hash-ref (valid-player-turns player
-                                 board)
+   (hash-ref (valid-player-turns state)
              'actions-available?)))
 
 
-(define (player-move player src-coords dest-coords board)
-  (let* ([piece-at-dest (piece-at-coordinates dest-coords board)]
-         [move-check (is-valid-move? player
-                                     src-coords
-                                     dest-coords
-                                     board)]
-         [move-response-init (hash 'valid? (car move-check)
-                                   'message (cadr move-check))])
+(define (player-move state dest-coords)
+  (let* ([piece-at-dest (piece-at-coordinates dest-coords (turn-board state))]
+         [move-check (is-valid-move? state
+                                     dest-coords)]
+         [response (struct-copy turn state
+                                [valid? (car move-check) ]
+                                [message (cadr move-check)])])
     (cond
-      ((hash-ref move-response-init 'valid?)
-       (hash-union (hash 'player (toggle-player player)
-                         'board (move-piece-clobber src-coords dest-coords board)
-                         'captured piece-at-dest)
-                   move-response-init))
+      ((turn-valid? response)
+       (struct-copy turn response
+                    [player (toggle-player (turn-player response))]
+                    [board (move-piece-clobber (turn-src-coords response)
+                                               dest-coords
+                                               (turn-board response))]
+                    [captured piece-at-dest]))
       (else
-       (hash-union (hash 'player player
-                         'board board
-                         'captured empty-location)
-                   move-response-init)))))
+       (struct-copy turn response
+                    [captured empty-location])))))
 
 ;; maybe return valid-player-turns for next turn to determine whether game was won
 ;; if so add player to next-turn hash when merged into player-move
