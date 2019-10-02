@@ -388,8 +388,7 @@
      ((piece-belongs-to-player? player dest-coords board ) '(#f "Cannot capture your own piece"))
      ((is-piece-cannon? src-coords board) (valid-cannon-move? src-coords dest-coords board))
      (else
-      (non-cannon-move-check src-coords dest-coords board))))
-  )
+      (non-cannon-move-check src-coords dest-coords board)))))
 
 
 (define (valid-moves-for-location state)
@@ -404,15 +403,33 @@
   (not (null? lst)))
 
 
+(define (selectable-coords? state coords)
+  (let ([board (turn-board state)])
+    (and (not (location-empty? coords
+                               board))
+         (location-revealed? coords
+                             board)
+         (piece-belongs-to-player? (turn-player state)
+                                   coords
+                                   board)
+         coords)))
+
+
+(define (player-selectable-coords state)
+  (filter-map (lambda (index)
+                (let ([coords (get-coords-from-index index)])
+                  (selectable-coords? state coords)))
+              board-indexes))
+
+
 (define (valid-moves-for-player state)
-  (filter-map (lambda (src-index)
-                (let* ([coords (get-coords-from-index src-index)]
-                       [location-check (struct-copy turn state
+  (filter-map (lambda (coords)
+                (let* ([location-check (struct-copy turn state
                                                     [src-coords coords])]
                        [valid-destinations (valid-moves-for-location location-check)])
                   (and (not-null? valid-destinations)
                        (cons coords valid-destinations))))
-              board-indexes))
+              (player-selectable-coords state)))
 
 
 (define (valid-player-turns state)
