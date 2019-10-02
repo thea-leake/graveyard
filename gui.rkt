@@ -1,9 +1,19 @@
-#lang racket/gui
+#lang racket/base
 
 (require (only-in pict
                   pict->bitmap)
          (only-in racket/format
                   ~a)
+         (only-in racket/string
+                  string-join)
+         (only-in racket/class
+                  new
+                  send)
+         (only-in racket/gui/base
+                  frame%
+                  message%
+                  dialog%
+                  button%)
          (only-in 2htdp/image
                   above
                   text)
