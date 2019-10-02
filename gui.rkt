@@ -87,7 +87,7 @@
 (define (risen-label piece)
     (pict->bitmap
      (text (b:role-name piece)
-           15
+           25
            (b:player-name piece)
             )))
 
