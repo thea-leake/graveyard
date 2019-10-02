@@ -213,7 +213,7 @@
     (cond
       (continue? (let* ([click-coords (channel-get button-event)]
                         [event-result (handle-button-click state click-coords)]
-                        [next-player-lost? (b:player-lost? state)]) ;; checking to see if next player lost based off event handling
+                        [next-player-lost? (b:player-lost? event-result)]) ;; checking to see if next player lost based off event handling
                    (loop event-result
                          (not next-player-lost?))))
                  (else (player-won state))))
