@@ -1,7 +1,16 @@
 #lang racket/base
-(require racket/list)
-(require racket/hash)
-(require memoize)
+(require (only-in racket/list
+                  take
+                  drop
+                  range
+                  flatten
+                  make-list
+                  shuffle
+                  count
+                  filter-map
+                  index-of)
+         (only-in memoize
+                  define/memo))
 
 (provide board-coordinates
          board-columns

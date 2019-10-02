@@ -1,9 +1,15 @@
 #lang racket/gui
-(require racket/gui/base)
-(require racket/format)
-(require table-panel)
 
-(require (prefix-in b: "banqi.rkt"))
+(require (only-in pict
+                  pict->bitmap)
+         (only-in racket/format
+                  ~a)
+         (only-in 2htdp/image
+                  above
+                  text)
+         (only-in table-panel
+                  table-panel%)
+         (prefix-in b: "banqi.rkt"))
 
 
 (define display-panel-min-width 350)
@@ -79,27 +85,57 @@
 
 
 (define (risen-label piece)
-  (~a (b:player-name piece)
-      "\n---\n"
-      (b:role-name piece)))
+    (pict->bitmap
+     (text (b:role-name piece)
+           15
+           (b:player-name piece)
+            )))
+
+(define hidden-button-label
+  (pict->bitmap
+   (above (text (string-join  (list "   --------------"
+                                    "/  Still buried   \\"
+                                    "|Click to raise!|"
+                                    "|     @>-`-,-     |"
+                                    )
+                              "\n")
+          15
+          'DarkSlateBlue)
+          (text "| ####-#### |"
+                16
+                'DarkSlateBlue)
+          (text (make-string 12 #\")
+                25
+                'darkgreen))))
+
+(define empty-plot-label
+  (let ([rubble (text "%&%*%&@&*%"
+                      15
+                      'brown)])
+    (pict->bitmap
+     (above rubble
+            (text "An Empty Plot!"
+                  15
+                  'black)
+            rubble))))
+
+(define (selected-label piece)
+  (pict->bitmap
+   (above (risen-label piece)
+          (text (string-join (list "      ----%----  "
+                                   "[xx|=selected=>")
+                             "\n")
+                12
+                'ForestGreen))))
 
 (define (get-button-label state piece coords)
   (cond
-    ((b:piece-empty? piece) "An empty Plot!")
+    ((b:piece-empty? piece) empty-plot-label)
     ((and (equal? coords (b:turn-src-coords state))
           (b:piece-revealed? piece))
-     (string-join (list (risen-label piece)
-                        "--%--"
-                        "[xx|=selected=>")
-                  "\n"))
+     (selected-label piece))
     ((b:piece-revealed? piece) (risen-label piece))
-    (else (~a (string-join  (list "----------"
-                                  "/  Still buried  \\"
-                                  "|Click to raise!|"
-                                  "|    @>-`-,-     |"
-                                  "| ####-#### |"
-                                  (make-string 18 #\"))
-                            "\n")))))
+    (else hidden-button-label)))
 
 (define (make-button piece coords)
   (new button%
