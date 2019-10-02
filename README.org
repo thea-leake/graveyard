@@ -1,12 +1,13 @@
 Graveyard - the game where 2 necromancers battle raised dead in a graveyard until one of them can no longer move!
 
 This is an implementation of the game [[https://en.wikipedia.org/wiki/Banqi][Banqi]] with a Halloween veneer. 
+It uses the Jumping cannon rules, where the cannon must jump over 1 and only 1 piece to move or capture.
 (currently using banqi role names etc, that may change)
 
 
 
 It's currently a work in progress - but has a playable GUI.
- - note: the dimensions are waaay off on windows, possibly Linux.  OSX is fine though.
+ - note: End-game notification seems to hang on closing on windows.  OSX is fine though.
 
 ** Dependencies:
 Racket - you can download [[https://download.racket-lang.org][here]]
