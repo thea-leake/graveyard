@@ -17,7 +17,7 @@
 (require racket/format)
 (require racket/string)
 
-(require "banqi.rkt")
+(require "graveyard.rkt")
 
 (provide display-board)
 
