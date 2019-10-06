@@ -400,13 +400,13 @@
        (non-cannon-move-check src-coords dest-coords board)))))
 
 
-(define/memo (coords-row-columns coords)
+(define (coords-row-columns coords)
   (let ([check (lambda (fn check-coords)
-                 (= (fn check-coords)
-                    (fn coords)))])
+                 (eq? (fn check-coords)
+                      (fn coords)))])
     (filter (lambda (check-coords)
-              (and (check x-pos check-coords)
-                   (check y-pos check-coords)))
+              (or (check x-pos check-coords)
+                  (check y-pos check-coords)))
             board-coordinates)))
 
 
