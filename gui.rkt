@@ -86,13 +86,21 @@
 
 
 (define end-game-dialog
-  (new dialog% [label "Game Over!"]
+  (new dialog%
+       [label "Game Over!"]
        [parent #f]
        [style '(close-button)]
        [enabled #f]
        [width 200]
        [height 50]))
 
+
+(define confirm-end-game-button
+  (new button%
+       [parent end-game-dialog]
+       [label "OK"]
+       [callback (lambda (button event)
+                   (send end-game-dialog show #f))]))
 
 (define (risen-label piece)
     (pict->bitmap
