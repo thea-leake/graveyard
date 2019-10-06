@@ -194,7 +194,7 @@
 
 (define (piece-belongs-to-player? player coords board)
   (eq? player
-      (player-at-location coords board)))
+       (player-at-location coords board)))
 
 (define (location-empty? coords board)
   (hash-ref (piece-at-coordinates coords
@@ -203,9 +203,9 @@
 
 (define (pieces-in-list piece-list)
   (count (lambda (x)
-            (not (hash-ref x
-                           'empty)))
-          piece-list))
+           (not (hash-ref x
+                          'empty)))
+         piece-list))
 
 (define (role-at-location coords board)
   (hash-ref (piece-at-coordinates coords
@@ -228,10 +228,10 @@
 
 (define (hidden-coordinates board)
   (filter-map (lambda (coords)
-            (and (location-hidden? (get-coords-from-index coords)
-                                   board)
-                 (get-coords-from-index coords)))
-          board-indexes))
+                (and (location-hidden? (get-coords-from-index coords)
+                                       board)
+                     (get-coords-from-index coords)))
+              board-indexes))
 
 
 (define (empty-index-list board)
@@ -265,11 +265,11 @@
 
 
 (define (move-piece-clobber src-coords dest-coords board)
-    (empty-coordinates src-coords
-                       (update-coordinates dest-coords
-                                           (piece-at-coordinates src-coords
-                                                                 board)
-                                           board)))
+  (empty-coordinates src-coords
+                     (update-coordinates dest-coords
+                                         (piece-at-coordinates src-coords
+                                                               board)
+                                         board)))
 
 
 (define (move-piece src-coords dest-coords board)
@@ -292,7 +292,7 @@
           (eq? leader defending-role))
      #t)
     (else(<= (hierarchy-value capturing-role)
-      (hierarchy-value defending-role)))))
+             (hierarchy-value defending-role)))))
 
 
 (define/memo (valid-non-cannon-move? src-coords dest-coords)
@@ -334,9 +334,9 @@
   (let* ([src-index (get-index-from-coordinates src-coords)]
          [dest-index (get-index-from-coordinates dest-coords)]
          [first-index (min src-index
-                     dest-index)]
+                           dest-index)]
          [last-index (max src-index
-                    dest-index)])
+                          dest-index)])
     (cannon-move-list-check (pieces-in-list (drop (take board
                                                         (add1 last-index))
                                                   first-index))
@@ -374,13 +374,13 @@
          [dest-index (get-index-from-coordinates dest-coords)]
          [move-horizontal? (= (quotient src-index board-columns)
                               (quotient dest-index board-columns))])
-   (cond
-     (move-horizontal? (cannon-row-move-check src-coords
-                                              dest-coords
-                                              board))
-     (else (cannon-column-move-check src-coords
-                                     dest-coords
-                                     board)))))
+    (cond
+      (move-horizontal? (cannon-row-move-check src-coords
+                                               dest-coords
+                                               board))
+      (else (cannon-column-move-check src-coords
+                                      dest-coords
+                                      board)))))
 
 
 
@@ -388,24 +388,32 @@
   (let ([board (turn-board state)]
         [src-coords (turn-src-coords state)]
         [player (turn-player state)])
-   (cond
-     ((coords-out-of-range? dest-coords) '(#f "Destination is off of board"))
-     ((coords-out-of-range? src-coords) '(#f "Source is off of board"))
-     ((location-hidden? dest-coords board) '(#f "Cannot capture a hidden piece"))
-     ((location-hidden? src-coords board) '(#f "Cannot move a hidden piece"))
-     ((not (piece-belongs-to-player? player src-coords board )) '(#f "Cannot move an opponents piece"))
-     ((piece-belongs-to-player? player dest-coords board ) '(#f "Cannot capture your own piece"))
-     ((is-piece-cannon? src-coords board) (valid-cannon-move? src-coords dest-coords board))
-     (else
-      (non-cannon-move-check src-coords dest-coords board)))))
+    (cond
+      ((coords-out-of-range? dest-coords) '(#f "Destination is off of board"))
+      ((coords-out-of-range? src-coords) '(#f "Source is off of board"))
+      ((location-hidden? dest-coords board) '(#f "Cannot capture a hidden piece"))
+      ((location-hidden? src-coords board) '(#f "Cannot move a hidden piece"))
+      ((not (piece-belongs-to-player? player src-coords board )) '(#f "Cannot move an opponents piece"))
+      ((piece-belongs-to-player? player dest-coords board ) '(#f "Cannot capture your own piece"))
+      ((is-piece-cannon? src-coords board) (valid-cannon-move? src-coords dest-coords board))
+      (else
+       (non-cannon-move-check src-coords dest-coords board)))))
+
+
+(define/memo (coords-row-columns coords)
+  (let ([check (lambda (fn check-coords)
+                 (= (fn check-coords)
+                    (fn coords)))])
+    (filter (lambda (check-coords)
+              (and (check x-pos check-coords)
+                   (check y-pos check-coords)))
+            board-coordinates)))
 
 
 (define (valid-moves-for-location state)
-  (filter-map (lambda (dest-index)
-                (and (car (is-valid-move? state
-                                          (get-coords-from-index dest-index)))
-                     (get-coords-from-index dest-index)))
-              board-indexes))
+  (filter (lambda (dest-coords)
+            (car (is-valid-move? state dest-coords)))
+          (coords-row-columns (turn-src-coords state))))
 
 
 (define (not-null? lst)
@@ -425,10 +433,9 @@
 
 
 (define (player-selectable-coords state)
-  (filter-map (lambda (index)
-                (let ([coords (get-coords-from-index index)])
-                  (selectable-coords? state coords)))
-              board-indexes))
+  (filter (lambda (coords)
+            (selectable-coords? state coords))
+          board-coordinates))
 
 
 (define (valid-moves-for-player state)
