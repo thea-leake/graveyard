@@ -22,6 +22,7 @@
          piece-revealed?
          piece-empty?
          player-move
+         player-flip-location
          location-hidden?
          flip-coordinates
          toggle-player
@@ -460,6 +461,20 @@
   (not
    (hash-ref (valid-player-turns state)
              'actions-available?)))
+
+(define (player-flip-location state coords)
+  (let ([next-player (if (turn-first? state)
+                         (toggle-player (player-at-location coords
+                                                            (turn-board state)))
+                         (toggle-player (turn-player state)))])
+    (struct-copy turn state
+                 [board (flip-coordinates coords
+                                          (turn-board state))]
+                 [player next-player]
+                 [message (role-at-location coords
+                                            (turn-board state))]
+                 [src-coords #f]
+                 [first? #f])))
 
 
 (define (player-move state dest-coords)

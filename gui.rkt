@@ -194,22 +194,15 @@
 (define (raise-message state coords)
   (string-join (list
                 "Raised a"
-                (b:role-at-location coords
-                                    (b:turn-board state)))))
+                (b:role-at-location coords (b:turn-board state)))))
 
 (define (raise-location state location-coords)
-  (let ([next-player (if (b:turn-first? state)
-                         (b:toggle-player (b:player-at-location location-coords
-                                               (b:turn-board state)))
-                         (b:toggle-player (b:turn-player state)))])
-    (event-handled (struct-copy b:turn state
-                                [board (b:flip-coordinates location-coords
-                                                           (b:turn-board state))]
-                                [player next-player]
-                                [message (raise-message state
-                                                        location-coords)]
-                                [src-coords #f]
-                                [first? #f]))))
+  (let ([handled-turn (b:player-flip-location state
+                                              location-coords)])
+    (event-handled
+     (struct-copy b:turn handled-turn
+                  [message (raise-message state
+                                          location-coords )]))))
 
 (define (move-message state location-coords)
   (string-join (list
