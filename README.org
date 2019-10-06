@@ -13,11 +13,11 @@ It's currently a work in progress - but has a playable GUI.
 Racket - you can download [[https://download.racket-lang.org][here]]
 
 Run the following to install library dependencies:
- - =raco pkg install memoize=
+ - =raco pkg install memoize table-panel=
  - =raco pkg install table-panel=
  
 ** To play:
- - run: =racket gui.rkt= in this directory
+ - run: =racket graveyard/gui.rkt= in this directory
 
 The README will be more filled out as the project becomes more usable.
 
