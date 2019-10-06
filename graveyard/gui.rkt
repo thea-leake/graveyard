@@ -33,7 +33,7 @@
                   text)
          (only-in table-panel
                   table-panel%)
-         (prefix-in g: "graveyard/graveyard.rkt"))
+         (prefix-in g: "graveyard.rkt"))
 
 
 (define display-panel-min-width 350)
