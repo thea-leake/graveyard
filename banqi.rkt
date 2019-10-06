@@ -402,8 +402,8 @@
 
 (define (coords-row-columns coords)
   (let ([check (lambda (fn check-coords)
-                 (eq? (fn check-coords)
-                      (fn coords)))])
+                 (= (fn check-coords)
+                    (fn coords)))])
     (filter (lambda (check-coords)
               (or (check x-pos check-coords)
                   (check y-pos check-coords)))
