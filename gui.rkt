@@ -62,22 +62,6 @@
        [min-width display-panel-min-width]))
 
 
-(define (location-format state)
-  (let ([selected-coords (b:turn-src-coords state)])
-    (if selected-coords
-        (string-join (list "Selected Square:"
-                           (~a selected-coords)
-                           ","
-                           (~a selected-coords)))
-        "Nothing Selected")))
-
-
-(define location-selected
-  (new message%
-       [parent player-display-table]
-       [label (location-format init-turn)]
-       [min-width display-panel-min-width]))
-
 (define board-table
   (new table-panel%
        [parent board-container]
@@ -184,8 +168,7 @@
 (define (update-ui state)
   (update-board state)
   (send player-display set-label (string-join (list "Current Player:" (b:turn-player state))))
-  (send player-message set-label (b:turn-message state))
-  (send location-selected set-label (location-format state)))
+  (send player-message set-label (b:turn-message state)))
 
 (define (event-handled state)
   (update-ui state)
