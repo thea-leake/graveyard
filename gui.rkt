@@ -33,14 +33,14 @@
                   text)
          (only-in table-panel
                   table-panel%)
-         (prefix-in b: "banqi.rkt"))
+         (prefix-in g: "graveyard/graveyard.rkt"))
 
 
 (define display-panel-min-width 350)
 (define display-panel-min-height 100)
 
 (define init-turn
-  (b:gen-init-turn "First player: pick a corpse to raise!"))
+  (g:gen-init-turn "First player: pick a corpse to raise!"))
 
 
 (define button-event (make-channel))
@@ -65,14 +65,14 @@
   (new message%
        [parent player-display-table]
        [label (string-join (list
-                            "Current Player:" (b:turn-player init-turn)))]
+                            "Current Player:" (g:turn-player init-turn)))]
        [min-width display-panel-min-width]))
 
 
 (define player-message
   (new message%
        [parent player-display-table]
-       [label (b:turn-message init-turn)]
+       [label (g:turn-message init-turn)]
        [min-width display-panel-min-width]))
 
 
@@ -80,7 +80,7 @@
   (new table-panel%
        [parent board-container]
        [border 2]
-       [dimensions (list b:board-rows b:board-columns)]))
+       [dimensions (list g:board-rows g:board-columns)]))
 
 
 (define end-game-dialog
@@ -102,9 +102,9 @@
 
 (define (risen-label piece)
     (pict->bitmap
-     (text (b:role-name piece)
+     (text (g:role-name piece)
            25
-           (b:player-name piece)
+           (g:player-name piece)
             )))
 
 (define hidden-button-label
@@ -146,11 +146,11 @@
 
 (define (get-button-label state piece coords)
   (cond
-    ((b:piece-empty? piece) empty-plot-label)
-    ((and (equal? coords (b:turn-src-coords state))
-          (b:piece-revealed? piece))
+    ((g:piece-empty? piece) empty-plot-label)
+    ((and (equal? coords (g:turn-src-coords state))
+          (g:piece-revealed? piece))
      (selected-label piece))
-    ((b:piece-revealed? piece) (risen-label piece))
+    ((g:piece-revealed? piece) (risen-label piece))
     (else hidden-button-label)))
 
 (define (make-button piece coords)
@@ -168,78 +168,78 @@
 
 (define button-list
   (map make-button
-       (b:turn-board init-turn)
-       b:board-coordinates))
+       (g:turn-board init-turn)
+       g:board-coordinates))
 
 (define (update-board state)
   (for-each (lambda (button-piece)
               (update-button state button-piece) )
             (map list
                  button-list
-                 (b:turn-board state)
-                 b:board-coordinates)))
+                 (g:turn-board state)
+                 g:board-coordinates)))
 
 (define (update-ui state)
   (update-board state)
-  (send player-display set-label (string-join (list "Current Player:" (b:turn-player state))))
-  (send player-message set-label (b:turn-message state)))
+  (send player-display set-label (string-join (list "Current Player:" (g:turn-player state))))
+  (send player-message set-label (g:turn-message state)))
 
 (define (event-handled state)
   (update-ui state)
   state)
 
 (define (finish-move-message state location-coords)
-  (let ([captured-piece (b:turn-captured state)])
-    (if (b:piece-empty? captured-piece)
-        (b:turn-message state)
+  (let ([captured-piece (g:turn-captured state)])
+    (if (g:piece-empty? captured-piece)
+        (g:turn-message state)
         (string-join (list "Captured "
-                           (b:player-name captured-piece)
-                           (b:role-name captured-piece))))))
+                           (g:player-name captured-piece)
+                           (g:role-name captured-piece))))))
 
 (define (finish-move-turn state location-coords)
-  (let* ([updated-game (b:player-move state
+  (let* ([updated-game (g:player-move state
                                       location-coords)]
          [message (finish-move-message updated-game
                                        location-coords)])
-    (event-handled (struct-copy b:turn updated-game
+    (event-handled (struct-copy g:turn updated-game
                                 [message message]
                                 [src-coords #f]))))
 
 (define (raise-message state coords)
   (string-join (list
                 "Raised a"
-                (b:role-at-location coords (b:turn-board state)))))
+                (g:role-at-location coords (g:turn-board state)))))
 
 (define (raise-location state location-coords)
-  (let ([handled-turn (b:player-flip-location state
+  (let ([handled-turn (g:player-flip-location state
                                               location-coords)])
     (event-handled
-     (struct-copy b:turn handled-turn
+     (struct-copy g:turn handled-turn
                   [message (raise-message state
                                           location-coords )]))))
 
 (define (move-message state location-coords)
   (string-join (list
-                (b:player-at-location location-coords (b:turn-board state))
-                (b:role-at-location location-coords (b:turn-board state))
+                (g:player-at-location location-coords (g:turn-board state))
+                (g:role-at-location location-coords (g:turn-board state))
                 "selected, choose destination")))
 
 (define (move-src-event state location-coords)
-  (event-handled (struct-copy b:turn state
+  (event-handled (struct-copy g:turn state
                               [src-coords location-coords]
                               [message (move-message state location-coords)])))
 
 (define (wrong-player state)
-  (event-handled (struct-copy b:turn state
+  (event-handled (struct-copy g:turn state
                               [message "Selected other players piece."])))
 
 (define (handle-button-click state location-coords)
   (cond
-    ((b:turn-src-coords state) (finish-move-turn state location-coords))
-    ((b:location-hidden? location-coords (b:turn-board state))
+    ((g:turn-src-coords state) (finish-move-turn state location-coords))
+    ((g:location-hidden? location-coords (g:turn-board state))
      (raise-location state location-coords))
-    ((eq? (b:turn-player state)
-          (b:player-at-location location-coords (b:turn-board state)))
+    ((eq? (g:turn-player state)
+          (g:player-at-location location-coords (g:turn-board state)))
      (move-src-event state location-coords))
     (else (wrong-player state))))
 
@@ -247,7 +247,7 @@
 (define (player-won state)
   (send end-game-dialog set-label
         (string-join (list "Player"
-                           (b:toggle-player (b:turn-player state))
+                           (g:toggle-player (g:turn-player state))
                            "Won!")))
   (send end-game-dialog show #t))
 
@@ -257,7 +257,7 @@
     (cond
       (continue? (let* ([click-coords (channel-get button-event)]
                         [event-result (handle-button-click state click-coords)]
-                        [next-player-lost? (b:player-lost? event-result)]) ;; checking to see if next player lost based off event handling
+                        [next-player-lost? (g:player-lost? event-result)]) ;; checking to see if next player lost based off event handling
                    (loop event-result
                          (not next-player-lost?))))
                  (else (player-won state))))
