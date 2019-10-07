@@ -40,7 +40,7 @@
 (define display-panel-min-height 100)
 
 (define init-turn
-  (g:gen-init-turn "First player: pick a corpse to raise!"))
+  (g:gen-init-turn "First Necromancer: pick a corpse to raise!"))
 
 
 (define button-event (make-channel))
@@ -65,7 +65,7 @@
   (new message%
        [parent player-display-table]
        [label (string-join (list
-                            "Current Player:" (g:turn-player init-turn)))]
+                            "Current Necromancer:" (g:turn-player init-turn)))]
        [min-width display-panel-min-width]))
 
 
@@ -181,7 +181,7 @@
 
 (define (update-ui state)
   (update-board state)
-  (send player-display set-label (string-join (list "Current Player:" (g:turn-player state))))
+  (send player-display set-label (string-join (list "Current Necromancer:" (g:turn-player state))))
   (send player-message set-label (g:turn-message state)))
 
 (define (event-handled state)
@@ -231,7 +231,7 @@
 
 (define (wrong-player state)
   (event-handled (struct-copy g:turn state
-                              [message "Selected other players piece."])))
+                              [message "Selected other necromancers piece."])))
 
 (define (handle-button-click state location-coords)
   (cond
@@ -246,7 +246,7 @@
 
 (define (player-won state)
   (send end-game-dialog set-label
-        (string-join (list "Player"
+        (string-join (list "Necromancer "
                            (g:toggle-player (g:turn-player state))
                            "Won!")))
   (send end-game-dialog show #t))
