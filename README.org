@@ -25,7 +25,9 @@ This should give a better startup time (though this game is not very resource in
  - to build a local build run =make executable=.  This will build an executable in =build/bin=
  - to make a distributable build run:
    + =make build_<OS_TYPE>= this will build a distributable executable in =build/target=
-   + OSX: =osx= - so command would be =make build_osx=
+     + OSX: =osx= - so command would be =make build_osx=
+     + Linux/UNIX: =unix=
+     + Windows: =windows=
 
 *** To remove build artifacts:
 Run =make clean=.
