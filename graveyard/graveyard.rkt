@@ -103,25 +103,31 @@
 (define cannon-max-pieces 3)
 
 
-(define leader "General")
+;; special roles
+(define leader "Lich")
+(define advisor "Vampire")
+(define elephant "Zombie")
+(define chariot "Ghoul")
+(define horse "Skeleton")
+(define cannon "Wraith")
+(define pawn "Skeleton")
 
-(define pawn "Soldier")
 
 ;; it is worth noting that this is not referenced when the cannon is capturing
 ;; cannons can capture any unit, and any unit except soldier can capture the cannon
 (define role-hierarchy
-  (list leader "Advisor" "Elephant" "Chariot" "Horse" "Cannon" pawn "#Empty#"))
+  (list leader advisor elephant chariot horse cannon pawn "#Empty#"))
 
 
 (define player-start-roles
   (flatten
    (list (make-list 1 leader)
-         (make-list 2 "Advisor")
-         (make-list 2 "Elephant")
-         (make-list 2 "Chariot")
-         (make-list 2 "Horse")
+         (make-list 2 advisor)
+         (make-list 2 elephant)
+         (make-list 2 chariot)
+         (make-list 2 horse)
          (make-list 5 pawn)
-         (make-list 2 "Cannon"))))
+         (make-list 2 cannon))))
 
 (define (mkpiece player role)
   (hash 'player player
@@ -229,7 +235,7 @@
 
 
 (define (is-piece-cannon? coords board)
-  (eq? "Cannon"
+  (eq? cannon
        (role-at-location coords board)))
 
 

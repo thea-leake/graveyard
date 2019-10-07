@@ -18,7 +18,36 @@ Run the following to install library dependencies:
  
 ** To play:
  - run: =racket graveyard/gui.rkt= in this directory
+ - 
 
-The README will be more filled out as the project becomes more usable.
+
+** How to play:
+The necromancers are presented with a graveyard full of buried corpses.
+Each player then either raises a corpse, or moves/captures one of the other necromancers corpses.
+
+The game ends when one player can no longer move or raise a new corpse.
 
 
+Each corpse (except the wraith--as specified in its role section) can move one plot horizontally or vertically.
+Capturing is done by moving into the plot another raised piece is in.
+The hierarchy of what corpse can capture what is defined below in roles.
+
+*** Roles
+    These are ordered by precedence from least to greatest vulnerability.
+**** Lich - General
+     The lich can capture any unit except poltergeists as poltergeists don't have enough of a presence for the lich to control them.
+     The lich is vulnerable to other liches, poltergeists, and wraiths.
+**** Vampire
+     The vampire is vulnerable to units above it and other vampires, and can capture units below it and other vampires
+**** Zombie
+     The zombie is vulnerable to units above it and other zombies, and can capture units below it and other zombies
+**** Ghoul
+     The ghoul is vulnerable to units above it and other ghouls, and can capture units below it and other ghouls
+**** Skeleton     
+     The skeleton is vulnerable to units above it and other skeletons, and can capture units below it and other skeletons
+**** Wraith
+     The wraith is a glass cannon, capable of capturing any unit, but capturable by any except the poltergeist.
+     To give the wraith the energy it needs to move or capture, it must latch on to the essence of another creature, and move through it.
+**** Poltergeist
+     The poltergeist can do little more than bat objects around, but their mischievous behavior is perfectly suited for stealing and breaking a liches philactory!
+     The poltergeist can only capture liches and other poltergeists, and are vulnerable to all other units
