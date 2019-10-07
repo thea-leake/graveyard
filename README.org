@@ -14,7 +14,6 @@ Racket - you can download [[https://download.racket-lang.org][here]]
 
 Run the following to install library dependencies:
  - =raco pkg install memoize table-panel=
- - =raco pkg install table-panel=
  
 ** To play:
  - run: =racket graveyard/gui.rkt= in this directory
