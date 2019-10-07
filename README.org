@@ -18,7 +18,6 @@ Run the following to install library dependencies:
  
 ** To play:
  - run: =racket graveyard/gui.rkt= in this directory
- - 
 
 
 ** How to play:
