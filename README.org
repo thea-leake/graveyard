@@ -7,7 +7,7 @@ It uses the Jumping cannon rules, where the cannon must jump over 1 and only 1 p
 
 
 It's currently a work in progress - but has a playable GUI.
- - note: End-game notification seems to hang on closing on windows.  OSX is fine though.
+ - note: Windows currently not working due to layering issues.  OSX is fine though.
 
 ** Dependencies:
 Racket - you can download [[https://download.racket-lang.org][here]]
