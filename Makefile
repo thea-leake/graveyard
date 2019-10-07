@@ -5,7 +5,8 @@ GUI_PATH = $(SRC_DIR)/gui.rkt
 BACKEND_PATH = $(SRC_DIR)/graveyard.rkt
 SRC_FILES  = $(GUI_PATH) $(SRC_PATH)
 BUILD_PATH = build
-EXECUTABLE_PATH = $(BUILD_PATH)/bin/graveyard
+BUILD_BIN_PATH = $(BUILD_PATH)/bin
+EXECUTABLE_PATH = $(BUILD_BIN_PATH)/graveyard
 OSX_EXECUTABLE_PATH = $(EXECUTABLE_PATH).app
 WINDOWS_EXECUTABLE_PATH = $(EXECUTABLE_PATH).exe
 TARGET_DIR = $(BUILD_PATH)/target
@@ -27,7 +28,7 @@ compile_gui: $(SRC_FILES)
 
 
 executable: compile_gui
-	mkdir -p $(BUILD_PATH)
+	mkdir -p $(BUILD_BIN_PATH)
 	raco exe --gui -o $(EXECUTABLE_PATH) $(GUI_PATH)
 
 build_osx: executable
