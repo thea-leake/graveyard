@@ -27,60 +27,139 @@
                   frame%
                   message%
                   dialog%
-                  button%)
+                  button%
+                  canvas%
+                  pane%
+                  vertical-pane%)
          (only-in 2htdp/image
                   above
-                  text)
+                  text
+                  overlay
+                  rectangle)
+         (only-in racket/draw
+                  make-color)
          (only-in table-panel
                   table-panel%)
          (prefix-in g: "graveyard.rkt"))
 
+(define dark-purple-taup
+  (make-color 75 65 79))
 
-(define display-panel-min-width 350)
-(define display-panel-min-height 100)
+(define button-width 130)
+
+(define button-height button-width)
+
+(define button-background
+  (above (rectangle button-width
+                    (* button-height 0.75)
+                    "solid"
+                    "Blue")
+         (rectangle button-width
+                    (* button-height 0.25)
+                    "solid"
+                    "MediumForestGreen")))
+
+(define coffin-color "LightSlateGray")
+
+(define hidden-button-text
+  (above (text (string-join  (list "   --------------"
+                                   "/  Still buried   \\"
+                                   "|Click to raise!|"
+                                   "|     @>-`-,-     |"
+                                   )
+                             "\n")
+               15
+               "LightSlateGray")
+         (text "| ####-#### |"
+               16
+               "LightSlateGray")
+         (text (make-string 12 #\")
+               25
+               'MediumForestGreen)))
+
+(define hidden-button-label
+  (pict->bitmap
+   (overlay hidden-button-text
+            button-background)))
+
+(define empty-plot-label
+  (let ([rubble (text "%&%*%&@&*%$@%"
+                      12
+                      'brown)])
+    (pict->bitmap
+     (overlay (above (text "\n\n\n\nAn Empty Plot!\n"
+                           15
+                           'black)
+                     rubble)
+              button-background))))
+
+(define selected-image
+  (text (string-join (list "      ----%----  "
+                           "[xx|=selected=>")
+                     "\n")
+        12
+        'Goldenrod))
+
+(define welcome-bitmap
+  (pict->bitmap (text "Welcome to Queen of the Graveyard!"
+                      27
+                      "Goldenrod")))
+
 
 (define init-turn
   (g:gen-init-turn "First Necromancer: pick a corpse to raise!"))
 
-
 (define button-event (make-channel))
 
 (define game-window (new frame% [label "Graveyard"]))
-(define start-game-msg (new message%
-                            [parent game-window]
-                            [label "Welcome to Queen of the Graveyard!"]))
 
-(define board-container game-window) ;; we'll likely be putting this into a canvas etc.. making it easier to change later
+(define game-pane
+  (new pane%
+       [parent game-window]))
+
+(define vert-arranger
+  (new vertical-pane%
+       [parent game-pane]))
+
+(define game-canvas
+  (new canvas%
+       [parent game-pane]))
+
+(define board-container vert-arranger) ;; we'll likely be putting this into a canvas etc.. making it easier to change later
+
+(define welcome-message
+  (new message%
+       [parent board-container]
+       [label welcome-bitmap]))
 
 (define player-display-table
   (new table-panel%
        [parent board-container]
-       [dimensions '(2 2)]
+       [dimensions '(1 2)]
        [column-stretchability #t]
        [row-stretchability #t]
-       [min-height display-panel-min-height]))
+       [alignment (list 'center 'top)]))
 
 
 (define player-display
   (new message%
        [parent player-display-table]
        [label (string-join (list
-                            "Current Necromancer:" (g:turn-player init-turn)))]
-       [min-width display-panel-min-width]))
+                            "Current Necromancer:" (g:turn-player init-turn)))]))
 
 
 (define player-message
   (new message%
        [parent player-display-table]
-       [label (g:turn-message init-turn)]
-       [min-width display-panel-min-width]))
+       [label (g:turn-message init-turn)]))
 
 
 (define board-table
   (new table-panel%
        [parent board-container]
        [border 2]
-       [dimensions (list g:board-rows g:board-columns)]))
+       [dimensions (list g:board-rows g:board-columns)]
+       [alignment (list 'center 'bottom)]))
 
 
 (define end-game-dialog
@@ -100,49 +179,26 @@
        [callback (lambda (button event)
                    (send end-game-dialog show #f))]))
 
-(define (risen-label piece)
-    (pict->bitmap
-     (text (g:role-name piece)
-           25
-           (g:player-name piece)
-            )))
-
-(define hidden-button-label
+(define (add-button-background image)
   (pict->bitmap
-   (above (text (string-join  (list "   --------------"
-                                    "/  Still buried   \\"
-                                    "|Click to raise!|"
-                                    "|     @>-`-,-     |"
-                                    )
-                              "\n")
-          15
-          'DarkSlateBlue)
-          (text "| ####-#### |"
-                16
-                'DarkSlateBlue)
-          (text (make-string 12 #\")
-                25
-                'darkgreen))))
+   (overlay image
+            button-background)))
 
-(define empty-plot-label
-  (let ([rubble (text "%&%*%&@&*%"
-                      15
-                      'brown)])
-    (pict->bitmap
-     (above rubble
-            (text "An Empty Plot!"
-                  15
-                  'black)
-            rubble))))
+
+(define (base-revealed-label piece)
+  (text (g:role-name piece)
+        25
+        (g:player-name piece)))
+
+(define (revealed-label piece)
+    (add-button-background
+     (base-revealed-label piece)))
+
 
 (define (selected-label piece)
-  (pict->bitmap
-   (above (risen-label piece)
-          (text (string-join (list "      ----%----  "
-                                   "[xx|=selected=>")
-                             "\n")
-                12
-                'ForestGreen))))
+  (add-button-background
+   (above (base-revealed-label piece)
+          selected-image)))
 
 (define (get-button-label state piece coords)
   (cond
@@ -150,7 +206,7 @@
     ((and (equal? coords (g:turn-src-coords state))
           (g:piece-revealed? piece))
      (selected-label piece))
-    ((g:piece-revealed? piece) (risen-label piece))
+    ((g:piece-revealed? piece) (revealed-label piece))
     (else hidden-button-label)))
 
 (define (make-button piece coords)
@@ -263,6 +319,9 @@
                  (else (player-won state))))
     (exit))
 
+
+(send game-canvas set-canvas-background dark-purple-taup)
+;; (send game-pane add-child game-canvas)
 (send game-window show #t)
 
 (thread
