@@ -103,7 +103,7 @@
 (define cannon-max-pieces 3)
 
 
-;; special roles
+;; roles
 (define leader "Lich")
 (define advisor "Vampire")
 (define elephant "Zombie")

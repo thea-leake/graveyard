@@ -46,6 +46,7 @@ The hierarchy of what corpse can capture what is defined below in roles.
 **** Wraith
      The wraith is a glass cannon, capable of capturing any unit, but capturable by any except the poltergeist.
      To give the wraith the energy it needs to move or capture, it must latch on to the essence of another creature, and move through it.
+     As such the wraith must skip over one (and only one) corpse on the board on either axis to move.
 **** Poltergeist
      The poltergeist can do little more than bat objects around, but their mischievous behavior is perfectly suited for stealing and breaking a liches philactory!
      The poltergeist can only capture liches and other poltergeists, and are vulnerable to all other units
