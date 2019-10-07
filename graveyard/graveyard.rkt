@@ -509,6 +509,3 @@
       (else
        (struct-copy turn response
                     [captured empty-location])))))
-
-;; maybe return valid-player-turns for next turn to determine whether game was won
-;; if so add player to next-turn hash when merged into player-move
