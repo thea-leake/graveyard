@@ -13,10 +13,22 @@ It's currently a work in progress - but has a playable GUI.
 Racket - you can download [[https://download.racket-lang.org][here]]
 
 Run the following to install library dependencies:
- - =raco pkg install memoize table-panel=
- 
+ - =raco pkg install memoize table-panel=, or
+ - =make deps=
+
 ** To play:
- - run: =racket graveyard/gui.rkt= in this directory
+*** Without building:
+ - run: =racket graveyard/gui.rkt= in this directory, or
+ - =make run=
+*** With building:
+This should give a better startup time (though this game is not very resource intensive)
+ - to build a local build run =make executable=.  This will build an executable in =build/bin=
+ - to make a distributable build run:
+   + =make build_<OS_TYPE>= this will build a distributable executable in =build/target=
+   + OSX: =osx= - so command would be =make build_osx=
+
+*** To remove build artifacts:
+Run =make clean=.
 
 
 ** How to play:
