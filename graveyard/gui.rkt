@@ -117,13 +117,15 @@
   (new pane%
        [parent game-window]))
 
+(define game-canvas
+  (new canvas%
+       [parent game-pane]))
+(send game-canvas set-canvas-background dark-purple-taup)
+
 (define vert-arranger
   (new vertical-pane%
        [parent game-pane]))
 
-(define game-canvas
-  (new canvas%
-       [parent game-pane]))
 
 (define board-container vert-arranger) ;; we'll likely be putting this into a canvas etc.. making it easier to change later
 
@@ -320,7 +322,6 @@
     (exit))
 
 
-(send game-canvas set-canvas-background dark-purple-taup)
 ;; (send game-pane add-child game-canvas)
 (send game-window show #t)
 
