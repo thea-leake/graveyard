@@ -117,10 +117,10 @@
   (new pane%
        [parent game-window]))
 
-(define game-canvas
-  (new canvas%
-       [parent game-pane]))
-(send game-canvas set-canvas-background dark-purple-taup)
+;; (define game-canvas
+;;   (new canvas%
+;;        [parent game-pane]))
+;; (send game-canvas set-canvas-background dark-purple-taup)
 
 (define vert-arranger
   (new vertical-pane%
