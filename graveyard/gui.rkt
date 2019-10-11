@@ -25,9 +25,12 @@
                   send
                   class
                   define/override
+                  define/public
                   super-new
                   object?
-                  init-field)
+                  init-field
+                  this
+                  inherit)
          (only-in racket/gui/base
                   frame%
                   message%
@@ -53,16 +56,16 @@
 (define dark-green
   (make-color 0 100 0))
 
-(define button-width 130)
+(define button-width 150)
 
 (define button-height button-width)
 
 (define button-background
-  (above (rectangle button-width
+  (above (rectangle (+ 25 button-width )
                     (* button-height 0.75)
                     "solid"
                     "Blue")
-         (rectangle button-width
+         (rectangle (+ 25 button-width )
                     (* button-height 0.25)
                     "solid"
                     "MediumForestGreen")))
@@ -132,25 +135,36 @@
 
 (define button-canvas%
   (class canvas%
+    (inherit min-width min-height)
     (super-new)
     (init-field callback
-                [min-width button-width]
-                [min-height button-height]
-                [style (list 'no-autoclear
-                             'border)]
+                [style (list 'no-autoclear)]
+                [prev-image  hidden-button-label]
      )
+    (define/public (store-image btmp)
+      (set! prev-image btmp))
+    (define/public (get-image)
+      prev-image)
+    (define (my-dc)
+      (send this get-dc))
     (define/override (on-event e)
       (when (and (object? e) (send e get-left-down))
-        (callback)))))
+        (callback)))
+    ;; (define/override (on-paint)
+    ;;   (lambda ()
+    ;;     (send (my-dc)
+    ;;           draw-bitmap
+    ;;           prev-image
+    ;;           0
+    ;;           0)))
+    ))
 
-;; (define game-canvas
-;;   (new canvas%
-;;        [parent game-pane]
-;;        [min-width 700]
-;;        [min-height 1200]))
+(define game-canvas
+  (new canvas%
+       [parent game-pane]))
 
-;; (send game-canvas set-canvas-background dark-purple-taup)
-;; (send game-canvas on-event (lambda (e) (println e)))
+(send game-canvas set-canvas-background dark-purple-taup)
+(send game-canvas on-event (lambda (e) (println e)))
 
 (define vert-arranger
   (new vertical-pane%
@@ -254,28 +268,32 @@
   (let ([new-button (new button-canvas%
                          [parent board-table]
                          [callback (lambda ()
-                                     (channel-put button-event coords))])])
+                                     (channel-put button-event coords))]
+                         [min-width button-width]
+                         [min-height button-height]
+                         [paint-callback (lambda (me dc)
+                                               (send dc
+                                                     draw-bitmap
+                                                     (send me get-image)
+                                                     0
+                                                     0))])])
     (send new-button set-canvas-background dark-green)
-    (send new-button
-          refresh-now (lambda (dc)
-                        (send dc
-                              draw-bitmap
-                              (get-button-label init-turn
-                                                piece
-                                                coords)
-                              0
-                              0)))
+    (send new-button on-paint)
     new-button))
 
 
 (define (update-button state button-piece)
-  (send (car button-piece)
+  (let ([button-img (get-button-label state
+                                      (cadr button-piece)
+                                      (caddr button-piece))])
+    (send (car button-piece)
         refresh-now
         (lambda (dc)
-          (draw-button dc
-                       state
-                       (cadr button-piece)
-                       (caddr button-piece)))))
+          (send dc
+                draw-bitmap
+                button-img
+                0 0)))
+    (send (car button-piece) store-image button-img)))
 
 (define button-list
   (map make-button
