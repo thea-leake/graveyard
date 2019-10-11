@@ -123,9 +123,7 @@
 (define button-event (make-channel))
 
 (define game-window (new frame%
-                         [label "Graveyard"]
-                         [height 500]
-                         [width 1500]))
+                         [label "Graveyard"]))
 
 (define game-pane
   (new pane%
@@ -150,28 +148,12 @@
     (define/override (on-event e)
       (when (and (object? e) (send e get-left-down))
         (callback)))
-    ;; (define/override (on-paint)
-    ;;   (lambda ()
-    ;;     (send (my-dc)
-    ;;           draw-bitmap
-    ;;           prev-image
-    ;;           0
-    ;;           0)))
-    ))
-
-(define game-canvas
-  (new canvas%
-       [parent game-pane]))
-
-(send game-canvas set-canvas-background dark-purple-taup)
-(send game-canvas on-event (lambda (e) (println e)))
-
 (define vert-arranger
   (new vertical-pane%
        [parent game-pane]))
 
 
-(define board-container vert-arranger) ;; we'll likely be putting this into a canvas etc.. making it easier to change later
+(define board-container vert-arranger)
 
 (define welcome-message
   (new message%
