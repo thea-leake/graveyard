@@ -110,7 +110,7 @@
 (define chariot "Ghoul")
 (define horse "Skeleton")
 (define cannon "Wraith")
-(define pawn "Skeleton")
+(define pawn "Poltergeist")
 
 
 ;; it is worth noting that this is not referenced when the cannon is capturing
