@@ -147,7 +147,8 @@
       (send this get-dc))
     (define/override (on-event e)
       (when (and (object? e) (send e get-left-down))
-        (callback)))
+        (callback)))))
+
 (define vert-arranger
   (new vertical-pane%
        [parent game-pane]))
@@ -156,9 +157,17 @@
 (define board-container vert-arranger)
 
 (define welcome-message
-  (new message%
+  (new canvas%
        [parent board-container]
-       [label welcome-bitmap]))
+       [min-height 50]
+       [paint-callback (lambda (me dc)
+                         (send dc
+                               draw-bitmap
+                               welcome-bitmap
+                               (- (quotient (send me get-width ) 2)
+                                  (quotient (send welcome-bitmap get-width) 2))
+                               0))]))
+(send welcome-message set-canvas-background dark-purple-taup)
 
 (define player-display-table
   (new table-panel%
@@ -237,14 +246,6 @@
     ((g:piece-revealed? piece) (revealed-label piece))
     (else hidden-button-label)))
 
-(define (draw-button dc state piece coords)
-  (lambda (dc)
-    (send dc
-          draw-bitmap
-          (get-button-label state piece coords)
-          0
-          0)
-    (println "Rarrr")))
 
 (define (make-button piece coords)
   (let ([new-button (new button-canvas%
@@ -259,7 +260,7 @@
                                                      (send me get-image)
                                                      0
                                                      0))])])
-    (send new-button set-canvas-background dark-green)
+    (send new-button set-canvas-background dark-purple-taup)
     (send new-button on-paint)
     new-button))
 
