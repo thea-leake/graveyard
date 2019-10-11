@@ -22,7 +22,12 @@
                   string-join)
          (only-in racket/class
                   new
-                  send)
+                  send
+                  class
+                  define/override
+                  super-new
+                  object?
+                  init-field)
          (only-in racket/gui/base
                   frame%
                   message%
@@ -44,6 +49,9 @@
 
 (define dark-purple-taup
   (make-color 75 65 79))
+
+(define dark-green
+  (make-color 0 100 0))
 
 (define button-width 130)
 
@@ -111,16 +119,38 @@
 
 (define button-event (make-channel))
 
-(define game-window (new frame% [label "Graveyard"]))
+(define game-window (new frame%
+                         [label "Graveyard"]
+                         [height 500]
+                         [width 1500]))
 
 (define game-pane
   (new pane%
        [parent game-window]))
 
+
+
+(define button-canvas%
+  (class canvas%
+    (super-new)
+    (init-field callback
+                [min-width button-width]
+                [min-height button-height]
+                [style (list 'no-autoclear
+                             'border)]
+     )
+    (define/override (on-event e)
+      (when (and (object? e) (send e get-left-down))
+        (callback)))))
+
 ;; (define game-canvas
 ;;   (new canvas%
-;;        [parent game-pane]))
+;;        [parent game-pane]
+;;        [min-width 700]
+;;        [min-height 1200]))
+
 ;; (send game-canvas set-canvas-background dark-purple-taup)
+;; (send game-canvas on-event (lambda (e) (println e)))
 
 (define vert-arranger
   (new vertical-pane%
@@ -211,18 +241,41 @@
     ((g:piece-revealed? piece) (revealed-label piece))
     (else hidden-button-label)))
 
+(define (draw-button dc state piece coords)
+  (lambda (dc)
+    (send dc
+          draw-bitmap
+          (get-button-label state piece coords)
+          0
+          0)
+    (println "Rarrr")))
+
 (define (make-button piece coords)
-  (new button%
-       [parent board-table]
-       [label (get-button-label init-turn piece coords)]
-       [callback (lambda (button event)
-                   (channel-put button-event coords))]))
+  (let ([new-button (new button-canvas%
+                         [parent board-table]
+                         [callback (lambda ()
+                                     (channel-put button-event coords))])])
+    (send new-button set-canvas-background dark-green)
+    (send new-button
+          refresh-now (lambda (dc)
+                        (send dc
+                              draw-bitmap
+                              (get-button-label init-turn
+                                                piece
+                                                coords)
+                              0
+                              0)))
+    new-button))
+
 
 (define (update-button state button-piece)
   (send (car button-piece)
-        set-label (get-button-label state
-                                    (cadr button-piece)
-                                    (caddr button-piece))))
+        refresh-now
+        (lambda (dc)
+          (draw-button dc
+                       state
+                       (cadr button-piece)
+                       (caddr button-piece)))))
 
 (define button-list
   (map make-button
