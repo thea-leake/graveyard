@@ -146,7 +146,7 @@
     (define (my-dc)
       (send this get-dc))
     (define/override (on-event e)
-      (when (and (object? e) (send e get-left-down))
+      (when (and (object? e) (send e button-down? 'left))
         (callback)))))
 
 (define vert-arranger
@@ -269,14 +269,8 @@
   (let ([button-img (get-button-label state
                                       (cadr button-piece)
                                       (caddr button-piece))])
-    (send (car button-piece)
-        refresh-now
-        (lambda (dc)
-          (send dc
-                draw-bitmap
-                button-img
-                0 0)))
-    (send (car button-piece) store-image button-img)))
+    (send (car button-piece) store-image button-img)
+    (send (car button-piece) on-paint)))
 
 (define button-list
   (map make-button
