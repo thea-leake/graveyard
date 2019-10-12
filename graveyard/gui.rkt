@@ -224,17 +224,17 @@
             button-background)))
 
 
-(define (base-revealed-label piece)
+(define/memo (base-revealed-label piece)
   (text (g:role-name piece)
         25
         (g:player-name piece)))
 
-(define (revealed-label piece)
+(define/memo (revealed-label piece)
     (add-button-background
      (base-revealed-label piece)))
 
 
-(define (selected-label piece)
+(define/memo (selected-label piece)
   (add-button-background
    (above (base-revealed-label piece)
           selected-image)))
