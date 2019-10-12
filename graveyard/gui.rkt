@@ -48,6 +48,8 @@
                   make-color)
          (only-in table-panel
                   table-panel%)
+         (only-in memoize
+                  define/memo)
          (prefix-in g: "graveyard.rkt"))
 
 (define dark-purple-taup
@@ -237,7 +239,7 @@
    (above (base-revealed-label piece)
           selected-image)))
 
-(define (get-button-label state piece coords)
+(define/memo (get-button-label state piece coords)
   (cond
     ((g:piece-empty? piece) empty-plot-label)
     ((and (equal? coords (g:turn-src-coords state))
