@@ -17,6 +17,10 @@ Run the following to install library dependencies:
  - =make deps=
 
 ** To play:
+*** Prepackaged builds
+There are prepackaged builds stored in the [[https://github.com/thea-leake/graveyard/releases][releases]] for this repository for OSX Linux and Windows.
+They may not be up to date with master though.
+
 *** Without building:
  - run: =racket graveyard/gui.rkt= in this directory, or
  - =make run=
