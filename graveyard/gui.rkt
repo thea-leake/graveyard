@@ -373,16 +373,6 @@
                  (else (player-won state))))
     (exit))
 
-;; consume extra UI events coming from game channel tiles until
-;; computer player is done
-(define (eat-extra-events chnl)
-  (thread
-   (lambda ()
-     (let loop ([continue? #t])
-      (when  continue?
-        (println "Ate event")
-        (loop (channel-get chnl))))))
-  (println "Finished"))
 
 (define (get-input-chnl human-player state)
   (if (eq? (g:turn-player state) human-player)
@@ -395,21 +385,27 @@
       human-player-channel))
 
 
+(define (clear-event-chnl chnl)
+  (let loop ([events? #t])
+    (when events?
+      (loop (channel-try-get chnl)))))
+
 (define (single-player-event-loop init-state)
   (let* ([first-turn (handle-button-click init-state (channel-get human-player-channel))]
          [human-player (g:toggle-player (g:turn-player first-turn))]
+         [human-player? (lambda (state)
+                          (eq? (g:turn-player state) human-player))]
          [player-channel (lambda (state)
                            (get-input-chnl human-player state))])
+    (ai:start-ai computer-player-channel)
     (let loop ([state first-turn])
+      (when (not (human-player? state))
+        (channel-put computer-player-channel state))
       (let* ([chnl (player-channel state)]
-             [ignore_chnl (toggle-input-chnl chnl)]
-             [input-coords (if (eq? (g:turn-player state) human-player)
-                                    (channel-get chnl)
-                                    (ai:ai-turn state (channel-get chnl)))]
+             [input-coords (channel-get chnl)]
              [event-result (handle-button-click state input-coords)]
              [next-player-lost? (g:player-lost? event-result)])
-        (channel-put chnl #f) ;; stop eating channel events for current player
-        (eat-extra-events ignore_chnl) ;; start for other player
+        (clear-event-chnl chnl)
         (cond
           (next-player-lost? (player-won state))
           (else (loop event-result))))))
