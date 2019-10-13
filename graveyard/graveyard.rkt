@@ -43,6 +43,7 @@
          role-at-location
          player-at-location
          player-lost?
+         valid-player-turns
          gen-init-turn
          (struct-out turn))
 

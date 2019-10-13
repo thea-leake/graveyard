@@ -50,7 +50,8 @@
                   table-panel%)
          (only-in memoize
                   define/memo)
-         (prefix-in g: "graveyard.rkt"))
+         (prefix-in g: "graveyard.rkt")
+         (prefix-in ai: "ai.rkt"))
 
 (define dark-purple-taup
   (make-color 75 65 79))
@@ -122,7 +123,8 @@
 (define init-turn
   (g:gen-init-turn "First Necromancer: pick a corpse to raise!"))
 
-(define button-event (make-channel))
+(define human-player-channel (make-channel))
+(define computer-player-channel (make-channel))
 
 (define game-window (new frame%
                          [label "Graveyard"]))
@@ -253,7 +255,7 @@
   (let ([new-button (new button-canvas%
                          [parent board-table]
                          [callback (lambda ()
-                                     (channel-put button-event coords))]
+                                     (channel-put human-player-channel coords))]
                          [min-width button-width]
                          [min-height button-height]
                          [paint-callback (lambda (me dc)
@@ -359,11 +361,11 @@
                            "Won!")))
   (send end-game-dialog show #t))
 
-(define (event-loop init-state)
+(define (multi-player-event-loop init-state)
   (let loop ([state init-state]
              [continue? #t])
     (cond
-      (continue? (let* ([click-coords (channel-get button-event)]
+      (continue? (let* ([click-coords (channel-get human-player-channel)]
                         [event-result (handle-button-click state click-coords)]
                         [next-player-lost? (g:player-lost? event-result)]) ;; checking to see if next player lost based off event handling
                    (loop event-result
@@ -371,9 +373,90 @@
                  (else (player-won state))))
     (exit))
 
+;; consume extra UI events coming from game channel tiles until
+;; computer player is done
+(define (eat-extra-events chnl)
+  (thread
+   (lambda ()
+     (let loop ([continue? #t])
+      (when  continue?
+        (println "Ate event")
+        (loop (channel-get chnl))))))
+  (println "Finished"))
+
+(define (get-input-chnl human-player state)
+  (if (eq? (g:turn-player state) human-player)
+      human-player-channel
+      computer-player-channel))
+
+(define (toggle-input-chnl chnl)
+  (if (eq? chnl human-player-channel)
+      computer-player-channel
+      human-player-channel))
+
+
+(define (single-player-event-loop init-state)
+  (let* ([first-turn (handle-button-click init-state (channel-get human-player-channel))]
+         [human-player (g:toggle-player (g:turn-player first-turn))]
+         [player-channel (lambda (state)
+                           (get-input-chnl human-player state))])
+    (let loop ([state first-turn])
+      (let* ([chnl (player-channel state)]
+             [ignore_chnl (toggle-input-chnl chnl)]
+             [input-coords (if (eq? (g:turn-player state) human-player)
+                                    (channel-get chnl)
+                                    (ai:ai-turn state (channel-get chnl)))]
+             [event-result (handle-button-click state input-coords)]
+             [next-player-lost? (g:player-lost? event-result)])
+        (channel-put chnl #f) ;; stop eating channel events for current player
+        (eat-extra-events ignore_chnl) ;; start for other player
+        (cond
+          (next-player-lost? (player-won state))
+          (else (loop event-result))))))
+  (exit))
 
 ;; (send game-pane add-child game-canvas)
-(send game-window show #t)
 
-(thread
- (lambda () ( event-loop init-turn )))
+
+(define (multi-player)
+ (thread
+  (lambda ()
+    (multi-player-event-loop init-turn))))
+
+(define (single-player)
+  (thread
+   (lambda ()
+     (single-player-event-loop init-turn))))
+
+
+
+(define start-game-dialog
+  (new dialog%
+       [label "Choose single or multiplayer"]
+       [parent #f]
+       [style '(close-button)]
+       [enabled #f]
+       [width 400]
+       [height 100]))
+
+
+(define single-player-button
+  (new button%
+       [parent start-game-dialog]
+       [label "Single Player"]
+       [callback (lambda (button event)
+                   (send start-game-dialog show #f)
+                   (send game-window show #t)
+                   (single-player))]))
+
+
+(define multi-player-button
+  (new button%
+       [parent start-game-dialog]
+       [label "Multi Player"]
+       [callback (lambda (button event)
+                   (send start-game-dialog show #f)
+                   (send game-window show #t)
+                   (multi-player))]))
+
+(send start-game-dialog show #t)
