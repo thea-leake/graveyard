@@ -386,9 +386,11 @@
 
 
 (define (clear-event-chnl chnl)
-  (let loop ([events? #t])
-    (when events?
-      (loop (channel-try-get chnl)))))
+  (thread
+   (lambda ()
+     (let loop ([events #t])
+      (unless (eq? events 'turn-start)
+        (loop (channel-get chnl)))))))
 
 (define (single-player-event-loop init-state)
   (let* ([first-turn (handle-button-click init-state (channel-get human-player-channel))]
@@ -397,21 +399,21 @@
                           (eq? (g:turn-player state) human-player))]
          [player-channel (lambda (state)
                            (get-input-chnl human-player state))])
-    (ai:start-ai computer-player-channel)
     (let loop ([state first-turn])
-      (when (not (human-player? state))
-        (channel-put computer-player-channel state))
-      (let* ([chnl (player-channel state)]
-             [input-coords (channel-get chnl)]
-             [event-result (handle-button-click state input-coords)]
-             [next-player-lost? (g:player-lost? event-result)])
-        (clear-event-chnl chnl)
-        (cond
-          (next-player-lost? (player-won state))
-          (else (loop event-result))))))
+      (let ([chnl (player-channel state)])
+        (unless (human-player? state)
+          (clear-event-chnl human-player-channel)
+          (channel-put computer-player-channel state))
+        (let* (
+               [input-coords (channel-get chnl)]
+               [event-result (handle-button-click state input-coords)]
+               [next-player-lost? (g:player-lost? event-result)])
+          (unless (human-player? state)
+            (channel-put human-player-channel 'turn-start))
+          (cond
+            (next-player-lost? (player-won state))
+            (else (loop event-result)))))))
   (exit))
-
-;; (send game-pane add-child game-canvas)
 
 
 (define (multi-player)
@@ -422,6 +424,7 @@
 (define (single-player)
   (thread
    (lambda ()
+     (ai:start-ai computer-player-channel)
      (single-player-event-loop init-turn))))
 
 
