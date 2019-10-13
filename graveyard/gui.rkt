@@ -401,14 +401,16 @@
                            (get-input-chnl human-player state))])
     (let loop ([state first-turn])
       (let ([chnl (player-channel state)])
-        (unless (human-player? state)
+        (unless (or (human-player? state)                    ;; when computer player starts
+                    (g:turn-src-coords state))               ;; is it first selection?
           (clear-event-chnl human-player-channel)
           (channel-put computer-player-channel state))
         (let* (
                [input-coords (channel-get chnl)]
                [event-result (handle-button-click state input-coords)]
                [next-player-lost? (g:player-lost? event-result)])
-          (unless (human-player? state)
+          (unless (or (human-player? state)                  ;; when computer player finished
+                      (g:turn-src-coords event-result))      ;; is computer player finished?
             (channel-put human-player-channel 'turn-start))
           (cond
             (next-player-lost? (player-won state))

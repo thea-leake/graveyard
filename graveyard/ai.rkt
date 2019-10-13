@@ -1,5 +1,8 @@
 #lang racket/base
-(require (prefix-in g: "graveyard.rkt"))
+(require (only-in minikanren
+                  ==
+                  run*)
+         (prefix-in g: "graveyard.rkt"))
 
 (provide start-ai)
 
@@ -17,7 +20,8 @@
   (let loop ([continue? #t])
       (let ([message (channel-get chnl)])
         (when message
-          (sleep turn-wait-time)
+          (unless (g:turn-src-coords message)
+            (sleep turn-wait-time))
           (loop (channel-put chnl (ai-turn message)))))))
 
 (define (start-ai chnl)

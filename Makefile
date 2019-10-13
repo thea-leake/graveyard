@@ -1,5 +1,5 @@
 SRC_DIR = graveyard
-DEP_PACKAGES = memoize table-panel
+DEP_PACKAGES = memoize table-panel minikanren
 BYTECODE_DIR = $(SRC_DIR)/compiled
 GUI_PATH = $(SRC_DIR)/gui.rkt
 BACKEND_PATH = $(SRC_DIR)/graveyard.rkt
