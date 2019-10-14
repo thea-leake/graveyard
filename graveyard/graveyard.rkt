@@ -22,9 +22,11 @@
                   shuffle
                   count
                   filter-map
+                  filter-not
                   index-of)
          (only-in memoize
-                  define/memo))
+                  define/memo
+                  memo-lambda))
 
 (provide board-coordinates
          board-columns
@@ -45,8 +47,8 @@
          player-lost?
          valid-player-turns
          gen-init-turn
-         (struct-out turn))
-
+         (struct-out turn)
+         (struct-out actions))
 
 (struct turn
   (board
@@ -56,6 +58,13 @@
    captured
    src-coords
    valid?))
+
+
+(struct actions
+  (available?
+   moves
+   flips
+   captures-thunk))
 
 (define board-rows 4)
 (define board-columns 8)
@@ -470,18 +479,36 @@
               (player-selectable-coords state)))
 
 
+(define (occupied-locations state loc-list)
+  (println "Location list")
+  (println loc-list)
+  (filter-not (lambda (coords)
+            (piece-empty? (piece-at-coordinates coords
+                                                (turn-board state))))
+          loc-list))
+
+(define (get-captures state moves)
+  (filter-map (lambda (location)
+                (let ([capturable-locations
+                       (occupied-locations state (cdr location))])
+                  (and (not (null? capturable-locations))
+                       (cons (car location)
+                             capturable-locations))))
+              moves))
+
 (define (valid-player-turns state)
   (let* ([moves (valid-moves-for-player state)]
          [flips (hidden-coordinates (turn-board state))])
-    (hash 'moves (make-immutable-hash moves )
-          'flips flips
-          'actions-available? (or (not-null? moves)
-                                  (not-null? flips)))))
+    (actions (or (not-null? moves)       ;; available?
+                 (not-null? flips))
+             moves                       ;; moves
+             flips                       ;; flips
+             (lambda ()
+               (get-captures state moves))))) ;; captures-thunk
 
 (define (player-lost? state)
   (not
-   (hash-ref (valid-player-turns state)
-             'actions-available?)))
+   (actions-available? (valid-player-turns state))))
 
 (define (player-flip-location state coords)
   (let ([next-player (if (turn-first? state)
