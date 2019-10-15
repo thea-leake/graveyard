@@ -15,11 +15,7 @@
 
 #lang racket/base
 
-(require (only-in racket/format
-                  ~a)
-         (only-in racket/string
-                  string-join)
-         (only-in racket/class
+(require (only-in racket/class
                   new
                   send
                   class
@@ -32,84 +28,20 @@
                   inherit)
          (only-in racket/gui/base
                   canvas%)
-         (only-in memoize
-                  define/memo)
-         (only-in pict
-                  pict->bitmap)
-         (only-in 2htdp/image
-                  above
-                  text
-                  overlay
-                  rectangle)
          (prefix-in g: "graveyard.rkt")
-         (prefix-in c: "colors.rkt"))
+         (prefix-in c: "colors.rkt")
+         (prefix-in i: "images.rkt"))
 
 (provide make-tile
          update-tile
          (struct-out location))
 
 
-
-(define tile-width 150)
-
-(define tile-height tile-width)
-
-(define coffin-color "LightSlateGray")
-
 (struct location
   (tile
    piece
    coords))
 
-(define tile-background
-  (above (rectangle (+ 25 tile-width )
-                    (* tile-height 0.75)
-                    "solid"
-                    "Blue")
-         (rectangle (+ 25 tile-width )
-                    (* tile-height 0.25)
-                    "solid"
-                    "MediumForestGreen")))
-
-
-(define hidden-tile-text
-  (above (text (string-join  (list "   --------------"
-                                   "/  Still buried   \\"
-                                   "|Click to raise!|"
-                                   "|     @>-`-,-     |"
-                                   )
-                             "\n")
-               15
-               "LightSlateGray")
-         (text "| ####-#### |"
-               16
-               "LightSlateGray")
-         (text (make-string 12 #\")
-               25
-               'MediumForestGreen)))
-
-(define hidden-tile-label
-  (pict->bitmap
-   (overlay hidden-tile-text
-            tile-background)))
-
-(define empty-plot-label
-  (let ([rubble (text "%&%*%&@&*%$@%"
-                      12
-                      'brown)])
-    (pict->bitmap
-     (overlay (above (text "\n\n\n\nAn Empty Plot!\n"
-                           15
-                           'black)
-                     rubble)
-              tile-background))))
-
-(define selected-image
-  (text (string-join (list "      ----%----  "
-                           "[xx|=selected=>")
-                     "\n")
-        12
-        'Goldenrod))
 
 (define tile-canvas%
   (class canvas%
@@ -117,7 +49,7 @@
     (super-new)
     (init-field callback
                 [style (list 'no-autoclear)]
-                [prev-image  hidden-tile-label]
+                [prev-image  i:hidden-tile-label]
                 )
     (define/public (store-image btmp)
       (set! prev-image btmp))
@@ -130,43 +62,12 @@
         (callback)))))
 
 
-(define (add-tile-background image)
-  (pict->bitmap
-   (overlay image
-            tile-background)))
-
-
-(define/memo (base-revealed-label piece)
-  (text (g:role-name piece)
-        25
-        (g:player-name piece)))
-
-(define/memo (revealed-label piece)
-    (add-tile-background
-     (base-revealed-label piece)))
-
-
-(define/memo (selected-label piece)
-  (add-tile-background
-   (above (base-revealed-label piece)
-          selected-image)))
-
-(define/memo (get-tile-label state piece coords)
-  (cond
-    ((g:piece-empty? piece) empty-plot-label)
-    ((and (equal? coords (g:turn-src-coords state))
-          (g:piece-revealed? piece))
-     (selected-label piece))
-    ((g:piece-revealed? piece) (revealed-label piece))
-    (else hidden-tile-label)))
-
-
 (define (make-tile parent callback piece coords)
   (let ([new-tile (new tile-canvas%
                          [parent parent]
                          [callback callback]
-                         [min-width tile-width]
-                         [min-height tile-height]
+                         [min-width i:tile-width]
+                         [min-height i:tile-height]
                          [paint-callback (lambda (me dc)
                                                (send dc
                                                      draw-bitmap
@@ -179,7 +80,7 @@
 
 
 (define (update-tile state tile)
-  (let ([tile-img (get-tile-label state
+  (let ([tile-img (i:get-tile-label state
                                       (location-piece tile)
                                       (location-coords tile))])
     (send (location-tile tile) store-image tile-img)

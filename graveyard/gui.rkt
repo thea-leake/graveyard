@@ -27,16 +27,13 @@
                   canvas%
                   pane%
                   vertical-pane%)
-         (only-in pict
-                  pict->bitmap)
          (only-in table-panel
                   table-panel%)
-         (only-in 2htdp/image
-                  text)
          (prefix-in g: "graveyard.rkt")
          (prefix-in ai: "ai.rkt")
          (prefix-in t: "tile.rkt")
-         (prefix-in c: "colors.rkt"))
+         (prefix-in c: "colors.rkt")
+         (prefix-in i: "images.rkt"))
 
 (define init-turn
   (g:gen-init-turn "First Necromancer: pick a corpse to raise!"))
@@ -91,11 +88,6 @@
 (define board-container vert-arranger)
 
 
-(define welcome-bitmap
-  (pict->bitmap (text "Welcome to Queen of the Graveyard!"
-                      27
-                      "Goldenrod")))
-
 (define welcome-message
   (new canvas%
        [parent board-container]
@@ -103,9 +95,9 @@
        [paint-callback (lambda (me dc)
                          (send dc
                                draw-bitmap
-                               welcome-bitmap
+                               i:welcome-bitmap
                                (- (quotient (send me get-width ) 2)
-                                  (quotient (send welcome-bitmap get-width) 2))
+                                  (quotient (send i:welcome-bitmap get-width) 2))
                                0))]))
 
 (send welcome-message set-canvas-background c:dark-purple-taup)
