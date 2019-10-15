@@ -14,23 +14,11 @@
 
 #lang racket/base
 
-(require (only-in pict
-                  pict->bitmap)
-         (only-in racket/format
-                  ~a)
-         (only-in racket/string
+(require (only-in racket/string
                   string-join)
          (only-in racket/class
                   new
-                  send
-                  class
-                  define/override
-                  define/public
-                  super-new
-                  object?
-                  init-field
-                  this
-                  inherit)
+                  send)
          (only-in racket/gui/base
                   frame%
                   message%
@@ -39,89 +27,21 @@
                   canvas%
                   pane%
                   vertical-pane%)
-         (only-in 2htdp/image
-                  above
-                  text
-                  overlay
-                  rectangle)
-         (only-in racket/draw
-                  make-color)
+         (only-in pict
+                  pict->bitmap)
          (only-in table-panel
                   table-panel%)
-         (only-in memoize
-                  define/memo)
+         (only-in 2htdp/image
+                  text)
          (prefix-in g: "graveyard.rkt")
-         (prefix-in ai: "ai.rkt"))
-
-(define dark-purple-taup
-  (make-color 75 65 79))
-
-(define dark-green
-  (make-color 0 100 0))
-
-(define tile-width 150)
-
-(define tile-height tile-width)
-
-(define tile-background
-  (above (rectangle (+ 25 tile-width )
-                    (* tile-height 0.75)
-                    "solid"
-                    "Blue")
-         (rectangle (+ 25 tile-width )
-                    (* tile-height 0.25)
-                    "solid"
-                    "MediumForestGreen")))
-
-(define coffin-color "LightSlateGray")
-
-(define hidden-tile-text
-  (above (text (string-join  (list "   --------------"
-                                   "/  Still buried   \\"
-                                   "|Click to raise!|"
-                                   "|     @>-`-,-     |"
-                                   )
-                             "\n")
-               15
-               "LightSlateGray")
-         (text "| ####-#### |"
-               16
-               "LightSlateGray")
-         (text (make-string 12 #\")
-               25
-               'MediumForestGreen)))
-
-(define hidden-tile-label
-  (pict->bitmap
-   (overlay hidden-tile-text
-            tile-background)))
-
-(define empty-plot-label
-  (let ([rubble (text "%&%*%&@&*%$@%"
-                      12
-                      'brown)])
-    (pict->bitmap
-     (overlay (above (text "\n\n\n\nAn Empty Plot!\n"
-                           15
-                           'black)
-                     rubble)
-              tile-background))))
-
-(define selected-image
-  (text (string-join (list "      ----%----  "
-                           "[xx|=selected=>")
-                     "\n")
-        12
-        'Goldenrod))
-
-(define welcome-bitmap
-  (pict->bitmap (text "Welcome to Queen of the Graveyard!"
-                      27
-                      "Goldenrod")))
-
+         (prefix-in ai: "ai.rkt")
+         (prefix-in t: "tile.rkt")
+         (prefix-in c: "colors.rkt"))
 
 (define init-turn
   (g:gen-init-turn "First Necromancer: pick a corpse to raise!"))
+
+
 
 (define human-player-channel (make-channel))
 (define computer-player-channel (make-channel))
@@ -133,25 +53,35 @@
   (new pane%
        [parent game-window]))
 
+(define start-game-dialog
+  (new dialog%
+       [label "Choose single or multiplayer"]
+       [parent #f]
+       [style '(close-button)]
+       [enabled #f]
+       [width 400]
+       [height 100]))
 
 
-(define tile-canvas%
-  (class canvas%
-    (inherit min-width min-height)
-    (super-new)
-    (init-field callback
-                [style (list 'no-autoclear)]
-                [prev-image  hidden-tile-label]
-     )
-    (define/public (store-image btmp)
-      (set! prev-image btmp))
-    (define/public (get-image)
-      prev-image)
-    (define (my-dc)
-      (send this get-dc))
-    (define/override (on-event e)
-      (when (and (object? e) (send e button-down? 'left))
-        (callback)))))
+(define single-player-button
+  (new button%
+       [parent start-game-dialog]
+       [label "Single Player"]
+       [callback (lambda (button event)
+                   (send start-game-dialog show #f)
+                   (send game-window show #t)
+                   (single-player))]))
+
+
+(define multi-player-button
+  (new button%
+       [parent start-game-dialog]
+       [label "Multi Player"]
+       [callback (lambda (button event)
+                   (send start-game-dialog show #f)
+                   (send game-window show #t)
+                   (multi-player))]))
+
 
 (define vert-arranger
   (new vertical-pane%
@@ -159,6 +89,12 @@
 
 
 (define board-container vert-arranger)
+
+
+(define welcome-bitmap
+  (pict->bitmap (text "Welcome to Queen of the Graveyard!"
+                      27
+                      "Goldenrod")))
 
 (define welcome-message
   (new canvas%
@@ -171,7 +107,8 @@
                                (- (quotient (send me get-width ) 2)
                                   (quotient (send welcome-bitmap get-width) 2))
                                0))]))
-(send welcome-message set-canvas-background dark-purple-taup)
+
+(send welcome-message set-canvas-background c:dark-purple-taup)
 
 (define player-display-table
   (new table-panel%
@@ -220,71 +157,21 @@
        [callback (lambda (button event)
                    (send end-game-dialog show #f))]))
 
-(define (add-tile-background image)
-  (pict->bitmap
-   (overlay image
-            tile-background)))
-
-
-(define/memo (base-revealed-label piece)
-  (text (g:role-name piece)
-        25
-        (g:player-name piece)))
-
-(define/memo (revealed-label piece)
-    (add-tile-background
-     (base-revealed-label piece)))
-
-
-(define/memo (selected-label piece)
-  (add-tile-background
-   (above (base-revealed-label piece)
-          selected-image)))
-
-(define/memo (get-tile-label state piece coords)
-  (cond
-    ((g:piece-empty? piece) empty-plot-label)
-    ((and (equal? coords (g:turn-src-coords state))
-          (g:piece-revealed? piece))
-     (selected-label piece))
-    ((g:piece-revealed? piece) (revealed-label piece))
-    (else hidden-tile-label)))
-
-
-(define (make-tile piece coords)
-  (let ([new-tile (new tile-canvas%
-                         [parent board-table]
-                         [callback (lambda ()
-                                     (channel-put human-player-channel coords))]
-                         [min-width tile-width]
-                         [min-height tile-height]
-                         [paint-callback (lambda (me dc)
-                                               (send dc
-                                                     draw-bitmap
-                                                     (send me get-image)
-                                                     0
-                                                     0))])])
-    (send new-tile set-canvas-background dark-purple-taup)
-    (send new-tile on-paint)
-    new-tile))
-
-
-(define (update-tile state tile-piece-coords)
-  (let ([tile-img (get-tile-label state
-                                      (cadr tile-piece-coords)
-                                      (caddr tile-piece-coords))])
-    (send (car tile-piece-coords) store-image tile-img)
-    (send (car tile-piece-coords) on-paint)))
-
 (define tile-list
-  (map make-tile
+  (map (lambda (piece coords)
+         (t:make-tile board-table
+                      (lambda ()
+                        (channel-put human-player-channel coords))
+                      piece
+                      coords))
        (g:turn-board init-turn)
        g:board-coordinates))
 
+
 (define (update-board state)
   (for-each (lambda (tile-piece-coords)
-              (update-tile state tile-piece-coords) )
-            (map list
+              (t:update-tile state tile-piece-coords) )
+            (map t:location
                  tile-list
                  (g:turn-board state)
                  g:board-coordinates)))
@@ -293,6 +180,7 @@
   (update-board state)
   (send player-display set-label (string-join (list "Current Necromancer:" (g:turn-player state))))
   (send player-message set-label (g:turn-message state)))
+
 
 (define (event-handled state)
   (update-ui state)
@@ -428,36 +316,5 @@
    (lambda ()
      (ai:start-ai computer-player-channel)
      (single-player-event-loop init-turn))))
-
-
-
-(define start-game-dialog
-  (new dialog%
-       [label "Choose single or multiplayer"]
-       [parent #f]
-       [style '(close-button)]
-       [enabled #f]
-       [width 400]
-       [height 100]))
-
-
-(define single-player-button
-  (new button%
-       [parent start-game-dialog]
-       [label "Single Player"]
-       [callback (lambda (button event)
-                   (send start-game-dialog show #f)
-                   (send game-window show #t)
-                   (single-player))]))
-
-
-(define multi-player-button
-  (new button%
-       [parent start-game-dialog]
-       [label "Multi Player"]
-       [callback (lambda (button event)
-                   (send start-game-dialog show #f)
-                   (send game-window show #t)
-                   (multi-player))]))
 
 (send start-game-dialog show #t)
