@@ -401,7 +401,6 @@
                            (get-input-chnl human-player state))])
     (let loop ([state first-turn])
       (let ([chnl (player-channel state)])
-        (println "Starting turn")
         (unless (human-player? state)
           (channel-put computer-player-channel state)
           (unless (g:turn-src-coords state)
@@ -412,7 +411,6 @@
                [next-player-lost? (g:player-lost? event-result)])
           (unless (or (human-player? state)                  ;; when computer player finished
                       (g:turn-src-coords event-result))      ;; is computer player finished?
-            (println "Ending computer turn")
             (channel-put human-player-channel 'turn-start))
           (cond
             (next-player-lost? (player-won state))

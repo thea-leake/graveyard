@@ -480,8 +480,6 @@
 
 
 (define (occupied-locations state loc-list)
-  (println "Location list")
-  (println loc-list)
   (filter-not (lambda (coords)
             (piece-empty? (piece-at-coordinates coords
                                                 (turn-board state))))

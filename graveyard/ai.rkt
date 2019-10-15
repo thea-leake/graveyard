@@ -26,7 +26,6 @@
 
 
 (define (choose-src actions)
-  (println "Choosing src")
   (let ([moves (g:actions-moves actions)]
         [captures (g:actions-captures-thunk actions)]) ;; memoized lambda
     (cond
@@ -37,8 +36,6 @@
        (caar (shuffle (captures)))))))
 
 (define (choose-dest src actions)
-  (println ((g:actions-captures-thunk actions)))
-  (println (g:actions-moves actions))
   (let* ([capture-coords (findf (lambda (x)
                                   (equal? src (car x)))
                                 ((g:actions-captures-thunk actions)))])
@@ -52,8 +49,6 @@
 (define (ai-turn state)
   (let* ([actions (g:valid-player-turns state)]
          [src (g:turn-src-coords state)])
-    (println "AI turn")
-    (println src)
     (cond
       (src (choose-dest src actions))
       (else (choose-src actions)))))
