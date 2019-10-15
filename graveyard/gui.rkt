@@ -59,23 +59,23 @@
 (define dark-green
   (make-color 0 100 0))
 
-(define button-width 150)
+(define tile-width 150)
 
-(define button-height button-width)
+(define tile-height tile-width)
 
-(define button-background
-  (above (rectangle (+ 25 button-width )
-                    (* button-height 0.75)
+(define tile-background
+  (above (rectangle (+ 25 tile-width )
+                    (* tile-height 0.75)
                     "solid"
                     "Blue")
-         (rectangle (+ 25 button-width )
-                    (* button-height 0.25)
+         (rectangle (+ 25 tile-width )
+                    (* tile-height 0.25)
                     "solid"
                     "MediumForestGreen")))
 
 (define coffin-color "LightSlateGray")
 
-(define hidden-button-text
+(define hidden-tile-text
   (above (text (string-join  (list "   --------------"
                                    "/  Still buried   \\"
                                    "|Click to raise!|"
@@ -91,10 +91,10 @@
                25
                'MediumForestGreen)))
 
-(define hidden-button-label
+(define hidden-tile-label
   (pict->bitmap
-   (overlay hidden-button-text
-            button-background)))
+   (overlay hidden-tile-text
+            tile-background)))
 
 (define empty-plot-label
   (let ([rubble (text "%&%*%&@&*%$@%"
@@ -105,7 +105,7 @@
                            15
                            'black)
                      rubble)
-              button-background))))
+              tile-background))))
 
 (define selected-image
   (text (string-join (list "      ----%----  "
@@ -135,13 +135,13 @@
 
 
 
-(define button-canvas%
+(define tile-canvas%
   (class canvas%
     (inherit min-width min-height)
     (super-new)
     (init-field callback
                 [style (list 'no-autoclear)]
-                [prev-image  hidden-button-label]
+                [prev-image  hidden-tile-label]
      )
     (define/public (store-image btmp)
       (set! prev-image btmp))
@@ -220,10 +220,10 @@
        [callback (lambda (button event)
                    (send end-game-dialog show #f))]))
 
-(define (add-button-background image)
+(define (add-tile-background image)
   (pict->bitmap
    (overlay image
-            button-background)))
+            tile-background)))
 
 
 (define/memo (base-revealed-label piece)
@@ -232,60 +232,60 @@
         (g:player-name piece)))
 
 (define/memo (revealed-label piece)
-    (add-button-background
+    (add-tile-background
      (base-revealed-label piece)))
 
 
 (define/memo (selected-label piece)
-  (add-button-background
+  (add-tile-background
    (above (base-revealed-label piece)
           selected-image)))
 
-(define/memo (get-button-label state piece coords)
+(define/memo (get-tile-label state piece coords)
   (cond
     ((g:piece-empty? piece) empty-plot-label)
     ((and (equal? coords (g:turn-src-coords state))
           (g:piece-revealed? piece))
      (selected-label piece))
     ((g:piece-revealed? piece) (revealed-label piece))
-    (else hidden-button-label)))
+    (else hidden-tile-label)))
 
 
-(define (make-button piece coords)
-  (let ([new-button (new button-canvas%
+(define (make-tile piece coords)
+  (let ([new-tile (new tile-canvas%
                          [parent board-table]
                          [callback (lambda ()
                                      (channel-put human-player-channel coords))]
-                         [min-width button-width]
-                         [min-height button-height]
+                         [min-width tile-width]
+                         [min-height tile-height]
                          [paint-callback (lambda (me dc)
                                                (send dc
                                                      draw-bitmap
                                                      (send me get-image)
                                                      0
                                                      0))])])
-    (send new-button set-canvas-background dark-purple-taup)
-    (send new-button on-paint)
-    new-button))
+    (send new-tile set-canvas-background dark-purple-taup)
+    (send new-tile on-paint)
+    new-tile))
 
 
-(define (update-button state button-piece)
-  (let ([button-img (get-button-label state
-                                      (cadr button-piece)
-                                      (caddr button-piece))])
-    (send (car button-piece) store-image button-img)
-    (send (car button-piece) on-paint)))
+(define (update-tile state tile-piece-coords)
+  (let ([tile-img (get-tile-label state
+                                      (cadr tile-piece-coords)
+                                      (caddr tile-piece-coords))])
+    (send (car tile-piece-coords) store-image tile-img)
+    (send (car tile-piece-coords) on-paint)))
 
-(define button-list
-  (map make-button
+(define tile-list
+  (map make-tile
        (g:turn-board init-turn)
        g:board-coordinates))
 
 (define (update-board state)
-  (for-each (lambda (button-piece)
-              (update-button state button-piece) )
+  (for-each (lambda (tile-piece-coords)
+              (update-tile state tile-piece-coords) )
             (map list
-                 button-list
+                 tile-list
                  (g:turn-board state)
                  g:board-coordinates)))
 
@@ -343,7 +343,7 @@
   (event-handled (struct-copy g:turn state
                               [message "Selected other necromancers piece."])))
 
-(define (handle-button-click state location-coords)
+(define (handle-tile-click state location-coords)
   (cond
     ((g:turn-src-coords state) (finish-move-turn state location-coords))
     ((g:location-hidden? location-coords (g:turn-board state))
@@ -366,7 +366,7 @@
              [continue? #t])
     (cond
       (continue? (let* ([click-coords (channel-get human-player-channel)]
-                        [event-result (handle-button-click state click-coords)]
+                        [event-result (handle-tile-click state click-coords)]
                         [next-player-lost? (g:player-lost? event-result)]) ;; checking to see if next player lost based off event handling
                    (loop event-result
                          (not next-player-lost?))))
@@ -393,7 +393,7 @@
         (loop (channel-get chnl)))))))
 
 (define (single-player-event-loop init-state)
-  (let* ([first-turn (handle-button-click init-state (channel-get human-player-channel))]
+  (let* ([first-turn (handle-tile-click init-state (channel-get human-player-channel))]
          [human-player (g:toggle-player (g:turn-player first-turn))]
          [human-player? (lambda (state)
                           (eq? (g:turn-player state) human-player))]
@@ -407,7 +407,7 @@
             (clear-event-chnl human-player-channel)))
         (let* (
                [input-coords (channel-get chnl)]
-               [event-result (handle-button-click state input-coords)]
+               [event-result (handle-tile-click state input-coords)]
                [next-player-lost? (g:player-lost? event-result)])
           (unless (or (human-player? state)                  ;; when computer player finished
                       (g:turn-src-coords event-result))      ;; is computer player finished?
