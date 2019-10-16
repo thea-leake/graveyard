@@ -32,11 +32,7 @@
          board-columns
          board-rows
          gen-board
-         role-name
-         player-name
          get-row
-         piece-revealed?
-         piece-empty?
          player-move
          player-flip-location
          location-hidden?
@@ -48,7 +44,8 @@
          valid-player-turns
          gen-init-turn
          (struct-out turn)
-         (struct-out actions))
+         (struct-out actions)
+         (struct-out cell))
 
 (struct turn
   (board
@@ -59,6 +56,11 @@
    src-coords
    valid?))
 
+(struct cell
+  (player
+   revealed?
+   role
+   empty?))
 
 (struct actions
   (available?
@@ -121,12 +123,12 @@
 (define horse "Skeleton")
 (define cannon "Wraith")
 (define pawn "Poltergeist")
-
+(define empty-role "#Emtpy#")
 
 ;; it is worth noting that this is not referenced when the cannon is capturing
 ;; cannons can capture any unit, and any unit except soldier can capture the cannon
 (define role-hierarchy
-  (list leader advisor elephant chariot horse cannon pawn "#Empty#"))
+  (list leader advisor elephant chariot horse cannon pawn empty-role))
 
 
 (define player-start-roles
@@ -140,37 +142,17 @@
          (make-list 2 cannon))))
 
 (define (mkpiece player role)
-  (hash 'player player
-        'revealed #f
-        'role role
-        'empty #f))
+  (cell player     ;; player
+        #f         ;; revealed
+        role       ;;
+        #f))       ;; empty
 
 (define empty-location
-  (hash 'empty #t
-        'revealed #t
-        'role "#Empty#"
-        'player #\_))
+  (cell #f         ;; player
+        #t         ;; revealed
+        empty-role ;; role
+        #t))       ;; empty
 
-
-(define (piece-revealed? piece)
-  (hash-ref piece 'revealed))
-
-(define (piece-empty? piece)
-  (hash-ref piece 'empty))
-
-(define (get-location-attr attr piece [show-hidden? #f])
-  (cond
-    (show-hidden? (hash-ref piece attr))
-    ((piece-revealed? piece)
-     (hash-ref piece attr))
-    (else "X")))
-
-(define (role-name piece [show-hidden? #f])
-  (get-location-attr 'role piece show-hidden?))
-
-
-(define (player-name piece [show-hidden? #f])
-  (get-location-attr 'player piece show-hidden?))
 
 (define (player-roles team)
   (map (lambda (role) (mkpiece team role))
@@ -188,7 +170,8 @@
       "Red"))
 
 (define (flip piece)
-  (hash-set piece 'revealed #t))
+  (struct-copy cell piece
+               [revealed? #t]))
 
 
 
@@ -219,29 +202,25 @@
 
 
 (define (player-at-location coords board)
-  (hash-ref (piece-at-coordinates coords
-                                  board)
-            'player))
+  (cell-player (piece-at-coordinates coords board)
+            ))
 
 (define (piece-belongs-to-player? player coords board)
   (eq? player
        (player-at-location coords board)))
 
 (define (location-empty? coords board)
-  (hash-ref (piece-at-coordinates coords
-                                  board)
-            'empty))
+  (cell-empty? (piece-at-coordinates coords
+                                  board)))
 
 (define (pieces-in-list piece-list)
   (count (lambda (x)
-           (not (hash-ref x
-                          'empty)))
+           (not (cell-empty? x)))
          piece-list))
 
 (define (role-at-location coords board)
-  (hash-ref (piece-at-coordinates coords
-                                  board)
-            'role))
+  (cell-role (piece-at-coordinates coords
+                                  board)))
 
 
 (define (is-piece-cannon? coords board)
@@ -250,7 +229,7 @@
 
 
 (define (location-revealed? coords board)
-  (piece-revealed? (piece-at-coordinates coords board)))
+  (cell-revealed? (piece-at-coordinates coords board)))
 
 
 (define (location-hidden? coords board)
@@ -481,7 +460,7 @@
 
 (define (occupied-locations state loc-list)
   (filter-not (lambda (coords)
-            (piece-empty? (piece-at-coordinates coords
+            (cell-empty? (piece-at-coordinates coords
                                                 (turn-board state))))
           loc-list))
 

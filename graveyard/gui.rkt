@@ -180,11 +180,11 @@
 
 (define (finish-move-message state location-coords)
   (let ([captured-piece (g:turn-captured state)])
-    (if (g:piece-empty? captured-piece)
+    (if (g:cell-empty? captured-piece)
         (g:turn-message state)
         (string-join (list "Captured "
-                           (g:player-name captured-piece)
-                           (g:role-name captured-piece))))))
+                           (g:cell-player captured-piece)
+                           (g:cell-role captured-piece))))))
 
 (define (finish-move-turn state location-coords)
   (let* ([updated-game (g:player-move state

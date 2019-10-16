@@ -59,7 +59,6 @@
                       "Goldenrod")))
 
 
-
 (define tile-background
   (above (rectangle (+ 25 tile-width )
                     (* tile-height 0.75)
@@ -122,9 +121,9 @@
 
 
 (define/memo (base-revealed-label piece)
-  (text (g:role-name piece)
+  (text (g:cell-role piece)
         25
-        (g:player-name piece)))
+        (g:cell-player piece)))
 
 (define/memo (revealed-label piece)
   (add-tile-background
@@ -143,10 +142,10 @@
 
 (define/memo (get-tile-label state piece coords)
   (cond
-    ((g:piece-empty? piece) empty-plot-label)
+    ((g:cell-empty? piece) empty-plot-label)
     ((and (equal? coords (g:turn-src-coords state))
-          (g:piece-revealed? piece))
+          (g:cell-revealed? piece))
      (selected-label piece))
-    ((g:piece-revealed? piece) (revealed-label piece))
+    ((g:cell-revealed? piece) (revealed-label piece))
     (else hidden-tile-label)))
 

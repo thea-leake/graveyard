@@ -60,7 +60,7 @@
 
 
 (define (location-revealed-print-padded piece)
-  (loc-field-print-padded piece-revealed? piece))
+  (loc-field-print-padded cell-revealed? piece))
 
 (define (board-row-revealed-str row-list)
   (print-row row-list location-revealed-print-padded))
