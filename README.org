@@ -1,4 +1,4 @@
-Graveyard - the game where 2 necromancers battle raised dead in a graveyard until one of them can no longer move!
+Graveyard - the game where 2 necromancers raise opposing forces in a graveyard and capture the other necromancers pieces until one of them can no longer move!
 
 This is an implementation of the game [[https://en.wikipedia.org/wiki/Banqi][Banqi]] with a Halloween veneer. 
 It uses the Jumping cannon rules, where the cannon must jump over 1 and only 1 piece to move or capture.
