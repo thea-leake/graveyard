@@ -76,7 +76,7 @@
 
 
 (define players
-  (cons "Red" "Black"))
+  (cons "Orange" "Purple"))
 
 
 ;; roles

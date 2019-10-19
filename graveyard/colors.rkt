@@ -15,10 +15,16 @@
 
 #lang racket/base
 
-(require (only-in racket/draw
-         make-color))
+(provide dark-green
+         dark-purple-taup
+         purple
+         orange
+         get-color)
 
-(provide (all-defined-out))
+(require (only-in racket/draw
+                  make-color)
+         (only-in 2htdp/image
+                  color))
 
 (define dark-green
   (make-color 0 100 0))
@@ -27,3 +33,16 @@
 (define dark-purple-taup
   (make-color 75 65 79))
 
+(define orange
+  (color 227 112 0))
+
+(define purple
+  (color 217 25 255))
+
+(define color-mappings
+  (make-immutable-hash
+   (list (cons "Purple" purple)
+         (cons "Orange" orange))))
+
+(define (get-color key)
+  (hash-ref color-mappings key))

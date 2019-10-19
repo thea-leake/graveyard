@@ -123,7 +123,7 @@
 (define/memo (base-revealed-label piece)
   (text (g:cell-role piece)
         25
-        (g:cell-player piece)))
+        (c:get-color (g:cell-player piece))))
 
 (define/memo (revealed-label piece)
   (add-tile-background
