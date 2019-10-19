@@ -17,7 +17,6 @@
 (provide board-table
          player-display
          player-message
-         end-game-dialog
          game-window)
 
 (require (only-in racket/string
@@ -105,21 +104,3 @@
        [border 2]
        [dimensions (list g:board-rows g:board-columns)]
        [alignment (list 'center 'bottom)]))
-
-
-(define end-game-dialog
-  (new dialog%
-       [label "Game Over!"]
-       [parent #f]
-       [style '(close-button)]
-       [enabled #f]
-       [width 200]
-       [height 50]))
-
-
-(define confirm-end-game-button
-  (new button%
-       [parent end-game-dialog]
-       [label "OK"]
-       [callback (lambda (button event)
-                   (send end-game-dialog show #f))]))

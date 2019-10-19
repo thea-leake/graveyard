@@ -26,7 +26,8 @@
          (prefix-in ai: "ai.rkt")
          (prefix-in t: "tile.rkt")
          (prefix-in i: "images.rkt")
-         (prefix-in v: "view.rkt"))
+         (prefix-in v: "view.rkt")
+         (prefix-in ev: "end_view.rkt"))
 
 (define init-turn
   (g:gen-init-turn "First Necromancer: pick a corpse to raise!"))
@@ -123,11 +124,11 @@
 
 
 (define (player-won state)
-  (send v:end-game-dialog set-label
+  (send ev:end-game-dialog set-label
         (string-join (list "Necromancer "
                            (g:toggle-player (g:turn-player state))
                            "Won!")))
-  (send v:end-game-dialog show #t))
+  (send ev:end-game-dialog show #t))
 
 (define (multi-player-event-loop init-state)
   (let loop ([state init-state]
