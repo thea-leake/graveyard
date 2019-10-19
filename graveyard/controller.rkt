@@ -124,10 +124,10 @@
 
 
 (define (player-won state)
-  (send ev:end-game-dialog set-label
-        (string-join (list "Necromancer "
-                           (g:toggle-player (g:turn-player state))
-                           "Won!")))
+  (send ev:end-game-message set-label
+        (string-join (list ("Player"
+                            g:toggle-player (g:turn-player state))
+                           "Has Won!")))
   (send ev:end-game-dialog show #t))
 
 (define (multi-player-event-loop init-state)

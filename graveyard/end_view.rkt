@@ -14,7 +14,8 @@
 
 #lang racket/base
 
-(provide end-game-dialog)
+(provide end-game-dialog
+         end-game-message)
 
 (require (only-in racket/class
                   new
@@ -33,6 +34,10 @@
        [width 200]
        [height 50]))
 
+(define end-game-message
+  (new message%
+       [parent end-game-dialog]
+       [label "Player ??????? has won!"]))
 
 (define confirm-end-game-button
   (new button%
