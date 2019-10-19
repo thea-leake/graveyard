@@ -14,144 +14,32 @@
 
 #lang racket/base
 
+
+(provide single-player
+         multi-player)
+
 (require (only-in racket/string
                   string-join)
          (only-in racket/class
-                  new
                   send)
-         (only-in racket/gui/base
-                  frame%
-                  message%
-                  dialog%
-                  button%
-                  canvas%
-                  pane%
-                  vertical-pane%)
-         (only-in table-panel
-                  table-panel%)
          (prefix-in g: "graveyard.rkt")
          (prefix-in ai: "ai.rkt")
          (prefix-in t: "tile.rkt")
-         (prefix-in c: "colors.rkt")
-         (prefix-in i: "images.rkt"))
+         (prefix-in i: "images.rkt")
+         (prefix-in v: "view.rkt"))
 
 (define init-turn
   (g:gen-init-turn "First Necromancer: pick a corpse to raise!"))
 
 
-
 (define human-player-channel (make-channel))
+
 (define computer-player-channel (make-channel))
 
-(define game-window (new frame%
-                         [label "Graveyard"]))
-
-(define game-pane
-  (new pane%
-       [parent game-window]))
-
-(define start-game-dialog
-  (new dialog%
-       [label "Choose single or multiplayer"]
-       [parent #f]
-       [style '(close-button)]
-       [enabled #f]
-       [width 400]
-       [height 100]))
-
-
-(define single-player-button
-  (new button%
-       [parent start-game-dialog]
-       [label "Single Player"]
-       [callback (lambda (button event)
-                   (send start-game-dialog show #f)
-                   (send game-window show #t)
-                   (single-player))]))
-
-
-(define multi-player-button
-  (new button%
-       [parent start-game-dialog]
-       [label "Multi Player"]
-       [callback (lambda (button event)
-                   (send start-game-dialog show #f)
-                   (send game-window show #t)
-                   (multi-player))]))
-
-
-(define vert-arranger
-  (new vertical-pane%
-       [parent game-pane]))
-
-
-(define board-container vert-arranger)
-
-
-(define welcome-message
-  (new canvas%
-       [parent board-container]
-       [min-height 50]
-       [paint-callback (lambda (me dc)
-                         (send dc
-                               draw-bitmap
-                               i:welcome-bitmap
-                               (- (quotient (send me get-width ) 2)
-                                  (quotient (send i:welcome-bitmap get-width) 2))
-                               0))]))
-
-(send welcome-message set-canvas-background c:dark-purple-taup)
-
-(define player-display-table
-  (new table-panel%
-       [parent board-container]
-       [dimensions '(1 2)]
-       [column-stretchability #t]
-       [row-stretchability #t]
-       [alignment (list 'center 'top)]))
-
-
-(define player-display
-  (new message%
-       [parent player-display-table]
-       [label (string-join (list
-                            "Current Necromancer:" (g:turn-player init-turn)))]))
-
-
-(define player-message
-  (new message%
-       [parent player-display-table]
-       [label (g:turn-message init-turn)]))
-
-
-(define board-table
-  (new table-panel%
-       [parent board-container]
-       [border 2]
-       [dimensions (list g:board-rows g:board-columns)]
-       [alignment (list 'center 'bottom)]))
-
-
-(define end-game-dialog
-  (new dialog%
-       [label "Game Over!"]
-       [parent #f]
-       [style '(close-button)]
-       [enabled #f]
-       [width 200]
-       [height 50]))
-
-
-(define confirm-end-game-button
-  (new button%
-       [parent end-game-dialog]
-       [label "OK"]
-       [callback (lambda (button event)
-                   (send end-game-dialog show #f))]))
 
 (define tile-list
   (map (lambda (piece coords)
-         (t:make-tile board-table
+         (t:make-tile v:board-table
                       (lambda ()
                         (channel-put human-player-channel coords))
                       piece
@@ -170,8 +58,8 @@
 
 (define (update-ui state)
   (update-board state)
-  (send player-display set-label (string-join (list "Current Necromancer:" (g:turn-player state))))
-  (send player-message set-label (g:turn-message state)))
+  (send v:player-display set-label (string-join (list "Current Necromancer:" (g:turn-player state))))
+  (send v:player-message set-label (g:turn-message state)))
 
 
 (define (event-handled state)
@@ -235,11 +123,11 @@
 
 
 (define (player-won state)
-  (send end-game-dialog set-label
+  (send v:end-game-dialog set-label
         (string-join (list "Necromancer "
                            (g:toggle-player (g:turn-player state))
                            "Won!")))
-  (send end-game-dialog show #t))
+  (send v:end-game-dialog show #t))
 
 (define (multi-player-event-loop init-state)
   (let loop ([state init-state]
@@ -308,5 +196,3 @@
    (lambda ()
      (ai:start-ai computer-player-channel)
      (single-player-event-loop init-turn))))
-
-(send start-game-dialog show #t)
