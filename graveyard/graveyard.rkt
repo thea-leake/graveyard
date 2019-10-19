@@ -47,6 +47,7 @@
          (struct-out actions)
          (struct-out cell))
 
+
 (struct turn
   (board
    player
@@ -72,6 +73,32 @@
 (define board-columns 8)
 (define location-count (* board-columns
                           board-rows))
+
+
+(define players
+  (cons "Red" "Black"))
+
+
+;; roles
+(define leader "Lich")
+(define advisor "Vampire")
+(define elephant "Zombie")
+(define chariot "Ghoul")
+(define horse "Skeleton")
+(define cannon "Wraith")
+(define pawn "Poltergeist")
+(define empty-role "#Emtpy#")
+
+
+;; it is worth noting that this is not referenced when the cannon is capturing
+;; cannons can capture any unit, and any unit except soldier can capture the cannon
+(define role-hierarchy
+  (list leader advisor elephant chariot horse cannon pawn empty-role))
+
+
+;; number of pieces that can be involve in a cannon move
+;; cannon, piece cannon jumps over, piece cannon takes
+(define cannon-max-pieces 3)
 
 
 (define (gen-init-turn message)
@@ -110,27 +137,6 @@
 (define board-indexes (range location-count))
 (define board-coordinates (map get-coords-from-index board-indexes))
 
-;; number of pieces that can be involve in a cannon move
-;; cannon, piece cannon jumps over, piece cannon takes
-(define cannon-max-pieces 3)
-
-
-;; roles
-(define leader "Lich")
-(define advisor "Vampire")
-(define elephant "Zombie")
-(define chariot "Ghoul")
-(define horse "Skeleton")
-(define cannon "Wraith")
-(define pawn "Poltergeist")
-(define empty-role "#Emtpy#")
-
-;; it is worth noting that this is not referenced when the cannon is capturing
-;; cannons can capture any unit, and any unit except soldier can capture the cannon
-(define role-hierarchy
-  (list leader advisor elephant chariot horse cannon pawn empty-role))
-
-
 (define player-start-roles
   (flatten
    (list (make-list 1 leader)
@@ -160,14 +166,14 @@
 
 
 (define (gen-board)
-  (shuffle (append (player-roles "Red")
-                   (player-roles "Black"))))
+  (shuffle (append (player-roles (car players))
+                   (player-roles (cdr players)))))
 
 
 (define (toggle-player player)
-  (if (eq? player "Red")
-      "Black"
-      "Red"))
+  (if (equal? player (car players))
+      (cdr players)
+      (car players)))
 
 (define (flip piece)
   (struct-copy cell piece
