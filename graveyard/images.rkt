@@ -31,6 +31,7 @@
                   above
                   text
                   overlay/align
+                  overlay
                   rectangle
                   bitmap/file
                   scale
@@ -48,6 +49,8 @@
 (define tile-width 150)
 
 (define tile-height tile-width)
+
+(define player-role-bar-height 14)
 
 (define hidden "hidden")
 
@@ -90,47 +93,28 @@
 
 
 (define hidden-tile-text
-  (above (text (string-join  (list "   --------------"
-                                   "/  Still buried   \\"
-                                   "|Click to raise!|"
-                                   "|     @>-`-,-     |"
-                                   )
-                             "\n")
-               15
-               "LightSlateGray")
-         (text "| ####-#### |"
-               16
-               "LightSlateGray")
-         (text (make-string 12 #\")
-               25
-               'MediumForestGreen)))
+  (above
+   (text (string-join (list
+                       "   Still buried     "
+                       " Click to raise! "
+                       "      @>-`-,-      "
+                       )
+                      "\n")
+         15
+         "LightSlateGray")
+   (text " ####-#### "
+         16
+         "LightSlateGray")
+   ))
 
 (define selected-image
   (text (string-join (list "----%----"
                            "Selected"
                            "----%----")
                      "\n")
-        15
+        18
         'Red))
 
-
-;;;;;;;;
-;; imported image fns
-;;;;;;;
-
-(define/memo (get-tile-mapping role coords)
-  (hash-ref (list-ref tile-mappings
-                      (g:position-row coords))
-            role))
-
-(define (hidden-tile-label coords)
-  (pict->bitmap (get-tile-mapping hidden
-                                  coords)))
-
-(define/memo (empty-plot-label coords) ;; memoizing because of last
-  (pict->bitmap
-   (get-tile-mapping (last g:role-hierarchy)
-                     coords)))
 
 
 ;;;;;;;;;
@@ -138,25 +122,49 @@
 ;;;;;;;;;
 
 
-(define (revealed-base-label piece coords)
+(define/memo (get-tile-mapping role coords)
+  (hash-ref (list-ref tile-mappings
+                      (g:position-row coords))
+            role))
+
+(define (hidden-tile-label coords)
+  (pict->bitmap
+   (overlay hidden-tile-text
+            (get-tile-mapping hidden
+                              coords))))
+
+(define/memo (empty-plot-label coords) ;; memoizing because of last
+  (pict->bitmap
+   (get-tile-mapping (last g:role-hierarchy)
+                     coords)))
+
+
+(define (player-role-image piece)
   (overlay/align 'center 'bottom
-                 (rectangle tile-width 10
+                 (text (g:cell-role piece)
+                       player-role-bar-height
+                       c:label-blue)
+                 (rectangle tile-width player-role-bar-height
                             'solid
                             (c:get-color (string-join
                                           (list (g:cell-player piece)
                                                 "Transparent")
-                                          "")))
+                                          "")))))
+
+(define (revealed-base-label piece coords)
+  (overlay/align 'center 'bottom
+                 (player-role-image piece)
                  (get-tile-mapping (g:cell-role piece)
                                    coords)))
 
 (define/memo (revealed-label piece coords)
   (pict->bitmap
    (revealed-base-label piece
-                                     coords)))
+                        coords)))
 
 (define/memo (selected-label piece coords)
   (pict->bitmap
-   (overlay/align 'center 'bottom
+   (overlay/align 'center 'center
                   selected-image
                   (revealed-base-label piece coords))))
 

@@ -21,6 +21,7 @@
          orange
          purple-transparent
          orange-transparent
+         label-blue
          get-color)
 
 (require (only-in racket/draw
@@ -49,6 +50,9 @@
 
 (define purple-transparent
   (color 217 25 255 border-opaqueness))
+
+(define label-blue
+  (color 35 64 153))
 
 (define color-mappings
   (make-immutable-hash
