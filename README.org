@@ -46,7 +46,7 @@ The hierarchy of what corpse can capture what is defined below in roles.
 
 *** Roles
     These are ordered by precedence from least to greatest vulnerability.
-**** Lich - General
+**** Lich
      The lich can capture any unit except poltergeists as poltergeists don't have enough of a presence for the lich to control them.
      The lich is vulnerable to other liches, poltergeists, and wraiths.
 **** Vampire
