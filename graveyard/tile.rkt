@@ -48,32 +48,35 @@
     (inherit min-width min-height)
     (super-new)
     (init-field callback
-                [style (list 'no-autoclear)]
-                [prev-image  i:hidden-tile-label]
-                )
+                tile-image
+                [style (list 'no-autoclear)])
     (define/public (store-image btmp)
-      (set! prev-image btmp))
+      (set! tile-image btmp))
     (define/public (get-image)
-      prev-image)
+      tile-image)
     (define (my-dc)
       (send this get-dc))
     (define/override (on-event e)
       (when (and (object? e) (send e button-down? 'left))
         (callback)))))
 
+(define tile-paint-callback
+  (lambda (me dc)
+    (send dc
+          draw-bitmap
+          (send me get-image)
+          0
+          0)))
 
 (define (make-tile parent callback piece coords)
-  (let ([new-tile (new tile-canvas%
+  (let* ([image (i:hidden-tile-label coords)]
+         [new-tile (new tile-canvas%
                          [parent parent]
                          [callback callback]
                          [min-width i:tile-width]
                          [min-height i:tile-height]
-                         [paint-callback (lambda (me dc)
-                                               (send dc
-                                                     draw-bitmap
-                                                     (send me get-image)
-                                                     0
-                                                     0))])])
+                         [tile-image image]
+                         [paint-callback tile-paint-callback])])
     (send new-tile set-canvas-background c:dark-purple-taup)
     (send new-tile on-paint)
     new-tile))

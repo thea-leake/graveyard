@@ -5,6 +5,8 @@ It uses the Jumping cannon rules, where the cannon must jump over 1 and only 1 p
 
 It's currently a work in progress - but has a playable GUI.
 
+The pixel art was drawn by my super talented spouse Trina!
+
 ** Dependencies:
 Racket - you can download [[https://download.racket-lang.org][here]]
 
@@ -55,7 +57,7 @@ The hierarchy of what corpse can capture what is defined below in roles.
      The zombie is vulnerable to units above it and other zombies, and can capture units below it and other zombies
 **** Ghoul
      The ghoul is vulnerable to units above it and other ghouls, and can capture units below it and other ghouls
-**** Skeleton     
+**** Skeleton
      The skeleton is vulnerable to units above it and other skeletons, and can capture units below it and other skeletons
 **** Wraith
      The wraith is a glass cannon, capable of capturing any unit, but capturable by any except the poltergeist.
@@ -64,3 +66,8 @@ The hierarchy of what corpse can capture what is defined below in roles.
 **** Poltergeist
      The poltergeist can do little more than bat objects around, but their mischievous behavior is perfectly suited for stealing and breaking a liches philactory!
      The poltergeist can only capture liches and other poltergeists, and are vulnerable to all other units
+
+
+
+All code is licensed under the [[https://www.apache.org/licenses/LICENSE-2.0][Apache 2.0]]  license.
+Images in =graveyard/assets= were created by Trina Rutz and are licensed under Creative Commons - Add version when decided.

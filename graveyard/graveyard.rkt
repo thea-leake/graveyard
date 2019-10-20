@@ -31,6 +31,7 @@
 (provide board-coordinates
          board-columns
          board-rows
+         role-hierarchy
          gen-board
          get-row
          player-move
@@ -45,7 +46,8 @@
          gen-init-turn
          (struct-out turn)
          (struct-out actions)
-         (struct-out cell))
+         (struct-out cell)
+         (struct-out position))
 
 
 (struct turn
@@ -69,6 +71,10 @@
    flips
    captures-thunk))
 
+(struct position
+  (column
+   row))
+
 (define board-rows 4)
 (define board-columns 8)
 (define location-count (* board-columns
@@ -87,7 +93,7 @@
 (define horse "Skeleton")
 (define cannon "Wraith")
 (define pawn "Poltergeist")
-(define empty-role "#Emtpy#")
+(define empty-role "Empty")
 
 
 ;; it is worth noting that this is not referenced when the cannon is capturing
@@ -112,16 +118,9 @@
         #f  ;; valid? - was move valid?
         ))
 
-
-(define (x-pos coords)
-  (car coords))
-
-(define (y-pos coords)
-  (cadr coords))
-
 (define/memo (get-index-from-coordinates coords)
-  (let ([x (x-pos coords)]
-        [y (y-pos coords)])
+  (let ([x (position-column coords)]
+        [y (position-row coords)])
     (+ (* y board-columns)
        x)))
 
@@ -131,7 +130,7 @@
                       board-columns)]
         [y (quotient index
                      board-columns)])
-    (list x y)))
+    (position x y)))
 
 
 (define board-indexes (range location-count))
@@ -421,8 +420,8 @@
                  (= (fn check-coords)
                     (fn coords)))])
     (filter (lambda (check-coords)
-              (or (check x-pos check-coords)
-                  (check y-pos check-coords)))
+              (or (check position-row check-coords)
+                  (check position-column check-coords)))
             board-coordinates)))
 
 

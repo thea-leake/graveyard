@@ -18,10 +18,11 @@
 
 (require (only-in racket/format
                   ~a)
-         (only-in memoize
-                  define/memo)
          (only-in racket/string
                   string-join)
+         (only-in racket/list
+                  range
+                  last)
          (only-in memoize
                   define/memo)
          (only-in pict
@@ -29,8 +30,11 @@
          (only-in 2htdp/image
                   above
                   text
-                  overlay
-                  rectangle)
+                  overlay/align
+                  rectangle
+                  bitmap/file
+                  scale
+                  image-width)
          (prefix-in g: "graveyard.rkt")
          (prefix-in c: "colors.rkt"))
 
@@ -41,12 +45,37 @@
          hidden-tile-label
          get-tile-label)
 
-
-
 (define tile-width 150)
 
 (define tile-height tile-width)
 
+(define hidden "hidden")
+
+(define (get-role-bitmap role row)
+  (let* ([path-str (string-join (list "assets/"
+                                 (string-downcase role)
+                                 "-"
+                                 (~a row)
+                                 ".png")
+                                "")]
+         [image (bitmap/file path-str)]
+         [img-size (image-width image)]
+         [scaled-image (scale (/ tile-width
+                                 img-size)
+                              image)])
+    (cons role
+          scaled-image)))
+
+(define (get-row-bitmaps row)
+  (make-immutable-hash
+   (map (lambda (role)
+          (get-role-bitmap role row))
+        (cons hidden
+              g:role-hierarchy))))
+
+(define tile-mappings
+  (map get-row-bitmaps
+       (range g:board-rows)))
 
 ;;;;;;;
 ;; base images
@@ -58,16 +87,6 @@
                       27
                       "Goldenrod")))
 
-
-(define tile-background
-  (above (rectangle (+ 25 tile-width )
-                    (* tile-height 0.75)
-                    "solid"
-                    "Blue")
-         (rectangle (+ 25 tile-width )
-                    (* tile-height 0.25)
-                    "solid"
-                    "MediumForestGreen")))
 
 
 (define hidden-tile-text
@@ -86,66 +105,74 @@
                25
                'MediumForestGreen)))
 
-(define hidden-tile-label
-  (pict->bitmap
-   (overlay hidden-tile-text
-            tile-background)))
-
-(define empty-plot-label
-  (let ([rubble (text "%&%*%&@&*%$@%"
-                      12
-                      'brown)])
-    (pict->bitmap
-     (overlay (above (text "\n\n\n\nAn Empty Plot!\n"
-                           15
-                           'black)
-                     rubble)
-              tile-background))))
-
-
 (define selected-image
-  (text (string-join (list "      ----%----  "
-                           "[xx|=selected=>")
+  (text (string-join (list "----%----"
+                           "Selected"
+                           "----%----")
                      "\n")
-        12
-        'Goldenrod))
+        15
+        'Red))
+
+
+;;;;;;;;
+;; imported image fns
+;;;;;;;
+
+(define/memo (get-tile-mapping role coords)
+  (hash-ref (list-ref tile-mappings
+                      (g:position-row coords))
+            role))
+
+(define (hidden-tile-label coords)
+  (pict->bitmap (get-tile-mapping hidden
+                                  coords)))
+
+(define/memo (empty-plot-label coords) ;; memoizing because of last
+  (pict->bitmap
+   (get-tile-mapping (last g:role-hierarchy)
+                     coords)))
+
 
 ;;;;;;;;;
 ;; Image building fns
 ;;;;;;;;;
 
-(define (add-tile-background image)
+
+(define (revealed-base-label piece coords)
+  (overlay/align 'center 'bottom
+                 (rectangle tile-width 10
+                            'solid
+                            (c:get-color (string-join
+                                          (list (g:cell-player piece)
+                                                "Transparent")
+                                          "")))
+                 (get-tile-mapping (g:cell-role piece)
+                                   coords)))
+
+(define/memo (revealed-label piece coords)
   (pict->bitmap
-   (overlay image
-            tile-background)))
+   (revealed-base-label piece
+                                     coords)))
 
-
-(define/memo (base-revealed-label piece)
-  (text (g:cell-role piece)
-        25
-        (c:get-color (g:cell-player piece))))
-
-(define/memo (revealed-label piece)
-  (add-tile-background
-   (base-revealed-label piece)))
-
-
-(define/memo (selected-label piece)
-  (add-tile-background
-   (above (base-revealed-label piece)
-          selected-image)))
+(define/memo (selected-label piece coords)
+  (pict->bitmap
+   (overlay/align 'center 'bottom
+                  selected-image
+                  (revealed-base-label piece coords))))
 
 ;;;;;;
 ;; Exported image building fns
 ;;;;;;
+(define/memo (tile-init-label coords)
+  (empty-plot-label coords))
 
 
 (define/memo (get-tile-label state piece coords)
   (cond
-    ((g:cell-empty? piece) empty-plot-label)
+    ((g:cell-empty? piece) (empty-plot-label coords))
     ((and (equal? coords (g:turn-src-coords state))
           (g:cell-revealed? piece))
-     (selected-label piece))
-    ((g:cell-revealed? piece) (revealed-label piece))
-    (else hidden-tile-label)))
-
+     (selected-label piece coords))
+    ((g:cell-revealed? piece) (revealed-label piece coords))
+    (else
+     (hidden-tile-label coords))))
