@@ -50,7 +50,7 @@
 
 (define tile-height tile-width)
 
-(define player-role-bar-height 14)
+(define player-role-bar-height 10)
 
 (define hidden "hidden")
 
@@ -100,10 +100,10 @@
                        "      @>-`-,-      "
                        )
                       "\n")
-         15
+         13
          "LightSlateGray")
    (text " ####-#### "
-         16
+         14
          "LightSlateGray")
    ))
 
