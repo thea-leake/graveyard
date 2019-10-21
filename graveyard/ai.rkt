@@ -40,7 +40,8 @@
                                   (equal? src (car x)))
                                 ((g:actions-captures-thunk actions)))])
     (cond
-      (capture-coords (car (shuffle capture-coords)))
+      (capture-coords
+       (car (shuffle (cdr capture-coords))))
       (else
        (car (shuffle (findf (lambda (x)
                                (equal? src (car x)))
