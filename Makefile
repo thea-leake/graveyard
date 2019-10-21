@@ -1,8 +1,7 @@
 SRC_DIR = graveyard
 DEP_PACKAGES = memoize table-panel
 BYTECODE_DIR = $(SRC_DIR)/compiled
-GUI_PATH = $(SRC_DIR)/gui.rkt
-BACKEND_PATH = $(SRC_DIR)/graveyard.rkt
+GUI_PATH = $(SRC_DIR)/start_view.rkt
 SRC_FILES  = $(GUI_PATH) $(SRC_PATH)
 BUILD_PATH = build
 BUILD_BIN_PATH = $(BUILD_PATH)/bin
@@ -14,7 +13,7 @@ TARGET_DIR = $(BUILD_PATH)/target
 
 
 run:
-	racket $(GUI_SRC)
+	racket $(GUI_PATH)
 
 deps:
 	raco pkg install --skip-installed $(DEP_PACKAGES)
