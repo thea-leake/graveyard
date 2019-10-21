@@ -20,7 +20,7 @@ There are prepackaged builds stored in the [[https://github.com/thea-leake/grave
 They may not be up to date with master though.
 
 *** Without building:
- - run: =racket graveyard/gui.rkt= in this directory, or
+ - run: =racket graveyard/start_view.rkt= in this directory, or
  - =make run=
 *** With building:
 This should give a better startup time (though this game is not very resource intensive)
