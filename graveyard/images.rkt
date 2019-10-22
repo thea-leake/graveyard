@@ -139,34 +139,35 @@
                      coords)))
 
 
-(define (player-role-image piece)
+(define (player-role-image role player)
   (overlay/align 'center 'bottom
-                 (text (g:cell-role piece)
+                 (text role
                        player-role-bar-height
                        c:label-blue)
                  (rectangle tile-width player-role-bar-height
                             'solid
                             (c:get-color (string-join
-                                          (list (g:cell-player piece)
+                                          (list player
                                                 "Transparent")
                                           "")))))
 
-(define (revealed-base-label piece coords)
+(define/memo (revealed-base-label role player coords)
   (overlay/align 'center 'bottom
-                 (player-role-image piece)
-                 (get-tile-mapping (g:cell-role piece)
+                 (player-role-image role player)
+                 (get-tile-mapping role
                                    coords)))
 
-(define/memo (revealed-label piece coords)
+(define/memo (revealed-label role player coords)
   (pict->bitmap
-   (revealed-base-label piece
+   (revealed-base-label role
+                        player
                         coords)))
 
-(define/memo (selected-label piece coords)
+(define/memo (selected-label role player coords)
   (pict->bitmap
    (overlay/align 'center 'center
                   selected-image
-                  (revealed-base-label piece coords))))
+                  (revealed-base-label role player coords))))
 
 ;;;;;;
 ;; Exported image building fns
@@ -176,11 +177,12 @@
 
 
 (define/memo (get-tile-label state piece coords)
-  (cond
-    ((g:cell-empty? piece) (empty-plot-label coords))
-    ((and (equal? coords (g:turn-src-coords state))
-          (g:cell-revealed? piece))
-     (selected-label piece coords))
-    ((g:cell-revealed? piece) (revealed-label piece coords))
-    (else
-     (hidden-tile-label coords))))
+  (let ([role (g:cell-role piece)]
+        [player (g:cell-player piece)])(cond
+     ((g:cell-empty? piece) (empty-plot-label coords))
+     ((and (equal? coords (g:turn-src-coords state))
+           (g:cell-revealed? piece))
+      (selected-label role player coords))
+     ((g:cell-revealed? piece) (revealed-label role player coords))
+     (else
+      (hidden-tile-label coords)))))
