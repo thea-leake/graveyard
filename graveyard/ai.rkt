@@ -43,9 +43,9 @@
       (capture-coords
        (car (shuffle (cdr capture-coords))))
       (else
-       (car (shuffle (findf (lambda (x)
+       (car (shuffle (cdr (findf (lambda (x)
                                (equal? src (car x)))
-                             (g:actions-moves actions))))))))
+                             (g:actions-moves actions)))))))))
 
 (define (ai-turn state)
   (let* ([actions (g:valid-player-turns state)]
