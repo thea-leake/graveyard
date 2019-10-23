@@ -127,7 +127,7 @@
                       (g:position-row coords))
             role))
 
-(define (hidden-tile-label coords)
+(define/memo (hidden-tile-label coords)
   (pict->bitmap
    (overlay hidden-tile-text
             (get-tile-mapping hidden
@@ -176,7 +176,7 @@
   (empty-plot-label coords))
 
 
-(define/memo (get-tile-label state piece coords)
+(define (get-tile-label state piece coords)
   (let ([role (g:cell-role piece)]
         [player (g:cell-player piece)])(cond
      ((g:cell-empty? piece) (empty-plot-label coords))
