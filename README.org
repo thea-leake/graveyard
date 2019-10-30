@@ -69,8 +69,10 @@ The hierarchy of what corpse can capture what is defined below in roles.
 
 
 
-Images in =graveyard/assets= were created by catspook - https://github.com/catspook/graveyard-pics and are licensed under the Creative Commons Attribution-NonCommercial 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc/4.0/.
+========================================
+** Licenses
+ - All code/text is licensed under the [[https://www.apache.org/licenses/LICENSE-2.0][Apache 2.0]]  license.
 
+ - Images in =graveyard/assets= were created by catspook - https://github.com/catspook/graveyard-pics and are licensed under the Creative Commons Attribution-NonCommercial 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc/4.0/.
 
-All code/text is licensed under the [[https://www.apache.org/licenses/LICENSE-2.0][Apache 2.0]]  license.
 
