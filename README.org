@@ -5,7 +5,7 @@ It uses the Jumping cannon rules, where the cannon must jump over 1 and only 1 p
 
 It's currently a work in progress - but has a playable GUI.
 
-The pixel art was drawn by my super talented spouse Trina!
+The pixel art was drawn by my super talented spouse [catspook](https://github.com/catspook/graveyard-pics)!
 
 ** Dependencies:
 Racket - you can download [[https://download.racket-lang.org][here]]
