@@ -1,7 +1,7 @@
-;; Art Copyright 2019 Trina Rutz Creative Commons
+;; Bitmap files in this directory are by catspook - https://github.com/catspook/graveyard-pics and licensed under the Creative Commons Attribution-NonCommercial 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc/4.0/.
 
 ;; Code Copyright 2019 Thea Leake
-;; Code License:
+
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
 ;; You may obtain a copy of the License at
