@@ -37,12 +37,12 @@
                   scale
                   image-width)
          (prefix-in g: "graveyard.rkt")
-         (prefix-in c: "colors.rkt"))
+         (prefix-in c: "colors.rkt")
+         (prefix-in i: "assets/inlined_images.rkt")
+         (prefix-in s: "image_settings.rkt"))
 
 
-(provide tile-width
-         tile-height
-         welcome-bitmap
+(provide welcome-bitmap
          hidden-tile-label
          get-tile-label)
 
@@ -54,31 +54,8 @@
 
 (define hidden "hidden")
 
-(define (get-role-bitmap role row)
-  (let* ([path-str (string-join (list "assets/"
-                                 (string-downcase role)
-                                 "-"
-                                 (~a row)
-                                 ".png")
-                                "")]
-         [image (bitmap/file path-str)]
-         [img-size (image-width image)]
-         [scaled-image (scale (/ tile-width
-                                 img-size)
-                              image)])
-    (cons role
-          scaled-image)))
 
-(define (get-row-bitmaps row)
-  (make-immutable-hash
-   (map (lambda (role)
-          (get-role-bitmap role row))
-        (cons hidden
-              g:role-hierarchy))))
-
-(define tile-mappings
-  (map get-row-bitmaps
-       (range g:board-rows)))
+(define tile-mappings i:tile-mappings)
 
 ;;;;;;;
 ;; base images

@@ -30,7 +30,8 @@
                   canvas%)
          (prefix-in g: "graveyard.rkt")
          (prefix-in c: "colors.rkt")
-         (prefix-in i: "images.rkt"))
+         (prefix-in i: "images.rkt")
+         (prefix-in s: "image_settings.rkt"))
 
 (provide make-tile
          update-tile
@@ -73,8 +74,8 @@
          [new-tile (new tile-canvas%
                          [parent parent]
                          [callback callback]
-                         [min-width i:tile-width]
-                         [min-height i:tile-height]
+                         [min-width s:tile-width]
+                         [min-height s:tile-height]
                          [tile-image image]
                          [paint-callback tile-paint-callback])])
     (send new-tile set-canvas-background c:dark-purple-taup)
