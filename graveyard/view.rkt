@@ -45,8 +45,9 @@
                 "turn up a piece to find"
                 " which team you're on!" )))
 
-(define game-window (new frame%
-                         [label "Graveyard"]))
+(define game-window
+  (new frame%
+       [label "Graveyard"]))
 
 (define game-pane
   (new pane%
@@ -104,3 +105,13 @@
        [border 2]
        [dimensions (list g:board-rows g:board-columns)]
        [alignment (list 'center 'bottom)]))
+
+
+(define captured-window
+  (new frame%
+       [label "Unfirmary"]))
+
+(define captured-vert-arranger
+  (new vertical-pane%
+       [parent captured-window]))
+

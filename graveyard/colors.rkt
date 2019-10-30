@@ -19,6 +19,9 @@
          dark-purple-taup
          purple
          orange
+         purple-transparent
+         orange-transparent
+         label-blue
          get-color)
 
 (require (only-in racket/draw
@@ -39,10 +42,24 @@
 (define purple
   (color 217 25 255))
 
+;; border colors..
+
+(define border-opaqueness 127)
+(define orange-transparent
+  (color 227 112 0 border-opaqueness))
+
+(define purple-transparent
+  (color 217 25 255 border-opaqueness))
+
+(define label-blue
+  (color 35 64 153))
+
 (define color-mappings
   (make-immutable-hash
    (list (cons "Purple" purple)
-         (cons "Orange" orange))))
+         (cons "Orange" orange)
+         (cons "PurpleTransparent" purple-transparent)
+         (cons "OrangeTransparent" orange-transparent))))
 
 (define (get-color key)
   (hash-ref color-mappings key))

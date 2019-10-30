@@ -18,10 +18,11 @@
 
 (require (only-in racket/format
                   ~a)
-         (only-in memoize
-                  define/memo)
          (only-in racket/string
                   string-join)
+         (only-in racket/list
+                  range
+                  last)
          (only-in memoize
                   define/memo)
          (only-in pict
@@ -29,24 +30,32 @@
          (only-in 2htdp/image
                   above
                   text
+                  overlay/align
                   overlay
-                  rectangle)
+                  rectangle
+                  bitmap/file
+                  scale
+                  image-width)
          (prefix-in g: "graveyard.rkt")
-         (prefix-in c: "colors.rkt"))
+         (prefix-in c: "colors.rkt")
+         (prefix-in i: "assets/inlined_images.rkt")
+         (prefix-in s: "image_settings.rkt"))
 
 
-(provide tile-width
-         tile-height
-         welcome-bitmap
+(provide welcome-bitmap
          hidden-tile-label
          get-tile-label)
-
-
 
 (define tile-width 150)
 
 (define tile-height tile-width)
 
+(define player-role-bar-height 10)
+
+(define hidden "hidden")
+
+
+(define tile-mappings i:tile-mappings)
 
 ;;;;;;;
 ;; base images
@@ -59,93 +68,98 @@
                       "Goldenrod")))
 
 
-(define tile-background
-  (above (rectangle (+ 25 tile-width )
-                    (* tile-height 0.75)
-                    "solid"
-                    "Blue")
-         (rectangle (+ 25 tile-width )
-                    (* tile-height 0.25)
-                    "solid"
-                    "MediumForestGreen")))
-
 
 (define hidden-tile-text
-  (above (text (string-join  (list "   --------------"
-                                   "/  Still buried   \\"
-                                   "|Click to raise!|"
-                                   "|     @>-`-,-     |"
-                                   )
-                             "\n")
-               15
-               "LightSlateGray")
-         (text "| ####-#### |"
-               16
-               "LightSlateGray")
-         (text (make-string 12 #\")
-               25
-               'MediumForestGreen)))
-
-(define hidden-tile-label
-  (pict->bitmap
-   (overlay hidden-tile-text
-            tile-background)))
-
-(define empty-plot-label
-  (let ([rubble (text "%&%*%&@&*%$@%"
-                      12
-                      'brown)])
-    (pict->bitmap
-     (overlay (above (text "\n\n\n\nAn Empty Plot!\n"
-                           15
-                           'black)
-                     rubble)
-              tile-background))))
-
+  (above
+   (text (string-join (list
+                       "   Still buried     "
+                       " Click to raise! "
+                       "      @>-`-,-      "
+                       )
+                      "\n")
+         13
+         "LightSlateGray")
+   (text " ####-#### "
+         14
+         "LightSlateGray")
+   ))
 
 (define selected-image
-  (text (string-join (list "      ----%----  "
-                           "[xx|=selected=>")
+  (text (string-join (list "----%----"
+                           "Selected"
+                           "----%----")
                      "\n")
-        12
-        'Goldenrod))
+        18
+        'Red))
+
+
 
 ;;;;;;;;;
 ;; Image building fns
 ;;;;;;;;;
 
-(define (add-tile-background image)
+
+(define/memo (get-tile-mapping role coords)
+  (hash-ref (list-ref tile-mappings
+                      (g:position-row coords))
+            role))
+
+(define/memo (hidden-tile-label coords)
   (pict->bitmap
-   (overlay image
-            tile-background)))
+   (overlay hidden-tile-text
+            (get-tile-mapping hidden
+                              coords))))
+
+(define/memo (empty-plot-label coords) ;; memoizing because of last
+  (pict->bitmap
+   (get-tile-mapping (last g:role-hierarchy)
+                     coords)))
 
 
-(define/memo (base-revealed-label piece)
-  (text (g:cell-role piece)
-        25
-        (c:get-color (g:cell-player piece))))
+(define (player-role-image role player)
+  (overlay/align 'center 'bottom
+                 (text role
+                       player-role-bar-height
+                       c:label-blue)
+                 (rectangle tile-width player-role-bar-height
+                            'solid
+                            (c:get-color (string-join
+                                          (list player
+                                                "Transparent")
+                                          "")))))
 
-(define/memo (revealed-label piece)
-  (add-tile-background
-   (base-revealed-label piece)))
+(define/memo (revealed-base-label role player coords)
+  (overlay/align 'center 'bottom
+                 (player-role-image role player)
+                 (get-tile-mapping role
+                                   coords)))
 
+(define/memo (revealed-label role player coords)
+  (pict->bitmap
+   (revealed-base-label role
+                        player
+                        coords)))
 
-(define/memo (selected-label piece)
-  (add-tile-background
-   (above (base-revealed-label piece)
-          selected-image)))
+(define/memo (selected-label role player coords)
+  (pict->bitmap
+   (overlay/align 'center 'center
+                  selected-image
+                  (revealed-base-label role player coords))))
 
 ;;;;;;
 ;; Exported image building fns
 ;;;;;;
+(define/memo (tile-init-label coords)
+  (empty-plot-label coords))
 
 
-(define/memo (get-tile-label state piece coords)
-  (cond
-    ((g:cell-empty? piece) empty-plot-label)
-    ((and (equal? coords (g:turn-src-coords state))
-          (g:cell-revealed? piece))
-     (selected-label piece))
-    ((g:cell-revealed? piece) (revealed-label piece))
-    (else hidden-tile-label)))
-
+(define (get-tile-label state piece coords)
+  (let ([role (g:cell-role piece)]
+        [player (g:cell-player piece)])(cond
+     ((g:cell-empty? piece) (empty-plot-label coords))
+     ((and (equal? coords (g:turn-src-coords state))
+           (g:cell-revealed? piece))
+      (selected-label role player coords))
+     ((g:cell-revealed? piece) (revealed-label role player coords))
+     (else
+      (hidden-tile-label coords)))))
