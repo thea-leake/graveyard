@@ -125,8 +125,8 @@
 
 (define (player-won state)
   (send ev:end-game-message set-label
-        (string-join (list ("Player"
-                            g:toggle-player (g:turn-player state))
+        (string-join (list "Player"
+                            (g:toggle-player (g:turn-player state))
                            "Has Won!")))
   (send ev:end-game-dialog show #t))
 
