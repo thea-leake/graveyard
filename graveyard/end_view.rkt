@@ -30,7 +30,7 @@
        [label "Game Over!"]
        [parent #f]
        [style '(close-button)]
-       [enabled #f]
+       [enabled #t]
        [width 200]
        [height 50]))
 
