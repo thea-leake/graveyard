@@ -29,7 +29,7 @@
        [label "Choose single or multiplayer"]
        [parent #f]
        [style '(close-button)]
-       [enabled #f]
+       [enabled #t]
        [width 400]
        [height 100]))
 
