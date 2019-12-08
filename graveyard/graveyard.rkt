@@ -169,12 +169,12 @@
                    (player-roles (cdr players)))))
 
 
-(define (toggle-player player)
+(define/memo (toggle-player player)
   (if (equal? player (car players))
       (cdr players)
       (car players)))
 
-(define (flip piece)
+(define/memo (flip piece)
   (struct-copy cell piece
                [revealed? #t]))
 
