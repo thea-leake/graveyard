@@ -147,11 +147,13 @@
   (channel-get computer-player-channel))
 
 
+;; returns winning player
 (define (event-loop init-state
                     get-player-choice) ;; fn to get the channel for current player
   (let loop ([state init-state])
     (cond
-      ((g:player-won? state) (g:turn-player state))
+      ((g:player-lost? state)
+       (g:toggle-player (g:turn-player state))) ;; if this player lost other player won
       (else
        (loop
         (handle-tile-click

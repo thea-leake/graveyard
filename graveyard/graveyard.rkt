@@ -41,7 +41,7 @@
          toggle-player
          role-at-location
          player-at-location
-         player-won?
+         player-lost?
          valid-player-turns
          gen-init-turn
          (struct-out turn)
@@ -491,11 +491,6 @@
 (define (player-lost? state)
   (not
    (actions-available? (valid-player-turns state))))
-
-(define (player-won? state)
-  (player-lost?
-   (struct-copy turn state
-                [player (toggle-player state)])))
 
 (define (player-flip-location state coords)
   (let ([next-player (if (turn-first? state)
