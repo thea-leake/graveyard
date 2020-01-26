@@ -56,12 +56,11 @@
 
 
 (define (ai-player chnl)
-  (let loop ([continue? #t])
-      (let ([message (channel-get chnl)])
-        (when message
-          (unless (g:turn-src-coords message)
-            (sleep turn-wait-time))
-          (loop (channel-put chnl (ai-turn message)))))))
+  (let loop ([message (channel-get chnl)])
+    (when message
+      (sleep turn-wait-time)
+      (channel-put chnl (ai-turn message))
+      (loop (channel-get chnl)))))
 
 (define (start-ai chnl)
   (thread

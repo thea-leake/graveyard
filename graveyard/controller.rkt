@@ -130,12 +130,13 @@
     (else (wrong-player state))))
 
 
-(define (player-won player)
+(define (player-won player cleanup-thunk)
   (send ev:end-game-message set-label
         (string-join (list "Player"
                             player
                            "Has Won!")))
-  (send ev:end-game-dialog show #t))
+  (send ev:end-game-dialog show #t)
+  (cleanup-thunk))
 
 
 (define (clear-player-channel)
@@ -187,10 +188,15 @@
 (define (multi-player)
  (thread
   (lambda ()
-    (player-won (multi-player-init-turn init-turn)))))
+    (player-won (multi-player-init-turn init-turn)
+                (lambda ()
+                  (void))))))
 
 (define (single-player)
   (thread
    (lambda ()
      (ai:start-ai computer-player-channel)
-     (player-won (single-player-init-turn init-turn)))))
+     (player-won (single-player-init-turn init-turn)
+                 (lambda ()
+                   (channel-put computer-player-channel
+                                #f))))))
