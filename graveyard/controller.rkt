@@ -138,7 +138,12 @@
   (send ev:end-game-dialog show #t))
 
 
+(define (clear-player-channel)
+  (when (channel-try-get human-player-channel)
+    (clear-player-channel)))
+
 (define (get-human-choice)
+  (clear-player-channel)
   (channel-get human-player-channel))
 
 
