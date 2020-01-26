@@ -50,7 +50,7 @@
 
 (define (update-board state)
   (for-each (lambda (tile-piece-coords)
-              (t:update-tile state tile-piece-coords) )
+              (t:update-tile state tile-piece-coords))
             (map t:location
                  tile-list
                  (g:turn-board state)
@@ -152,18 +152,15 @@
   (channel-get computer-player-channel))
 
 
-;; returns winning player
-(define (event-loop init-state
-                    get-player-choice) ;; fn to get the channel for current player
+(define (event-loop init-state player-choice-fn)
   (let loop ([state init-state])
     (cond
       ((g:player-lost? state)
-       (g:toggle-player (g:turn-player state))) ;; if this player lost other player won
+       (g:toggle-player (g:turn-player state)))         ;; toggle to return winning player
       (else
        (loop
-        (handle-tile-click
-         state
-         (get-player-choice state)))))))
+        (handle-tile-click state
+                           (player-choice-fn state)))))))
 
 
 (define (single-player-init-turn init-state)
