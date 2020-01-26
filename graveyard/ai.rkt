@@ -27,7 +27,7 @@
 
 (define (choose-src actions)
   (let ([moves (g:actions-moves actions)]
-        [captures (g:actions-captures-thunk actions)]) ;; memoized lambda
+        [captures (g:actions-captures-thunk actions)])
     (cond
       ((null? moves) (choose-flip actions))
       ((null? (captures))
