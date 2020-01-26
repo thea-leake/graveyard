@@ -32,7 +32,6 @@
 (define init-turn
   (g:gen-init-turn "First Necromancer: pick a corpse to raise!"))
 
-
 (define human-player-channel (make-channel))
 
 (define computer-player-channel (make-channel))
@@ -67,6 +66,7 @@
   (update-ui state)
   state)
 
+
 (define (finish-move-message state location-coords)
   (let ([captured-piece (g:turn-captured state)])
     (if (g:cell-empty? captured-piece)
@@ -74,6 +74,7 @@
         (string-join (list "Captured "
                            (g:cell-player captured-piece)
                            (g:cell-role captured-piece))))))
+
 
 (define (finish-move-turn state location-coords)
   (let* ([updated-game (g:player-move state
@@ -84,10 +85,12 @@
                                 [message message]
                                 [src-coords #f]))))
 
+
 (define (raise-message state coords)
   (string-join (list
                 "Raised a"
                 (g:role-at-location coords (g:turn-board state)))))
+
 
 (define (raise-location state location-coords)
   (let ([handled-turn (g:player-flip-location state
@@ -97,20 +100,24 @@
                   [message (raise-message state
                                           location-coords )]))))
 
+
 (define (move-message state location-coords)
   (string-join (list
                 (g:player-at-location location-coords (g:turn-board state))
                 (g:role-at-location location-coords (g:turn-board state))
                 "selected, choose destination")))
 
+
 (define (move-src-event state location-coords)
   (event-handled (struct-copy g:turn state
                               [src-coords location-coords]
                               [message (move-message state location-coords)])))
 
+
 (define (wrong-player state)
   (event-handled (struct-copy g:turn state
                               [message "Selected other necromancers piece."])))
+
 
 (define (handle-tile-click state location-coords)
   (cond
@@ -123,77 +130,63 @@
     (else (wrong-player state))))
 
 
-(define (player-won state)
+(define (player-won player)
   (send ev:end-game-message set-label
         (string-join (list "Player"
-                            (g:toggle-player (g:turn-player state))
+                            player
                            "Has Won!")))
   (send ev:end-game-dialog show #t))
 
-(define (multi-player-event-loop init-state)
-  (let loop ([state init-state]
-             [continue? #t])
+
+(define (get-human-choice)
+  (channel-get human-player-channel))
+
+
+(define (get-computer-choice state)
+  (channel-put computer-player-channel state)
+  (channel-get computer-player-channel))
+
+
+(define (event-loop init-state
+                    get-player-choice) ;; fn to get the channel for current player
+  (let loop ([state init-state])
     (cond
-      (continue? (let* ([click-coords (channel-get human-player-channel)]
-                        [event-result (handle-tile-click state click-coords)]
-                        [next-player-lost? (g:player-lost? event-result)]) ;; checking to see if next player lost based off event handling
-                   (loop event-result
-                         (not next-player-lost?))))
-                 (else (player-won state))))
-    (exit))
+      ((g:player-won? state) (g:turn-player state))
+      (else
+       (loop
+        (handle-tile-click
+         state
+         (get-player-choice state)))))))
 
 
-(define (get-input-chnl human-player state)
-  (if (eq? (g:turn-player state) human-player)
-      human-player-channel
-      computer-player-channel))
+(define (single-player-init-turn init-state)
+  (let* ([second-turn
+         (handle-tile-click init-state
+                            (channel-get human-player-channel))]
+         [second-player (g:turn-player second-turn)])
+    (event-loop second-turn
+                (lambda (state)
+                  (if (eq? (g:turn-player state ) second-player)
+                      (get-computer-choice state)
+                      (get-human-choice))))))
 
-(define (toggle-input-chnl chnl)
-  (if (eq? chnl human-player-channel)
-      computer-player-channel
-      human-player-channel))
 
-
-(define (clear-event-chnl chnl)
-  (thread
-   (lambda ()
-     (let loop ([events #t])
-      (unless (eq? events 'turn-start)
-        (loop (channel-get chnl)))))))
-
-(define (single-player-event-loop init-state)
-  (let* ([first-turn (handle-tile-click init-state (channel-get human-player-channel))]
-         [human-player (g:toggle-player (g:turn-player first-turn))]
-         [human-player? (lambda (state)
-                          (eq? (g:turn-player state) human-player))]
-         [player-channel (lambda (state)
-                           (get-input-chnl human-player state))])
-    (let loop ([state first-turn])
-      (let ([chnl (player-channel state)])
-        (unless (human-player? state)
-          (channel-put computer-player-channel state)
-          (unless (g:turn-src-coords state)
-            (clear-event-chnl human-player-channel)))
-        (let* (
-               [input-coords (channel-get chnl)]
-               [event-result (handle-tile-click state input-coords)]
-               [next-player-lost? (g:player-lost? event-result)])
-          (unless (or (human-player? state)                  ;; when computer player finished
-                      (g:turn-src-coords event-result))      ;; is computer player finished?
-            (channel-put human-player-channel 'turn-start))
-          (cond
-            (next-player-lost? (player-won state))
-            (else (loop event-result)))))))
-  (exit))
+(define (multi-player-init-turn init-state)
+  (let ([event-result
+         (handle-tile-click init-state
+                            (channel-get human-player-channel))])
+    (event-loop event-result
+                (lambda (_)
+                  (get-human-choice)))))
 
 
 (define (multi-player)
  (thread
   (lambda ()
-    (multi-player-event-loop init-turn))))
+    (player-won (multi-player-init-turn init-turn)))))
 
 (define (single-player)
   (thread
    (lambda ()
      (ai:start-ai computer-player-channel)
-     (single-player-event-loop init-turn))))
+     (player-won (single-player-init-turn init-turn)))))
