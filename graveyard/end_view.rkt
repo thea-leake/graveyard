@@ -23,7 +23,8 @@
          (only-in racket/gui/base
                   message%
                   dialog%
-                  button%))
+                  button%)
+         (prefix-in v: "view.rkt"))
 
 (define end-game-dialog
   (new dialog%
@@ -44,4 +45,5 @@
        [parent end-game-dialog]
        [label "OK"]
        [callback (lambda (button event)
-                   (send end-game-dialog show #f))]))
+                   (send end-game-dialog show #f)
+                   (send v:game-window show #f))]))
