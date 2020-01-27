@@ -21,46 +21,59 @@
 
 (define turn-wait-time .75)
 
+;; This contains all the things the computer event loop would want to keep track of or pass on
+(struct ai-state
+  (turn-response
+   next-turn-dest))
+
+
 (define (choose-flip actions)
   (car (shuffle (g:actions-flips actions))))
 
 
-(define (choose-src actions)
+(define (choose-locations actions)
   (let ([moves (g:actions-moves actions)]
         [captures (g:actions-captures-thunk actions)])
     (cond
-      ((null? moves) (choose-flip actions))
+      ((null? moves) (cons (choose-flip actions)
+                           #f))
       ((null? (captures))
-       (caar (shuffle moves)))
+       (let ([move (car (shuffle moves))])
+         (cons (car move)
+               (cadr move))))
       (else
-       (caar (shuffle (captures)))))))
+       (let ([capture (car (shuffle (captures)))])
+         (cons (car capture)
+               (cadr capture)))))))
 
-(define (choose-dest src actions)
-  (let* ([capture-coords (findf (lambda (x)
-                                  (equal? src (car x)))
-                                ((g:actions-captures-thunk actions)))])
-    (cond
-      (capture-coords
-       (car (shuffle (cdr capture-coords))))
-      (else
-       (car (shuffle (cdr (findf (lambda (x)
-                               (equal? src (car x)))
-                             (g:actions-moves actions)))))))))
 
-(define (ai-turn state)
-  (let* ([actions (g:valid-player-turns state)]
-         [src (g:turn-src-coords state)])
-    (cond
-      (src (choose-dest src actions))
-      (else (choose-src actions)))))
+(define (choose-dest prev-turn)
+  (ai-state-next-turn-dest prev-turn))
+
+
+(define (ai-turn turn prev-turn)
+  (cond
+    ((g:turn-src-coords turn) (ai-state (choose-dest prev-turn)     ;; turn choice src
+                                        #f))                        ;; next turn dest
+    (else (let* ([chosen-locations
+                  (choose-locations (g:valid-player-turns turn))]
+                 [chosen-src (car chosen-locations)]
+                 [chosen-dest (cdr chosen-locations)])
+            (ai-state chosen-src                                    ;; turn choice src
+                      chosen-dest)))))                              ;; next turn dest
 
 
 (define (ai-player chnl difficulty)
-  (let loop ([message (channel-get chnl)])
+  (let loop ([message (channel-get chnl)]
+             [ai-prev-turn (ai-state #f
+                                     #f)])
     (when message
       (sleep turn-wait-time)
-      (channel-put chnl (ai-turn message))
-      (loop (channel-get chnl)))))
+      (let ([ai-decision (ai-turn message ai-prev-turn)])
+        (channel-put chnl
+                     (ai-state-turn-response ai-decision))
+        (loop (channel-get chnl)
+              ai-decision)))))
 
 (define (start-ai chnl difficulty)
   (thread
