@@ -31,7 +31,7 @@
   (car (shuffle (g:actions-flips actions))))
 
 
-(define (choose-locations actions)
+(define (choose-locations-easy actions)
   (let ([moves (g:actions-moves actions)]
         [captures (g:actions-captures-thunk actions)])
     (cond
@@ -51,31 +51,36 @@
   (ai-state-next-turn-dest prev-turn))
 
 
-(define (ai-turn turn prev-turn)
-  (cond
-    ((g:turn-src-coords turn) (ai-state (choose-dest prev-turn)     ;; turn choice src
-                                        #f))                        ;; next turn dest
-    (else (let* ([chosen-locations
-                  (choose-locations (g:valid-player-turns turn))]
-                 [chosen-src (car chosen-locations)]
-                 [chosen-dest (cdr chosen-locations)])
-            (ai-state chosen-src                                    ;; turn choice src
-                      chosen-dest)))))                              ;; next turn dest
+(define (ai-builder choose-locations-fn)
+  (lambda (turn prev-turn)
+    (cond
+      ((g:turn-src-coords turn) (ai-state (choose-dest prev-turn)     ;; turn choice src
+                                          #f))                        ;; next turn dest
+      (else (let* ([chosen-locations
+                    (choose-locations-fn (g:valid-player-turns turn))]
+                   [chosen-src (car chosen-locations)]
+                   [chosen-dest (cdr chosen-locations)])
+              (ai-state chosen-src                                    ;; turn choice src
+                        chosen-dest))))))                              ;; next turn dest
 
 
-(define (ai-player chnl difficulty)
+(define (ai-player chnl ai-logic)
   (let loop ([message (channel-get chnl)]
              [ai-prev-turn (ai-state #f
                                      #f)])
     (when message
       (sleep turn-wait-time)
-      (let ([ai-decision (ai-turn message ai-prev-turn)])
+      (let ([ai-decision (ai-logic message ai-prev-turn)])
         (channel-put chnl
                      (ai-state-turn-response ai-decision))
         (loop (channel-get chnl)
               ai-decision)))))
 
 (define (start-ai chnl difficulty)
-  (thread
-   (lambda ()
-     (ai-player chnl difficulty))))
+  (let ([ai-logic
+         (ai-builder
+          (cond
+            ((eq? difficulty 'easy) choose-locations-easy)))])
+    (thread
+     (lambda ()
+       (ai-player chnl ai-logic)))))
