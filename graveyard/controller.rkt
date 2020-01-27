@@ -192,10 +192,10 @@
                 (lambda ()
                   (void))))))
 
-(define (single-player)
+(define (single-player [difficulty 'easy])
   (thread
    (lambda ()
-     (ai:start-ai computer-player-channel)
+     (ai:start-ai computer-player-channel difficulty)
      (player-won (single-player-init-turn init-turn)
                  (lambda ()
                    (channel-put computer-player-channel

@@ -14,6 +14,8 @@
 
 #lang racket/base
 
+(provide ai-difficulty-dialog)
+
 (require (only-in racket/class
                   new
                   send)
@@ -21,13 +23,12 @@
                   dialog%
                   button%)
          (prefix-in v: "view.rkt")
-         (prefix-in ctrl: "controller.rkt")
-         (prefix-in m: "multiplayer-start-view.rkt"))
+         (prefix-in ctrl: "controller.rkt"))
 
 
-(define start-game-dialog
+(define ai-difficulty-dialog
   (new dialog%
-       [label "Choose single or multiplayer"]
+       [label "Choose Difficulty Level"]
        [parent #f]
        [style '(close-button)]
        [enabled #t]
@@ -35,21 +36,11 @@
        [height 100]))
 
 
-(define single-player-button
+(define easy-button
   (new button%
-       [parent start-game-dialog]
-       [label "Single Player"]
+       [parent ai-difficulty-dialog]
+       [label "Easy"]
        [callback (lambda (button event)
-                   (send m:ai-difficulty-dialog show #t)
-                   (send start-game-dialog show #f))]))
-
-(define multi-player-button
-  (new button%
-       [parent start-game-dialog]
-       [label "Multi Player"]
-       [callback (lambda (button event)
-                   (send start-game-dialog show #f)
+                   (send ai-difficulty-dialog show #f)
                    (send v:game-window show #t)
-                   (ctrl:multi-player))]))
-
-(send start-game-dialog show #t)
+                   (ctrl:single-player 'easy))]))

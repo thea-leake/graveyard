@@ -55,14 +55,14 @@
       (else (choose-src actions)))))
 
 
-(define (ai-player chnl)
+(define (ai-player chnl difficulty)
   (let loop ([message (channel-get chnl)])
     (when message
       (sleep turn-wait-time)
       (channel-put chnl (ai-turn message))
       (loop (channel-get chnl)))))
 
-(define (start-ai chnl)
+(define (start-ai chnl difficulty)
   (thread
    (lambda ()
-     (ai-player chnl))))
+     (ai-player chnl difficulty))))
