@@ -485,7 +485,7 @@
                  (not-null? flips))
              moves                       ;; moves
              flips                       ;; flips
-             (lambda ()
+             (memo-lambda ()
                (get-captures state moves))))) ;; captures-thunk
 
 (define (player-lost? state)

@@ -44,3 +44,13 @@
                    (send ai-difficulty-dialog show #f)
                    (send v:game-window show #t)
                    (ctrl:single-player 'easy))]))
+
+
+(define medium-button
+  (new button%
+       [parent ai-difficulty-dialog]
+       [label "Medium"]
+       [callback (lambda (button event)
+                   (send ai-difficulty-dialog show #f)
+                   (send v:game-window show #t)
+                   (ctrl:single-player 'medium))]))

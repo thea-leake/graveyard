@@ -27,24 +27,23 @@
    next-turn-dest))
 
 
-(define (choose-flip actions)
-  (car (shuffle (g:actions-flips actions))))
+(define (choose-random-flip locations)
+  (car (shuffle (g:actions-flips locations))))
+
+(define (choose-random-move moves)
+  (car (shuffle moves)))
 
 
 (define (choose-locations-easy actions)
   (let ([moves (g:actions-moves actions)]
         [captures (g:actions-captures-thunk actions)])
     (cond
-      ((null? moves) (cons (choose-flip actions)
-                           #f))
-      ((null? (captures))
-       (let ([move (car (shuffle moves))])
-         (cons (car move)
-               (cadr move))))
+      ((null? moves) (cons (choose-random-flip actions)
+                           '(#f)))
+      ((null? (captures)) ;; memoized lambda
+       (choose-random-move moves))
       (else
-       (let ([capture (car (shuffle (captures)))])
-         (cons (car capture)
-               (cadr capture)))))))
+       (choose-random-move (captures))))))
 
 
 (define (choose-dest prev-turn)
@@ -59,7 +58,7 @@
       (else (let* ([chosen-locations
                     (choose-locations-fn (g:valid-player-turns turn))]
                    [chosen-src (car chosen-locations)]
-                   [chosen-dest (cdr chosen-locations)])
+                   [chosen-dest (cadr chosen-locations)])
               (ai-state chosen-src                                    ;; turn choice src
                         chosen-dest))))))                              ;; next turn dest
 
