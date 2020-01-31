@@ -554,7 +554,7 @@
         [safety-checker (safety-checker-builder (turn-board state)
                                                src
                                                dest)])
-    (map safety-checker direction-checks)))
+    (findf (lambda (x) x) (map safety-checker direction-checks))))
 
 (define (player-lost? state)
   (not
