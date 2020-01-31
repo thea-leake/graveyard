@@ -26,7 +26,8 @@
                   index-of)
          (only-in memoize
                   define/memo
-                  memo-lambda))
+                  memo-lambda)
+         (prefix-in u: "utils.rkt"))
 
 (provide board-coordinates
          board-columns
@@ -44,6 +45,7 @@
          player-lost?
          valid-player-turns
          gen-init-turn
+         unsafe-move?
          (struct-out turn)
          (struct-out actions)
          (struct-out cell)
@@ -57,23 +59,27 @@
    first?
    captured
    src-coords
-   valid?))
+   valid?)
+  #:transparent)
 
 (struct cell
   (player
    revealed?
    role
-   empty?))
+   empty?)
+  #:transparent)
 
 (struct actions
   (available?
    moves
    flips
-   captures-thunk))
+   captures-thunk)
+  #:transparent)
 
 (struct position
   (column
-   row))
+   row)
+  #:transparent)
 
 (define board-rows 4)
 (define board-columns 8)
@@ -186,6 +192,7 @@
     (drop (take board
                 end)
           start)))
+
 
 
 (define/memo (index-in-range? index)
@@ -487,6 +494,67 @@
              flips                       ;; flips
              (memo-lambda ()
                (get-captures state moves))))) ;; captures-thunk
+
+;; builds a function that takes a checker, and returns
+;; either the location that will be able to take the piece after move
+;; or false if there are no pieces the move is vulnerable to.
+(define (safety-checker-builder board src dest)
+  (let* ([piece (piece-at-coordinates src
+                                      board)]
+         [src-role (cell-role piece)]
+         [src-player (cell-player piece)]
+         )
+    (lambda (direction-incr-fn)
+      (let checker ([accum 0]
+                    [pieces-between 0]
+                    [check-index (direction-incr-fn (get-index-from-coordinates dest))])
+        (if (or (not (index-in-range? check-index))
+                (< 1 pieces-between))
+            #f
+            (let* ([piece-loc (get-coords-from-index check-index)]
+                   [checked-piece
+                    (piece-at-coordinates piece-loc
+                                          board)])
+              (u:inspect (cond
+                 ((cell-empty? checked-piece)
+                  (checker (add1 accum)
+                           pieces-between
+                           (direction-incr-fn check-index)))
+                 ((not (cell-revealed? checked-piece))
+                  (checker (add1 accum)
+                           (add1 pieces-between)
+                           (direction-incr-fn check-index)))
+                 ((eq? (cell-player checked-piece)
+                       src-player)
+                  (checker (add1 accum)
+                           (add1 pieces-between)
+                           (direction-incr-fn check-index)))
+                 ((and (= pieces-between 1)
+                       (eq? cannon
+                            (cell-role checked-piece)))
+                  piece-loc) ;; vulnerable to cannon at loc
+                 ((and (= accum 0)
+                       (not (eq? cannon
+                                 (cell-role checked-piece)))
+                       (hierarchal-able-to-capture? (cell-role checked-piece)
+                                                    src-role))
+                  piece-loc) ;; vulnerable to piece at loc
+                 (else
+                  (checker (add1 accum)
+                           (add1 pieces-between)
+                           (direction-incr-fn check-index)))))))))))
+
+
+(define (unsafe-move? state src dest)
+  (let ([direction-checks
+         (list sub1                                  ;; x axis west
+               add1                                  ;; x axis east
+               (lambda (x) (+ x board-columns))      ;; y axis south
+               (lambda (x) (- x board-columns)))]    ;; y axis north
+        [safety-checker (safety-checker-builder (turn-board state)
+                                               src
+                                               dest)])
+    (map safety-checker direction-checks)))
 
 (define (player-lost? state)
   (not

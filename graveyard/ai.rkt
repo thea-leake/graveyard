@@ -14,8 +14,12 @@
 
 #lang racket/base
 (require (only-in racket/list
-                  shuffle)
-         (prefix-in g: "graveyard.rkt"))
+                  shuffle
+                  filter-not
+                  empty?
+                  filter-map)
+         (prefix-in g: "graveyard.rkt")
+         (prefix-in u: "utils.rkt"))
 
 (provide start-ai)
 
@@ -34,9 +38,10 @@
   (car (shuffle moves)))
 
 
-(define (choose-locations-easy actions)
-  (let ([moves (g:actions-moves actions)]
-        [captures (g:actions-captures-thunk actions)])
+(define (choose-locations-easy turn)
+  (let* ([actions (g:valid-player-turns turn)]
+         [moves (g:actions-moves actions)]
+         [captures (g:actions-captures-thunk actions)])
     (cond
       ((null? moves) (cons (choose-random-flip actions)
                            '(#f)))
@@ -44,6 +49,44 @@
        (choose-random-move moves))
       (else
        (choose-random-move (captures))))))
+
+(define (choose-locations-medium turn)
+  (let* ([actions (g:valid-player-turns turn)]
+         [moves-safety-checker
+          (lambda (moves)
+            (foldl (lambda (piece-moves safe-moves)
+                     (let* ([src (car piece-moves)]
+                            [dests (cdr piece-moves)]
+                            [safe-dests (u:inspect (filter (lambda (dest)
+                                                       (g:unsafe-move? turn
+                                                                       src
+                                                                       dest))
+                                                     dests) #:header "RARR")])
+                       (if safe-dests
+                           (cons (cons src
+                                       safe-dests)
+                                 safe-moves)
+                           safe-moves)))
+                   '()
+                   moves))]
+         [moves (g:actions-moves actions)]
+         [safe-moves (moves-safety-checker moves)]
+         [captures ((g:actions-captures-thunk actions))]
+         [safe-captures (moves-safety-checker captures)])
+    (cond
+      ((null? moves) (cons (choose-random-flip actions)
+                           '(#f)))
+      ((not (empty? safe-captures))
+       (choose-random-move safe-captures))
+      ((not (empty? safe-moves))
+       (choose-random-move safe-moves))
+      ;; ((not (empty? g:actions-flips))
+      ;;  (cons (choose-random-flip actions)
+      ;;        '(#f)))
+      ((null? captures)
+       (choose-random-move moves))
+      (else
+       (choose-random-move captures)))))
 
 
 (define (choose-dest prev-turn)
@@ -56,7 +99,7 @@
       ((g:turn-src-coords turn) (ai-state (choose-dest prev-turn)     ;; turn choice src
                                           #f))                        ;; next turn dest
       (else (let* ([chosen-locations
-                    (choose-locations-fn (g:valid-player-turns turn))]
+                    (choose-locations-fn turn )]
                    [chosen-src (car chosen-locations)]
                    [chosen-dest (cadr chosen-locations)])
               (ai-state chosen-src                                    ;; turn choice src
@@ -78,8 +121,9 @@
 (define (start-ai chnl difficulty)
   (let ([ai-logic
          (ai-builder
-          (cond
-            ((eq? difficulty 'easy) choose-locations-easy)))])
+          (case difficulty
+            ('easy choose-locations-easy)
+            ('medium choose-locations-medium)))])
     (thread
      (lambda ()
        (ai-player chnl ai-logic)))))
