@@ -50,29 +50,33 @@
       (else
        (choose-random-move (captures))))))
 
+
+(define (build-move-checker turn)
+  (lambda (moves)
+    (foldl (lambda (piece-moves safe-moves)
+             (let* ([src (car piece-moves)]
+                    [dests (cdr piece-moves)]
+                    [safe-dests (filter-not (lambda (dest)
+                                              (g:unsafe-move? turn
+                                                              src
+                                                              dest))
+                                            dests)])
+               (if (not (empty? safe-dests))
+                   (cons (cons src
+                               safe-dests)
+                         safe-moves)
+                   safe-moves)))
+           '()
+           moves)))
+
+
 (define (choose-locations-medium turn)
   (let* ([actions (g:valid-player-turns turn)]
-         [moves-safety-checker
-          (lambda (moves)
-            (foldl (lambda (piece-moves safe-moves)
-                     (let* ([src (car piece-moves)]
-                            [dests (cdr piece-moves)]
-                            [safe-dests (u:inspect (filter (lambda (dest)
-                                                       (g:unsafe-move? turn
-                                                                       src
-                                                                       dest))
-                                                     dests) #:header "RARR")])
-                       (if safe-dests
-                           (cons (cons src
-                                       safe-dests)
-                                 safe-moves)
-                           safe-moves)))
-                   '()
-                   moves))]
+         [moves-safety-checker (build-move-checker turn)]
          [moves (g:actions-moves actions)]
-         [safe-moves (moves-safety-checker moves)]
+         [safe-moves (u:inspect (moves-safety-checker moves) #:header "## Safe moves")]
          [captures ((g:actions-captures-thunk actions))]
-         [safe-captures (moves-safety-checker captures)])
+         [safe-captures (u:inspect (moves-safety-checker captures) #:header "## Safe Captures")])
     (cond
       ((null? moves) (cons (choose-random-flip actions)
                            '(#f)))
@@ -80,9 +84,6 @@
        (choose-random-move safe-captures))
       ((not (empty? safe-moves))
        (choose-random-move safe-moves))
-      ;; ((not (empty? g:actions-flips))
-      ;;  (cons (choose-random-flip actions)
-      ;;        '(#f)))
       ((null? captures)
        (choose-random-move moves))
       (else

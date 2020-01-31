@@ -495,6 +495,7 @@
              (memo-lambda ()
                (get-captures state moves))))) ;; captures-thunk
 
+
 ;; builds a function that takes a checker, and returns
 ;; either the location that will be able to take the piece after move
 ;; or false if there are no pieces the move is vulnerable to.
@@ -502,8 +503,7 @@
   (let* ([piece (piece-at-coordinates src
                                       board)]
          [src-role (cell-role piece)]
-         [src-player (cell-player piece)]
-         )
+         [src-player (cell-player piece)])
     (lambda (direction-incr-fn)
       (let checker ([accum 0]
                     [pieces-between 0]
