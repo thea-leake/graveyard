@@ -16,20 +16,69 @@
 
 (require rackunit
          rackunit/text-ui
+         (only-in racket/list
+                  take)
+         "../utils.rkt"
          "../graveyard.rkt")
+
+(define player1 (car players))
+(define player2 (cdr players))
+
+
+(define test-known-board
+  (list
+   (cell player1 #f cannon #f) (cell player1 #f horse #f) (cell player2 #f leader #f) (cell player2 #f pawn #f) (cell player1 #f elephant #f) (cell player2 #f chariot #f) (cell player2 #f elephant #f) (cell player1 #f advisor #f)
+   (cell player2 #f cannon #f) (cell player1 #f horse #f) (cell player2 #f horse #f) (cell player1 #f pawn #f) (cell player1 #f cannon #f) (cell player2 #f cannon #f) (cell player1 #f chariot #f) (cell player2 #f advisor #f)
+   (cell player1 #f pawn #f) (cell player2 #f pawn #f) (cell player2 #f pawn #f) (cell player2 #f pawn #f) (cell player1 #f advisor #f) (cell player1 #f leader #f) (cell player1 #f chariot #f) (cell player1 #f pawn #f)
+   (cell player1 #f pawn #f) (cell player2 #f chariot #f) (cell player2 #f pawn #f) (cell player1 #f elephant #f) (cell player2 #f advisor #f) (cell player2 #f horse #f) (cell player1 #f pawn #f) (cell player2 #f elephant #f)))
+
 
 
 ;; Test gen-board - check tests working
+(define test-board (gen-board))
+
 (define gen-board-tests
   (test-suite "Test board generation"
-              (check-equal? (length (gen-board)) 32)))
+              ;; board created w/ 32 cells
+              (check-equal? (length test-board)
+                            32)
+              ;; all cells start out hidden
+              (check-equal? (length (filter (lambda (x)
+                                             (cell-revealed? x))
+                                            test-board))
+                            0)
+              ;; player count split in half
+              (check-equal? (length (filter (lambda (x)
+                                              (eq? (cell-player x)
+                                                   player1))
+                                            test-board))
+                            16)))
 
 (run-tests gen-board-tests)
 
+;; toggle player
+(define toggle-player-tests
+  (test-suite "Test toggle player"
+              (check-equal? (toggle-player player1)
+                            player2)
+              (check-equal? (toggle-player player2)
+                            player1)))
+
+(run-tests toggle-player-tests)
+
+
+;; Get row
+(define test-row
+  (take test-known-board 8))
+
+(define get-row-test
+  (test-suite "Test get row"
+              (check-equal? (get-row 0 test-known-board)
+                            test-row)))
+
+(run-tests get-row-test)
+
 ;; Unsafe-move? tests 
-(define player1 (car players))
-(define player2 (cdr players))
-(define empty-role "Empty")
 
 (define player1-zombie
   (cell player1

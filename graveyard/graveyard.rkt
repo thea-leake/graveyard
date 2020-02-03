@@ -54,6 +54,11 @@
          leader
          advisor
          elephant
+         chariot
+         horse
+         cannon
+         pawn
+         empty-role
          players
          get-index-from-coordinates
          get-coords-from-index
