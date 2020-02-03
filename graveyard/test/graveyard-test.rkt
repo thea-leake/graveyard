@@ -16,7 +16,7 @@
 
 (require rackunit
          rackunit/text-ui
-         "graveyard.rkt")
+         "../graveyard.rkt")
 
 
 ;; Test gen-board - check tests working
@@ -77,6 +77,18 @@
         player2
         "" #f #f #f #f))
 
+;; this allows us to get the memoized obj - as we're using eq? for lightweight comparisons
+(define src-position
+  (get-coords-from-index
+   (get-index-from-coordinates (position 4 1))))
+
+(define dest-position
+  (get-coords-from-index
+   (get-index-from-coordinates (position 3 1))))
+
+(define opponent-greater-position
+  (get-coords-from-index
+   (get-index-from-coordinates (position 2 1))))
 
 (define unsafe-move?-tests
   (test-suite "Tests checking whether moves are safe or not"

@@ -55,6 +55,8 @@
          advisor
          elephant
          players
+         get-index-from-coordinates
+         get-coords-from-index
          )
 
 
