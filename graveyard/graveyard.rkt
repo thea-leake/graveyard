@@ -511,7 +511,7 @@
 
 (define (opponent-move-captures captures dest)
   (and (findf (lambda (x)
-                (equal? dest x))
+                (eq? dest x))
               (cdr captures))
        (car captures)))
 

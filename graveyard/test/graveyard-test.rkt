@@ -142,12 +142,12 @@
 (define unsafe-move?-tests
   (test-suite "Tests checking whether moves are safe or not"
               (check-equal? (unsafe-move? game-state-safe-capture
-                                          (position 4 1)
-                                          (position 3 1))
+                                          src-position
+                                          dest-position)
                             #f)
               (check-equal? (unsafe-move? game-state-unsafe-capture
-                                          (position 4 1)
-                                          (position 3 1))
-                            (list (position 2 1)))))
+                                          src-position
+                                          dest-position)
+                            (list opponent-greater-position))))
 
 (run-tests unsafe-move?-tests)
