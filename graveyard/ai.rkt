@@ -74,9 +74,9 @@
   (let* ([actions (g:valid-player-turns turn)]
          [moves-safety-checker (build-move-checker turn)]
          [moves (g:actions-moves actions)]
-         [safe-moves (u:inspect (moves-safety-checker moves) #:header "## Safe moves")]
+         [safe-moves (moves-safety-checker moves) ]
          [captures ((g:actions-captures-thunk actions))]
-         [safe-captures (u:inspect (moves-safety-checker captures) #:header "## Safe Captures")])
+         [safe-captures  (moves-safety-checker captures)])
     (cond
       ((null? moves) (cons (choose-random-flip actions)
                            '(#f)))

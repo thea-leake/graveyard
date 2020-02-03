@@ -13,20 +13,26 @@
 (run-tests gen-board-tests)
 
 ;; Unsafe-move? tests 
-(define player1 "Purple")
-(define player2 "Orange")
+(define player1 (car players))
+(define player2 (cdr players))
 (define empty-role "Empty")
 
 (define player1-zombie
   (cell player1
         #t
-        "Zombie"
+        elephant
+        #f))
+
+(define player1-lich
+  (cell player1
+        #t
+        leader
         #f))
 
 (define player2-vampire
   (cell player2
         #t
-        "Vampire"
+        advisor
         #f))
 
 (define empty-location
@@ -46,11 +52,27 @@
         "" #f #f #f #f))
 
 
+(define move-with-unsafe-capture
+  (list   empty-location    empty-location    empty-location  player1-zombie  empty-location     empty-location    empty-location     empty-location
+          empty-location    empty-location    player1-lich    player1-zombie  player2-vampire    empty-location    empty-location     empty-location
+          empty-location    empty-location    empty-location  player1-zombie  empty-location     empty-location    empty-location     empty-location
+          empty-location    empty-location    empty-location  empty-location  empty-location     empty-location    empty-location     empty-location))
+
+(define game-state-unsafe-capture
+  (turn move-with-unsafe-capture
+        player2
+        "" #f #f #f #f))
+
+
 (define unsafe-move?-tests
   (test-suite "Tests checking whether moves are safe or not"
               (check-equal? (unsafe-move? game-state-safe-capture
                                           (position 4 1)
                                           (position 3 1))
-                            #f)))
+                            #f)
+              (check-equal? (unsafe-move? game-state-unsafe-capture
+                                          (position 4 1)
+                                          (position 3 1))
+                            (list (position 2 1)))))
 
 (run-tests unsafe-move?-tests)
