@@ -36,7 +36,9 @@
                   bitmap/file
                   scale
                   image-width)
-         (prefix-in g: "graveyard.rkt")
+         (prefix-in b: "models/board.rkt")
+         (prefix-in g: "models/graveyard.rkt")
+         (prefix-in r: "models/roles.rkt")
          (prefix-in c: "colors.rkt")
          (prefix-in i: "assets/inlined_images.rkt")
          (prefix-in s: "image_settings.rkt"))
@@ -101,7 +103,7 @@
 
 (define/memo (get-tile-mapping role coords)
   (hash-ref (list-ref tile-mappings
-                      (g:position-row coords))
+                      (b:position-row coords))
             role))
 
 (define/memo (hidden-tile-label coords)
@@ -112,7 +114,7 @@
 
 (define/memo (empty-plot-label coords) ;; memoizing because of last
   (pict->bitmap
-   (get-tile-mapping (last g:role-hierarchy)
+   (get-tile-mapping (last r:role-hierarchy)
                      coords)))
 
 
@@ -154,12 +156,12 @@
 
 
 (define (get-tile-label state piece coords)
-  (let ([role (g:cell-role piece)]
-        [player (g:cell-player piece)])(cond
-     ((g:cell-empty? piece) (empty-plot-label coords))
+  (let ([role (r:cell-role piece)]
+        [player (r:cell-player piece)])(cond
+     ((r:cell-empty? piece) (empty-plot-label coords))
      ((and (equal? coords (g:turn-src-coords state))
-           (g:cell-revealed? piece))
+           (r:cell-revealed? piece))
       (selected-label role player coords))
-     ((g:cell-revealed? piece) (revealed-label role player coords))
+     ((r:cell-revealed? piece) (revealed-label role player coords))
      (else
       (hidden-tile-label coords)))))

@@ -22,7 +22,9 @@
                   string-join)
          (only-in racket/class
                   send)
-         (prefix-in g: "graveyard.rkt")
+         (prefix-in b: "models/board.rkt")
+         (prefix-in r: "models/roles.rkt")
+         (prefix-in g: "models/graveyard.rkt")
          (prefix-in ai: "ai.rkt")
          (prefix-in t: "tile.rkt")
          (prefix-in i: "images.rkt")
@@ -45,7 +47,7 @@
                       piece
                       coords))
        (g:turn-board init-turn)
-       g:board-coordinates))
+       b:board-coordinates))
 
 
 (define (update-board state)
@@ -54,7 +56,7 @@
             (map t:location
                  tile-list
                  (g:turn-board state)
-                 g:board-coordinates)))
+                 b:board-coordinates)))
 
 (define (update-ui state)
   (update-board state)
@@ -69,11 +71,11 @@
 
 (define (finish-move-message state location-coords)
   (let ([captured-piece (g:turn-captured state)])
-    (if (g:cell-empty? captured-piece)
+    (if (r:cell-empty? captured-piece)
         (g:turn-message state)
         (string-join (list "Captured "
-                           (g:cell-player captured-piece)
-                           (g:cell-role captured-piece))))))
+                           (r:cell-player captured-piece)
+                           (r:cell-role captured-piece))))))
 
 
 (define (finish-move-turn state location-coords)
@@ -157,7 +159,7 @@
   (let loop ([state init-state])
     (cond
       ((g:player-lost? state)
-       (g:toggle-player (g:turn-player state)))         ;; toggle to return winning player
+       (r:toggle-player (g:turn-player state)))         ;; toggle to return winning player
       (else
        (loop
         (handle-tile-click state

@@ -18,38 +18,41 @@
          rackunit/text-ui
          (only-in racket/list
                   take)
-         "../utils.rkt"
-         "../graveyard.rkt")
+         "../../utils.rkt"
+         (prefix-in g: "../../models/graveyard.rkt")
+         (prefix-in r: "../../models/roles.rkt")
+         (prefix-in b: "../../models/board.rkt")
+         )
 
-(define player1 (car players))
-(define player2 (cdr players))
+(define player1 (car r:players))
+(define player2 (cdr r:players))
 
 
 (define test-known-board
   (list
-   (cell player1 #f cannon #f) (cell player1 #f horse #f) (cell player2 #f leader #f) (cell player2 #f pawn #f) (cell player1 #f elephant #f) (cell player2 #f chariot #f) (cell player2 #f elephant #f) (cell player1 #f advisor #f)
-   (cell player2 #f cannon #f) (cell player1 #f horse #f) (cell player2 #f horse #f) (cell player1 #f pawn #f) (cell player1 #f cannon #f) (cell player2 #f cannon #f) (cell player1 #f chariot #f) (cell player2 #f advisor #f)
-   (cell player1 #f pawn #f) (cell player2 #f pawn #f) (cell player2 #f pawn #f) (cell player2 #f pawn #f) (cell player1 #f advisor #f) (cell player1 #f leader #f) (cell player1 #f chariot #f) (cell player1 #f pawn #f)
-   (cell player1 #f pawn #f) (cell player2 #f chariot #f) (cell player2 #f pawn #f) (cell player1 #f elephant #f) (cell player2 #f advisor #f) (cell player2 #f horse #f) (cell player1 #f pawn #f) (cell player2 #f elephant #f)))
+   (r:cell player1 #f r:cannon #f) (r:cell player1 #f r:horse #f) (r:cell player2 #f r:leader #f) (r:cell player2 #f r:pawn #f) (r:cell player1 #f r:elephant #f) (r:cell player2 #f r:chariot #f) (r:cell player2 #f r:elephant #f) (r:cell player1 #f r:advisor #f)
+   (r:cell player2 #f r:cannon #f) (r:cell player1 #f r:horse #f) (r:cell player2 #f r:horse #f) (r:cell player1 #f r:pawn #f) (r:cell player1 #f r:cannon #f) (r:cell player2 #f r:cannon #f) (r:cell player1 #f r:chariot #f) (r:cell player2 #f r:advisor #f)
+   (r:cell player1 #f r:pawn #f) (r:cell player2 #f r:pawn #f) (r:cell player2 #f r:pawn #f) (r:cell player2 #f r:pawn #f) (r:cell player1 #f r:advisor #f) (r:cell player1 #f r:leader #f) (r:cell player1 #f r:chariot #f) (r:cell player1 #f r:pawn #f)
+   (r:cell player1 #f r:pawn #f) (r:cell player2 #f r:chariot #f) (r:cell player2 #f r:pawn #f) (r:cell player1 #f r:elephant #f) (r:cell player2 #f r:advisor #f) (r:cell player2 #f r:horse #f) (r:cell player1 #f r:pawn #f) (r:cell player2 #f r:elephant #f)))
 
 
 
 ;; Test gen-board - check tests working
-(define test-board (gen-board))
+(define test-board (b:gen-board))
 
 (define gen-board-tests
   (test-suite "Test board generation"
-              ;; board created w/ 32 cells
+              ;; board created w/ 32 r:cells
               (check-equal? (length test-board)
                             32)
-              ;; all cells start out hidden
+              ;; all r:cells start out hidden
               (check-equal? (length (filter (lambda (x)
-                                             (cell-revealed? x))
+                                             (r:cell-revealed? x))
                                             test-board))
                             0)
               ;; player count split in half
               (check-equal? (length (filter (lambda (x)
-                                              (eq? (cell-player x)
+                                              (eq? (r:cell-player x)
                                                    player1))
                                             test-board))
                             16)))
@@ -59,49 +62,50 @@
 ;; toggle player
 (define toggle-player-tests
   (test-suite "Test toggle player"
-              (check-equal? (toggle-player player1)
+              (check-equal? (r:toggle-player player1)
                             player2)
-              (check-equal? (toggle-player player2)
+              (check-equal? (r:toggle-player player2)
                             player1)))
 
 (run-tests toggle-player-tests)
 
 
 ;; Get row
-(define test-row
-  (take test-known-board 8))
+;; (define test-row
+;;   (take test-known-board 8))
 
-(define get-row-test
-  (test-suite "Test get row"
-              (check-equal? (get-row 0 test-known-board)
-                            test-row)))
+;; (define get-row-test
+;;   (test-suite "Test get row"
+;;               (check-equal? (get-row 0 test-known-board)
+;;                             test-row)))
 
-(run-tests get-row-test)
+;; (run-tests get-row-test)
+
 
 ;; Unsafe-move? tests 
 
 (define player1-zombie
-  (cell player1
+  (r:cell player1
         #t
-        elephant
+        r:elephant
         #f))
 
 (define player1-lich
-  (cell player1
+  (r:cell player1
         #t
-        leader
+        r:leader
         #f))
 
 (define player2-vampire
-  (cell player2
+  (r:cell player2
         #t
-        advisor
+        r:advisor
         #f))
 
 (define empty-location
-  (cell #f         ;; player
+  (r:cell #f         ;; player
         #t         ;; revealed
-        empty-role ;; role
+        r:empty-role ;; role
         #t))       ;; empty
 
 (define move-with-safe-capture
@@ -110,7 +114,7 @@
           empty-location    empty-location    empty-location  player1-zombie  empty-location     empty-location    empty-location     empty-location
           empty-location    empty-location    empty-location  empty-location  empty-location     empty-location    empty-location     empty-location))
 (define game-state-safe-capture
-  (turn move-with-safe-capture
+  (g:turn move-with-safe-capture
         player2
         "" #f #f #f #f))
 
@@ -122,30 +126,27 @@
           empty-location    empty-location    empty-location  empty-location  empty-location     empty-location    empty-location     empty-location))
 
 (define game-state-unsafe-capture
-  (turn move-with-unsafe-capture
+  (g:turn move-with-unsafe-capture
         player2
         "" #f #f #f #f))
 
-;; this allows us to get the memoized obj - as we're using eq? for lightweight comparisons
+;; this allows us to get the memoized coordinates obj - as we're using eq? for lightweight comparisons
 (define src-position
-  (get-coords-from-index
-   (get-index-from-coordinates (position 4 1))))
+  (b:get-coords-from-index 12)) ;; 4, 1
 
 (define dest-position
-  (get-coords-from-index
-   (get-index-from-coordinates (position 3 1))))
+  (b:get-coords-from-index 11)) ;; 3, 1
 
 (define opponent-greater-position
-  (get-coords-from-index
-   (get-index-from-coordinates (position 2 1))))
+  (b:get-coords-from-index 10)) ; 2, 1
 
 (define unsafe-move?-tests
   (test-suite "Tests checking whether moves are safe or not"
-              (check-equal? (unsafe-move? game-state-safe-capture
+              (check-equal? (g:unsafe-move? game-state-safe-capture
                                           src-position
                                           dest-position)
                             #f)
-              (check-equal? (unsafe-move? game-state-unsafe-capture
+              (check-equal? (g:unsafe-move? game-state-unsafe-capture
                                           src-position
                                           dest-position)
                             (list opponent-greater-position))))

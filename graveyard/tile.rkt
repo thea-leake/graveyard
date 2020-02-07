@@ -28,7 +28,7 @@
                   inherit)
          (only-in racket/gui/base
                   canvas%)
-         (prefix-in g: "graveyard.rkt")
+         (prefix-in g: "models/graveyard.rkt")
          (prefix-in c: "colors.rkt")
          (prefix-in i: "images.rkt")
          (prefix-in s: "image_settings.rkt"))

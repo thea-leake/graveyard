@@ -34,7 +34,7 @@
                   vertical-pane%)
          (only-in table-panel
                   table-panel%)
-         (prefix-in g: "graveyard.rkt")
+         (prefix-in b: "models/board.rkt")
          (prefix-in c: "colors.rkt")
          (prefix-in i: "images.rkt"))
 
@@ -103,7 +103,7 @@
   (new table-panel%
        [parent board-container]
        [border 2]
-       [dimensions (list g:board-rows g:board-columns)]
+       [dimensions (list b:board-rows b:board-columns)]
        [alignment (list 'center 'bottom)]))
 
 
