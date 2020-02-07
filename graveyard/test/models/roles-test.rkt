@@ -26,6 +26,36 @@
 (define player1 (car r:players))
 (define player2 (cdr r:players))
 
+;; player-roles
+(define player-roles-tests
+  (test-suite "Test player role list generation"
+              (check-equal? (length (r:player-roles player1))
+                            16)
+              (check-equal? (length (filter (lambda (x)
+                                              (eq? player1 (r:cell-player x)))
+                                            (r:player-roles player1)))
+                            16)
+              (check-equal? (length (filter r:cell-revealed?
+                                            (r:player-roles player1)))
+                            0)
+              (check-equal? (length (filter r:cell-empty?
+                                            (r:player-roles player1)))
+                            0)
+              (check-equal? (length (filter (lambda (x)
+                                              (eq? r:leader (r:cell-role x)))
+                                            (r:player-roles player1)))
+                            1)
+              (check-equal? (length (filter (lambda (x)
+                                              (eq? r:cannon (r:cell-role x)))
+                                            (r:player-roles player1)))
+                            2)
+              (check-equal? (length (filter (lambda (x)
+                                              (eq? r:pawn (r:cell-role x)))
+                                            (r:player-roles player1)))
+                            5)))
+
+(run-tests player-roles-tests)
+
 ;; toggle player
 (define toggle-player-tests
   (test-suite "Test toggle player"
