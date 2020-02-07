@@ -74,3 +74,21 @@
                             player1)))
 
 (run-tests toggle-player-tests)
+
+(define hidden-piece
+  (r:cell player1
+        #f ;; revealed
+        r:elephant
+        #f))
+(define revealed-piece
+  (r:cell player1
+        #t ;; revealed
+        r:elephant
+        #f))
+
+(define flip-piece-tests
+  (test-suite "Test flip - switch cell to revealed"
+              (check-equal? (r:flip hidden-piece)
+                            revealed-piece)))
+
+(run-tests flip-piece-tests)
