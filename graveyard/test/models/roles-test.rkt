@@ -26,7 +26,16 @@
 (define player1 (car r:players))
 (define player2 (cdr r:players))
 
-;; player-roles
+(define role-hierarchy-value-tests
+  (test-suite "Test getting role hierarchy"
+              (check-equal? (r:hierarchy-value r:leader)
+                            0)
+              (check-equal? (r:hierarchy-value r:pawn)
+                            6)))
+
+(run-tests role-hierarchy-value-tests)
+
+
 (define player-roles-tests
   (test-suite "Test player role list generation"
               (check-equal? (length (r:player-roles player1))
@@ -56,7 +65,7 @@
 
 (run-tests player-roles-tests)
 
-;; toggle player
+
 (define toggle-player-tests
   (test-suite "Test toggle player"
               (check-equal? (r:toggle-player player1)
