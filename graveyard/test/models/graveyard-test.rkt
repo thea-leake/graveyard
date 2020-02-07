@@ -45,14 +45,6 @@
           r:advisor
           #f))
 
-(define test-known-board
-  (list
-   (r:cell player1 #f r:cannon #f) (r:cell player1 #f r:horse #f) (r:cell player2 #f r:leader #f) (r:cell player2 #f r:pawn #f) (r:cell player1 #f r:elephant #f) (r:cell player2 #f r:chariot #f) (r:cell player2 #f r:elephant #f) (r:cell player1 #f r:advisor #f)
-   (r:cell player2 #f r:cannon #f) (r:cell player1 #f r:horse #f) (r:cell player2 #f r:horse #f) (r:cell player1 #f r:pawn #f) (r:cell player1 #f r:cannon #f) (r:cell player2 #f r:cannon #f) (r:cell player1 #f r:chariot #f) (r:cell player2 #f r:advisor #f)
-   (r:cell player1 #f r:pawn #f) (r:cell player2 #f r:pawn #f) (r:cell player2 #f r:pawn #f) (r:cell player2 #f r:pawn #f) (r:cell player1 #f r:advisor #f) (r:cell player1 #f r:leader #f) (r:cell player1 #f r:chariot #f) (r:cell player1 #f r:pawn #f)
-   (r:cell player1 #f r:pawn #f) (r:cell player2 #f r:chariot #f) (r:cell player2 #f r:pawn #f) (r:cell player1 #f r:elephant #f) (r:cell player2 #f r:advisor #f) (r:cell player2 #f r:horse #f) (r:cell player1 #f r:pawn #f) (r:cell player2 #f r:elephant #f)))
-
-
 
 ;; Test gen-board - check tests working
 (define test-board (b:gen-board))
