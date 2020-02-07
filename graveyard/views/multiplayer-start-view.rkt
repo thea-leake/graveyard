@@ -23,7 +23,7 @@
                   dialog%
                   button%)
          (prefix-in v: "view.rkt")
-         (prefix-in ctrl: "../controller.rkt"))
+         (prefix-in ctrl: "../controllers/controller.rkt"))
 
 
 (define ai-difficulty-dialog

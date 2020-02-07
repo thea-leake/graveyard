@@ -18,8 +18,8 @@
                   filter-not
                   empty?
                   filter-map)
-         (prefix-in g: "models/graveyard.rkt")
-         (prefix-in u: "utils.rkt"))
+         (prefix-in g: "../models/graveyard.rkt")
+         (prefix-in u: "../utils.rkt"))
 
 (provide start-ai)
 
