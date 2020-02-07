@@ -46,17 +46,7 @@
           #f))
 
 
-;; toggle player
-(define toggle-player-tests
-  (test-suite "Test toggle player"
-              (check-equal? (r:toggle-player player1)
-                            player2)
-              (check-equal? (r:toggle-player player2)
-                            player1)))
-
-(run-tests toggle-player-tests)
-
-;; Unsafe-move? tests 
+;; Unsafe-move? tests
 
 
 (define move-with-safe-capture
