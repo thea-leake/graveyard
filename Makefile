@@ -9,6 +9,9 @@ EXECUTABLE_PATH = $(BUILD_BIN_PATH)/graveyard
 OSX_EXECUTABLE_PATH = $(EXECUTABLE_PATH).app
 WINDOWS_EXECUTABLE_PATH = $(EXECUTABLE_PATH).exe
 TARGET_DIR = $(BUILD_PATH)/target
+TEST_DIR = $(SRC_DIR)/test
+ALL_TESTS_FILE = $(TEST_DIR)/run_tests.rkt
+
 
 
 
@@ -38,5 +41,8 @@ build_unix: executable
 
 build_windows: executable
 	raco distribute $(TARGET_DIR) $(WINDOWS_EXECUTABLE_PATH)
+
+test:
+	racket $(ALL_TESTS_FILE)
 
 .PHONY:  run deps clean
