@@ -27,6 +27,23 @@
 (define player1 (car r:players))
 (define player2 (cdr r:players))
 
+(define player1-zombie
+  (r:cell player1
+          #t
+          r:elephant
+          #f))
+
+(define player1-lich
+  (r:cell player1
+          #t
+          r:leader
+          #f))
+
+(define player2-vampire
+  (r:cell player2
+          #t
+          r:advisor
+          #f))
 
 (define test-known-board
   (list
@@ -69,50 +86,14 @@
 
 (run-tests toggle-player-tests)
 
-
-;; Get row
-;; (define test-row
-;;   (take test-known-board 8))
-
-;; (define get-row-test
-;;   (test-suite "Test get row"
-;;               (check-equal? (get-row 0 test-known-board)
-;;                             test-row)))
-
-;; (run-tests get-row-test)
-
-
 ;; Unsafe-move? tests 
 
-(define player1-zombie
-  (r:cell player1
-        #t
-        r:elephant
-        #f))
-
-(define player1-lich
-  (r:cell player1
-        #t
-        r:leader
-        #f))
-
-(define player2-vampire
-  (r:cell player2
-        #t
-        r:advisor
-        #f))
-
-(define empty-location
-  (r:cell #f         ;; player
-        #t         ;; revealed
-        r:empty-role ;; role
-        #t))       ;; empty
 
 (define move-with-safe-capture
-  (list   empty-location    empty-location    empty-location  player1-zombie  empty-location     empty-location    empty-location     empty-location
-          empty-location    empty-location    player1-zombie  player1-zombie  player2-vampire    empty-location    empty-location     empty-location
-          empty-location    empty-location    empty-location  player1-zombie  empty-location     empty-location    empty-location     empty-location
-          empty-location    empty-location    empty-location  empty-location  empty-location     empty-location    empty-location     empty-location))
+  (list  r:empty-location  r:empty-location  r:empty-location player1-zombie r:empty-location   r:empty-location  r:empty-location  r:empty-location
+         r:empty-location  r:empty-location   player1-zombie  player1-zombie  player2-vampire   r:empty-location  r:empty-location  r:empty-location
+         r:empty-location  r:empty-location  r:empty-location player1-zombie r:empty-location   r:empty-location  r:empty-location  r:empty-location
+         r:empty-location  r:empty-location r:empty-location r:empty-location r:empty-location  r:empty-location  r:empty-location  r:empty-location))
 (define game-state-safe-capture
   (g:turn move-with-safe-capture
         player2
@@ -120,10 +101,10 @@
 
 
 (define move-with-unsafe-capture
-  (list   empty-location    empty-location    empty-location  player1-zombie  empty-location     empty-location    empty-location     empty-location
-          empty-location    empty-location    player1-lich    player1-zombie  player2-vampire    empty-location    empty-location     empty-location
-          empty-location    empty-location    empty-location  player1-zombie  empty-location     empty-location    empty-location     empty-location
-          empty-location    empty-location    empty-location  empty-location  empty-location     empty-location    empty-location     empty-location))
+  (list  r:empty-location  r:empty-location  r:empty-location player1-zombie r:empty-location   r:empty-location  r:empty-location  r:empty-location
+         r:empty-location  r:empty-location   player1-lich    player1-zombie  player2-vampire   r:empty-location  r:empty-location  r:empty-location
+         r:empty-location  r:empty-location  r:empty-location player1-zombie r:empty-location   r:empty-location  r:empty-location  r:empty-location
+         r:empty-location  r:empty-location r:empty-location r:empty-location r:empty-location  r:empty-location  r:empty-location  r:empty-location))
 
 (define game-state-unsafe-capture
   (g:turn move-with-unsafe-capture

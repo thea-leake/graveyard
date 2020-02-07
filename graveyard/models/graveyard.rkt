@@ -31,8 +31,7 @@
          (prefix-in b: "board.rkt")
          (prefix-in r: "roles.rkt"))
 
-(provide get-row
-         player-move
+(provide player-move
          player-flip-location
          location-hidden?
          flip-coordinates
@@ -75,13 +74,6 @@
         #f  ;; valid? - was move valid?
         ))
 
-
-(define/memo (get-row index board)
-  (let* ([start (* index b:board-columns)]
-         [end (+ start b:board-columns)])
-    (drop (take board
-                end)
-          start)))
 
 (define (piece-at-coordinates coords board)
   (list-ref board
