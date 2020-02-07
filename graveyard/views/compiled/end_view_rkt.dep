@@ -1,0 +1,1 @@
+("7.4" racket ("0c9f7ce74076da28cc24c7e4b95dae653be6d02f" . "dfbc4a57505082dbdac0ac13e9b8986080ed4af8") #"/Users/thealeake/repos/graveyard/graveyard/views/view.rkt" (collects #"racket" #"base.rkt") (collects #"racket" #"class.rkt") (collects #"racket" #"gui" #"base.rkt") (collects #"racket" #"runtime-config.rkt"))

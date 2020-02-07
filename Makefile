@@ -1,7 +1,7 @@
 SRC_DIR = graveyard
 DEP_PACKAGES = memoize table-panel
 BYTECODE_DIR = $(SRC_DIR)/compiled
-GUI_PATH = $(SRC_DIR)/start_view.rkt
+GUI_PATH = $(SRC_DIR)/views/start_view.rkt
 SRC_FILES  = $(GUI_PATH) $(SRC_PATH)
 BUILD_PATH = build
 BUILD_BIN_PATH = $(BUILD_PATH)/bin

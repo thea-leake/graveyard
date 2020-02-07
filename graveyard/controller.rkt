@@ -26,10 +26,10 @@
          (prefix-in r: "models/roles.rkt")
          (prefix-in g: "models/graveyard.rkt")
          (prefix-in ai: "ai.rkt")
-         (prefix-in t: "tile.rkt")
-         (prefix-in i: "images.rkt")
-         (prefix-in v: "view.rkt")
-         (prefix-in ev: "end_view.rkt"))
+         (prefix-in t: "views/tile.rkt")
+         (prefix-in i: "views/images.rkt")
+         (prefix-in v: "views/view.rkt")
+         (prefix-in ev: "views/end_view.rkt"))
 
 (define init-turn
   (g:gen-init-turn "First Necromancer: pick a corpse to raise!"))
