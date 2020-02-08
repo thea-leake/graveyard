@@ -1,38 +1,47 @@
-Graveyard - the game where 2 necromancers raise opposing forces in a graveyard and capture the other necromancers pieces until one of them can no longer move!
+* Graveyard
 
-This is an implementation of the game [[https://en.wikipedia.org/wiki/Banqi][Banqi]] with a Halloween veneer. 
-It uses the Jumping cannon rules, where the cannon must jump over 1 and only 1 piece to move or capture.
+#+CAPTION: Screenshot of Graveyard
+[[./screenshots/screenshot.png]]
 
-It's currently a work in progress - but has a playable GUI.
+This is a Halloween take on the game [[https://en.wikipedia.org/wiki/Banqi][Banqi]] - or dark (or blind, or half) chess.
+
+The point of the game is to be the last player that can make a valid move (including flipping pieces up).
+This can be done by either:
+ - eliminating the other players pieces so they cannot move
+ - trapping the other players pieces so they cannot legally move
+
+It uses the Jumping cannon rules, where the wraith --or cannon in traditional banqi-- must jump over 1 and only 1 piece to move or capture.
+
 
 The pixel art was drawn by my super talented spouse [[https://github.com/catspook/graveyard-pics][catspook]]!
 
-** Dependencies:
-Racket - you can download [[https://download.racket-lang.org][here]]
-
-Run the following to install library dependencies:
- - =raco pkg install memoize table-panel=, or
- - =make deps=
-
 ** To play:
 *** Prepackaged builds
-There are prepackaged builds stored in the [[https://github.com/thea-leake/graveyard/releases][releases]] for this repository for OSX Linux and Windows.
-They may not be up to date with master though.
+    If you don't want to install racket or the library dependencies there are prepackaged builds in [[https://github.com/thea-leake/graveyard/releases][releases]].
+    They may not be up to date with master though.
+*** Building or running from source
+**** Dependencies:
+    If you do not want to use the prepackaged build you will need:
+    - Racket - you can download [[https://download.racket-lang.org][here]]
 
-*** Without building:
- - run: =racket graveyard/start_view.rkt= in this directory, or
- - =make run=
-*** With building:
-This should give a better startup time (though this game is not very resource intensive)
- - to build a local build run =make executable=.  This will build an executable in =build/bin=
- - to make a distributable build run:
-   + =make build_<OS_TYPE>= this will build a distributable executable in =build/target=
-     + OSX: =osx= - so command would be =make build_osx=
-     + Linux/UNIX: =unix=
-     + Windows: =windows=
+    - Libraries -- either:
+      - =raco pkg install memoize table-panel=, /or/
+      - =make deps=
 
-*** To remove build artifacts:
-Run =make clean=.
+**** Run from source without building:
+  - run: =racket graveyard/start_view.rkt= in this directory, or
+  - =make run=
+**** With building:
+ This should give a better startup time, and will build a portable executable.
+  - to build a local build run =make executable=.  This will build an executable in =build/bin=
+  - to make a distributable build run:
+    + =make build_<OS_TYPE>= this will build a distributable executable in =build/target=
+      + OSX: =osx= - so command would be =make build_osx=
+      + Linux/UNIX: =unix=
+      + Windows: =windows=
+
+***** To remove build artifacts:
+   Run =make clean=.
 
 
 ** How to play:
@@ -49,6 +58,11 @@ The hierarchy of what corpse can capture what is defined below in roles.
 *** Roles
     These are ordered by precedence from least to greatest vulnerability.
 **** Lich
+     #+CAPTION: Lich
+     #+ATTR_HTML: :width 100px
+     #+ATTR_LATEX: :width 100px
+     [[graveyard/views/assets/lich-0.bmp]]
+
      The lich can capture any unit except poltergeists as poltergeists don't have enough of a presence for the lich to control them.
      The lich is vulnerable to other liches, poltergeists, and wraiths.
 **** Vampire
