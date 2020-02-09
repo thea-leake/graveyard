@@ -1,0 +1,16 @@
+dist: bionic
+before_install:
+  - sudo apt-get -y install racket
+
+
+jobs:
+  include:
+    - stage: "Verify dependencies"
+      name: "Dep"
+      script: make deps
+    - stage: "Build"
+      name: "Build"
+      script: "make build_unix"
+    - stage: "Test"
+      name: "Test"
+      script: "make test"
