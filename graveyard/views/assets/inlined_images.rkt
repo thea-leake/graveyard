@@ -76,12 +76,11 @@
 
   (define (get-transform image-name)
     (cond
-      ((regexp-match #rx"^empty"
+      ((regexp-match #rx"^hidden"
                      image-name)
        (lambda (image)
-         (pict->bitmap
-          (overlay hidden-tile-text-compiled
-                   image))))
+         (overlay hidden-tile-text-compiled
+                  image)))
       (else
        (lambda (image)
          image))))
@@ -92,7 +91,7 @@
                                     image-name)]
            [image (read-bitmap image-path)]
            [img-size (image-width image)]
-           [type-transform (get-transform image-path)])
+           [type-transform (get-transform image-name)])
       (pict->bitmap
        (type-transform (scale (/ s:tile-width
                                img-size)
