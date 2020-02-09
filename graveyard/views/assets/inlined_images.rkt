@@ -41,10 +41,6 @@
                               range)))
 
 
-;; This is kind of messy, but it allows inlining of the images into the
-;; bytecode, so the images can be included inside the executable.
-;; something more dynamic would require the images to be present at run time.
-
 (begin-for-syntax
   (define image-type-list
     (cons "hidden"
