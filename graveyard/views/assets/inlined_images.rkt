@@ -16,7 +16,10 @@
 
 #lang at-exp racket/base
 
-(provide tile-mappings)
+(provide tile-mappings
+         welcome-bitmap
+         hidden-tile-text
+         selected-image)
 
 (require images/compile-time
          (prefix-in r: "../../models/roles.rkt")
@@ -36,10 +39,14 @@
                               read-bitmap)
                      (only-in 2htdp/image
                               scale
-                              image-width)
+                              image-width
+                              text
+                              above)
                      (only-in racket/list
                               cartesian-product
-                              range)))
+                              range)
+                     (only-in racket/string
+                              string-join)))
 
 
 (begin-for-syntax
@@ -78,9 +85,6 @@
         (cartesian-product (range b:board-rows)
                            image-type-list))))
 
-(define first-row
-  (take tile-mappings-list image-type-count))
-
 (define (make-row-hash row)
   (make-immutable-hash
    (map cons
@@ -93,3 +97,39 @@
 
 (define tile-mappings
   (map make-row-hash (range b:board-rows)))
+
+
+(define welcome-bitmap
+  (compiled-bitmap
+   (pict->bitmap
+    (text "Welcome to Queen of the Graveyard!"
+          27
+          "Goldenrod"))))
+
+(define hidden-tile-text
+  (compiled-bitmap
+   (pict->bitmap
+    (above
+     (text (string-join (list
+                         "   Still buried     "
+                         " Click to raise! "
+                         "      @>-`-,-      "
+                         )
+                        "\n")
+           13
+           "LightSlateGray")
+     (text " ####-#### "
+           14
+           "LightSlateGray")
+     ))))
+
+(define selected-image
+  (compiled-bitmap
+   (pict->bitmap
+    (text (string-join (list "----%----"
+                             "Selected"
+                             "----%----")
+                       "\n")
+          18
+          'Red))))
+

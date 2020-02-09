@@ -47,44 +47,8 @@
          get-tile-label)
 
 
-
-(define tile-mappings i:tile-mappings)
-
-;;;;;;;
-;; base images
-;;;;;;
-
-
-(define welcome-bitmap
-  (pict->bitmap (text "Welcome to Queen of the Graveyard!"
-                      27
-                      "Goldenrod")))
-
-
-
-(define hidden-tile-text
-  (above
-   (text (string-join (list
-                       "   Still buried     "
-                       " Click to raise! "
-                       "      @>-`-,-      "
-                       )
-                      "\n")
-         13
-         "LightSlateGray")
-   (text " ####-#### "
-         14
-         "LightSlateGray")
-   ))
-
-(define selected-image
-  (text (string-join (list "----%----"
-                           "Selected"
-                           "----%----")
-                     "\n")
-        18
-        'Red))
-
+;; as we're passing this on to views
+(define welcome-bitmap i:welcome-bitmap)
 
 
 ;;;;;;;;;
@@ -93,13 +57,13 @@
 
 
 (define/memo (get-tile-mapping role coords)
-  (hash-ref (list-ref tile-mappings
+  (hash-ref (list-ref i:tile-mappings
                       (b:position-row coords))
             role))
 
 (define/memo (hidden-tile-label coords)
   (pict->bitmap
-   (overlay hidden-tile-text
+   (overlay i:hidden-tile-text
             (get-tile-mapping s:hidden
                               coords))))
 
@@ -135,7 +99,7 @@
 (define/memo (selected-label role player coords)
   (pict->bitmap
    (overlay/align 'center 'center
-                  selected-image
+                  i:selected-image
                   (revealed-base-label role player coords))))
 
 ;;;;;;
