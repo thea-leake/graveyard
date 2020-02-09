@@ -16,7 +16,7 @@
 
 #lang racket/base
 
-;; (provide tile-mappings)
+(provide tile-mappings)
 
 (require images/compile-time
          (for-syntax "../image_settings.rkt"
@@ -29,7 +29,6 @@
                               scale
                               image-width)))
 
-(provide tile-mappings)
 
 ;; This is kind of messy, but it allows inlining of the images into the
 ;; bytecode, so the images can be included inside the executable.
