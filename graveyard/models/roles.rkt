@@ -20,7 +20,8 @@
                   shuffle
                   index-of)
          (only-in memoize
-                  define/memo)
+                  define/memo
+                  memo-lambda)
          (prefix-in u: "../utils.rkt"))
 
 (provide role-hierarchy
@@ -94,11 +95,17 @@
          (make-list 5 pawn)
          (make-list 2 cannon))))
 
-(define/memo (mkpiece player role)
-  (cell player     ;; player
-        #f         ;; revealed
-        role       ;;
-        #f))       ;; empty
+
+;; the memoized lambda lets us memoize the the pieces of the same data
+;; so they share the same obj id - which lets us memoize more effectively
+;; further down the line w/ only obj id checks
+;; using a memoized lambda instead of define/memo to allow these object to be cleaned up by GC when no longer used.
+(define (piece-maker)
+  (memo-lambda (player role)
+   (cell player     ;; player
+         #f         ;; revealed
+         role       ;;
+         #f)))       ;; empty
 
 (define empty-location
   (cell #f         ;; player
@@ -108,8 +115,9 @@
 
 
 (define (player-roles team)
-  (map (lambda (role) (mkpiece team role))
-       player-start-roles))
+  (let ([mkpiece (piece-maker)])
+    (map (lambda (role) (mkpiece team role))
+        player-start-roles)))
 
 
 (define/memo (toggle-player player)
