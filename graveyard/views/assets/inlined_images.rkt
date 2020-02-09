@@ -14,12 +14,14 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-#lang racket/base
+#lang at-exp racket/base
 
 (provide tile-mappings)
 
 (require images/compile-time
          (for-syntax "../image_settings.rkt"
+                     (prefix-in r: "../../models/roles.rkt")
+                     (prefix-in b: "../../models/board.rkt")
                      racket/base
                      (only-in pict
                               pict->bitmap)
@@ -27,7 +29,10 @@
                               read-bitmap)
                      (only-in 2htdp/image
                               scale
-                              image-width)))
+                              image-width)
+                     (only-in racket/list
+                              cartesian-product
+                              range)))
 
 
 ;; This is kind of messy, but it allows inlining of the images into the
@@ -45,6 +50,14 @@
                  img-size)
               image)))))
 
+(define tile-mappings-list
+  (compiled-bitmap-list
+   (map (lambda (x)
+          (transform-image (format "~a-~a.bmp"
+                                   (string-downcase (cadr x))
+                                   (car x))))
+        (cartesian-product (range b:board-rows)
+                           r:role-hierarchy))))
 
 (define tile-mappings
   (list
