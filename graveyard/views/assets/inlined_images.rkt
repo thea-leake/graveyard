@@ -16,67 +16,77 @@
 
 #lang racket/base
 
-(provide tile-mappings)
+;; (provide tile-mappings)
 
-(require mrlib/include-bitmap
-         (only-in 2htdp/image
-                  scale
-                  image-width)
-         (prefix-in s: "../image_settings.rkt"))
+(require images/compile-time
+         (for-syntax "../image_settings.rkt"
+                     racket/base
+                     (only-in pict
+                              pict->bitmap)
+                     (only-in racket/draw
+                              read-bitmap)
+                     (only-in 2htdp/image
+                              scale
+                              image-width)))
 
 ;; This is kind of messy, but it allows inlining of the images into the
 ;; bytecode, so the images can be included inside the executable.
 ;; something more dynamic would require the images to be present at run time.
 
-(define (transform-image image)
-  (let ([img-size (image-width image)])
-    (scale (/ s:tile-width
-              img-size)
-           image)))
+(begin-for-syntax
+  (define (transform-image image-path)
+    (let* ([image (read-bitmap image-path)]
+           [img-size (image-width image)])
+      (pict->bitmap (scale (/ tile-width
+                 img-size)
+              image)))))
 
-(define tile-mappings
-  (list
-   (make-immutable-hash
-    (list
-     (cons "Empty" (transform-image (include-bitmap "empty-0.bmp")))
-     (cons "Ghoul" (transform-image (include-bitmap "ghoul-0.bmp")))
-     (cons "hidden" (transform-image (include-bitmap "hidden-0.bmp")))
-     (cons "Lich" (transform-image (include-bitmap "lich-0.bmp")))
-     (cons "Poltergeist" (transform-image (include-bitmap "poltergeist-0.bmp")))
-     (cons "Skeleton" (transform-image (include-bitmap "skeleton-0.bmp")))
-     (cons "Vampire" (transform-image (include-bitmap "vampire-0.bmp")))
-     (cons "Wraith" (transform-image (include-bitmap "wraith-0.bmp")))
-     (cons "Zombie" (transform-image (include-bitmap "zombie-0.bmp")))))
-   (make-immutable-hash
-    (list
-     (cons "Empty" (transform-image (include-bitmap "empty-1.bmp")))
-     (cons "Ghoul" (transform-image (include-bitmap "ghoul-1.bmp")))
-     (cons "hidden" (transform-image (include-bitmap "hidden-1.bmp")))
-     (cons "Lich" (transform-image (include-bitmap "lich-1.bmp")))
-     (cons "Poltergeist" (transform-image (include-bitmap "poltergeist-1.bmp")))
-     (cons "Skeleton" (transform-image (include-bitmap "skeleton-1.bmp")))
-     (cons "Vampire" (transform-image (include-bitmap "vampire-1.bmp")))
-     (cons "Wraith" (transform-image (include-bitmap "wraith-1.bmp")))
-     (cons "Zombie" (transform-image (include-bitmap "zombie-1.bmp")))))
-   (make-immutable-hash
-    (list
-     (cons "Empty" (transform-image (include-bitmap "empty-2.bmp")))
-     (cons "Ghoul" (transform-image (include-bitmap "ghoul-2.bmp")))
-     (cons "hidden" (transform-image (include-bitmap "hidden-2.bmp")))
-     (cons "Lich" (transform-image (include-bitmap "lich-2.bmp")))
-     (cons "Poltergeist" (transform-image (include-bitmap "poltergeist-2.bmp")))
-     (cons "Skeleton" (transform-image (include-bitmap "skeleton-2.bmp")))
-     (cons "Vampire" (transform-image (include-bitmap "vampire-2.bmp")))
-     (cons "Wraith" (transform-image (include-bitmap "wraith-2.bmp")))
-     (cons "Zombie" (transform-image (include-bitmap "zombie-2.bmp")))))
-   (make-immutable-hash
-    (list
-     (cons "Empty" (transform-image (include-bitmap "empty-3.bmp")))
-     (cons "Ghoul" (transform-image (include-bitmap "ghoul-3.bmp")))
-     (cons "hidden" (transform-image (include-bitmap "hidden-3.bmp")))
-     (cons "Lich" (transform-image (include-bitmap "lich-3.bmp")))
-     (cons "Poltergeist" (transform-image (include-bitmap "poltergeist-3.bmp")))
-     (cons "Skeleton" (transform-image (include-bitmap "skeleton-3.bmp")))
-     (cons "Vampire" (transform-image (include-bitmap "vampire-3.bmp")))
-     (cons "Wraith" (transform-image (include-bitmap "wraith-3.bmp")))
-     (cons "Zombie" (transform-image (include-bitmap "zombie-3.bmp")))))))
+
+(define rarr (compiled-bitmap (transform-image "empty-0.bmp")))
+
+;; (define tile-mappings
+;;   (list
+;;    (make-immutable-hash
+;;     (list
+;;      (cons "Empty" (transform-image "empty-0.bmp"))
+;;      (cons "Ghoul" (transform-image "ghoul-0.bmp"))
+;;      (cons "hidden" (transform-image "hidden-0.bmp"))
+;;      (cons "Lich" (transform-image "lich-0.bmp"))
+;;      (cons "Poltergeist" (transform-image "poltergeist-0.bmp"))
+;;      (cons "Skeleton" (transform-image "skeleton-0.bmp"))
+;;      (cons "Vampire" (transform-image "vampire-0.bmp"))
+;;      (cons "Wraith" (transform-image "wraith-0.bmp"))
+;;      (cons "Zombie" (transform-image "zombie-0.bmp"))))
+;;    (make-immutable-hash
+;;     (list
+;;      (cons "Empty" (transform-image "empty-1.bmp"))
+;;      (cons "Ghoul" (transform-image "ghoul-1.bmp"))
+;;      (cons "hidden" (transform-image "hidden-1.bmp"))
+;;      (cons "Lich" (transform-image "lich-1.bmp"))
+;;      (cons "Poltergeist" (transform-image "poltergeist-1.bmp"))
+;;      (cons "Skeleton" (transform-image "skeleton-1.bmp"))
+;;      (cons "Vampire" (transform-image "vampire-1.bmp"))
+;;      (cons "Wraith" (transform-image "wraith-1.bmp"))
+;;      (cons "Zombie" (transform-image "zombie-1.bmp"))))
+;;    (make-immutable-hash
+;;     (list
+;;      (cons "Empty" (transform-image "empty-2.bmp"))
+;;      (cons "Ghoul" (transform-image "ghoul-2.bmp"))
+;;      (cons "hidden" (transform-image "hidden-2.bmp"))
+;;      (cons "Lich" (transform-image "lich-2.bmp"))
+;;      (cons "Poltergeist" (transform-image "poltergeist-2.bmp"))
+;;      (cons "Skeleton" (transform-image "skeleton-2.bmp"))
+;;      (cons "Vampire" (transform-image "vampire-2.bmp"))
+;;      (cons "Wraith" (transform-image "wraith-2.bmp"))
+;;      (cons "Zombie" (transform-image "zombie-2.bmp"))))
+;;    (make-immutable-hash
+;;     (list
+;;      (cons "Empty" (transform-image "empty-3.bmp"))
+;;      (cons "Ghoul" (transform-image "ghoul-3.bmp"))
+;;      (cons "hidden" (transform-image "hidden-3.bmp"))
+;;      (cons "Lich" (transform-image "lich-3.bmp"))
+;;      (cons "Poltergeist" (transform-image "poltergeist-3.bmp"))
+;;      (cons "Skeleton" (transform-image "skeleton-3.bmp"))
+;;      (cons "Vampire" (transform-image "vampire-3.bmp"))
+;;      (cons "Wraith" (transform-image "wraith-3.bmp"))
+;;      (cons "Zombie" (transform-image "zombie-3.bmp"))))))
