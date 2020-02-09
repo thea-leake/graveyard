@@ -19,7 +19,7 @@ run:
 	racket $(GUI_PATH)
 
 deps:
-	raco pkg install --skip-installed $(DEP_PACKAGES)
+	raco pkg install  --skip-installed --scope installation $(DEP_PACKAGES)
 
 clean:
 	rm -rf $(BYTECODE_DIR)
