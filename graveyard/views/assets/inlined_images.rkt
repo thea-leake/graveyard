@@ -21,11 +21,12 @@
 (require images/compile-time
          (prefix-in r: "../../models/roles.rkt")
          (prefix-in b: "../../models/board.rkt")
+         (prefix-in s: "../image_settings.rkt")
          (only-in racket/list
                   take
                   drop
                   range)
-         (for-syntax "../image_settings.rkt"
+         (for-syntax (prefix-in s: "../image_settings.rkt")
                      (prefix-in r: "../../models/roles.rkt")
                      (prefix-in b: "../../models/board.rkt")
                      racket/base
@@ -43,7 +44,7 @@
 
 (begin-for-syntax
   (define image-type-list
-    (cons "hidden"
+    (cons s:hidden
           r:role-hierarchy))
 
   (define image-type-count
@@ -55,13 +56,13 @@
                                     image-name)]
            [image (read-bitmap image-path)]
            [img-size (image-width image)])
-      (pict->bitmap (scale (/ tile-width
+      (pict->bitmap (scale (/ s:tile-width
                  img-size)
               image)))))
 
 
 (define image-type-list
-  (cons "hidden"
+  (cons s:hidden
         r:role-hierarchy))
 
 (define image-type-count

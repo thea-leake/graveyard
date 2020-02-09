@@ -46,13 +46,6 @@
          hidden-tile-label
          get-tile-label)
 
-(define tile-width 150)
-
-(define tile-height tile-width)
-
-(define player-role-bar-height 10)
-
-(define hidden "hidden")
 
 
 (define tile-mappings i:tile-mappings)
@@ -107,7 +100,7 @@
 (define/memo (hidden-tile-label coords)
   (pict->bitmap
    (overlay hidden-tile-text
-            (get-tile-mapping hidden
+            (get-tile-mapping s:hidden
                               coords))))
 
 (define/memo (empty-plot-label coords) ;; memoizing because of last
@@ -118,9 +111,9 @@
 (define (player-role-image role player)
   (overlay/align 'center 'bottom
                  (text role
-                       player-role-bar-height
+                       s:player-role-bar-height
                        c:label-blue)
-                 (rectangle tile-width player-role-bar-height
+                 (rectangle s:tile-width s:player-role-bar-height
                             'solid
                             (c:get-color (string-join
                                           (list player
