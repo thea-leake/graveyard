@@ -62,10 +62,8 @@
             role))
 
 (define/memo (hidden-tile-label coords)
-  (pict->bitmap
-   (overlay i:hidden-tile-text
-            (get-tile-mapping s:hidden
-                              coords))))
+  (get-tile-mapping s:hidden
+                    coords))
 
 (define/memo (empty-plot-label coords) ;; memoizing because of last
   (get-tile-mapping (last r:role-hierarchy)

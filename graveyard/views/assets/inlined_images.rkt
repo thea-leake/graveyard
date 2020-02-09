@@ -41,7 +41,8 @@
                               scale
                               image-width
                               text
-                              above)
+                              above
+                              overlay)
                      (only-in racket/list
                               cartesian-product
                               range)
@@ -57,15 +58,45 @@
   (define image-type-count
     (length image-type-list))
 
+  (define hidden-tile-text-compiled
+    (pict->bitmap
+     (above
+      (text (string-join (list
+                          "   Still buried     "
+                          " Click to raise! "
+                          "      @>-`-,-      "
+                          )
+                         "\n")
+            13
+            "LightSlateGray")
+      (text " ####-#### "
+            14
+            "LightSlateGray")
+      )))
+
+  (define (get-transform image-name)
+    (cond
+      ((regexp-match #rx"^empty"
+                     image-name)
+       (lambda (image)
+         (pict->bitmap
+          (overlay hidden-tile-text-compiled
+                   image))))
+      (else
+       (lambda (image)
+         image))))
+
   (define (transform-image image-name)
     (let* ([image-path (string-append (path->string
                                        (current-load-relative-directory))
                                     image-name)]
            [image (read-bitmap image-path)]
-           [img-size (image-width image)])
-      (pict->bitmap (scale (/ s:tile-width
-                 img-size)
-              image)))))
+           [img-size (image-width image)]
+           [type-transform (get-transform image-path)])
+      (pict->bitmap
+       (type-transform (scale (/ s:tile-width
+                               img-size)
+                            image))))))
 
 
 (define image-type-list
@@ -107,21 +138,7 @@
           "Goldenrod"))))
 
 (define hidden-tile-text
-  (compiled-bitmap
-   (pict->bitmap
-    (above
-     (text (string-join (list
-                         "   Still buried     "
-                         " Click to raise! "
-                         "      @>-`-,-      "
-                         )
-                        "\n")
-           13
-           "LightSlateGray")
-     (text " ####-#### "
-           14
-           "LightSlateGray")
-     ))))
+  (compiled-bitmap hidden-tile-text-compiled))
 
 (define selected-image
   (compiled-bitmap
