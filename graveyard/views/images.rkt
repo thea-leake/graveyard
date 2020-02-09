@@ -33,8 +33,6 @@
                   overlay/align
                   overlay
                   rectangle
-                  bitmap/file
-                  scale
                   image-width)
          (prefix-in b: "../models/board.rkt")
          (prefix-in g: "../models/graveyard.rkt")
@@ -113,9 +111,8 @@
                               coords))))
 
 (define/memo (empty-plot-label coords) ;; memoizing because of last
-  (pict->bitmap
-   (get-tile-mapping (last r:role-hierarchy)
-                     coords)))
+  (get-tile-mapping (last r:role-hierarchy)
+                    coords))
 
 
 (define (player-role-image role player)
@@ -131,16 +128,16 @@
                                           "")))))
 
 (define/memo (revealed-base-label role player coords)
-  (overlay/align 'center 'bottom
-                 (player-role-image role player)
-                 (get-tile-mapping role
-                                   coords)))
+  (pict->bitmap
+   (overlay/align 'center 'bottom
+                  (player-role-image role player)
+                  (get-tile-mapping role
+                                    coords))))
 
 (define/memo (revealed-label role player coords)
-  (pict->bitmap
-   (revealed-base-label role
-                        player
-                        coords)))
+  (revealed-base-label role
+                       player
+                       coords))
 
 (define/memo (selected-label role player coords)
   (pict->bitmap
