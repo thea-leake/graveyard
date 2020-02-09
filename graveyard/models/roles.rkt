@@ -94,7 +94,7 @@
          (make-list 5 pawn)
          (make-list 2 cannon))))
 
-(define (mkpiece player role)
+(define/memo (mkpiece player role)
   (cell player     ;; player
         #f         ;; revealed
         role       ;;
