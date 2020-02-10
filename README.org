@@ -3,11 +3,10 @@
 #+CAPTION: Screenshot of Graveyard
 [[./screenshots/screenshot.png]]
 
-
+-------------
 
 [[https://travis-ci.org/thea-leake/graveyard.svg?branch=master]]
 
--------------
 ** About Graveyard
 
 Graveyard is a Halloween take on the game [[https://en.wikipedia.org/wiki/Banqi][Banqi]] - or dark (or blind, or half) chess.
