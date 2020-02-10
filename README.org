@@ -3,7 +3,14 @@
 #+CAPTION: Screenshot of Graveyard
 [[./screenshots/screenshot.png]]
 
-This is a Halloween take on the game [[https://en.wikipedia.org/wiki/Banqi][Banqi]] - or dark (or blind, or half) chess.
+
+
+[[https://travis-ci.org/thea-leake/graveyard.svg?branch=master]]
+
+-------------
+** About Graveyard
+
+Graveyard is a Halloween take on the game [[https://en.wikipedia.org/wiki/Banqi][Banqi]] - or dark (or blind, or half) chess.
 
 The point of the game is to be the last player that can make a valid move (including flipping pieces up).
 This can be done by either:
