@@ -1,6 +1,6 @@
 dist: bionic
 before_install:
-  - sudo apt-get -y install racket
+  - sudo apt-get -y install racket racket-doc
 
 install:
  - make deps
