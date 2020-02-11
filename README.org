@@ -5,7 +5,7 @@
 
 -------------
 
-[[https://travis-ci.org/thea-leake/graveyard.svg?branch=master]]
+[[https://travis-ci.org/thea-leake/graveyard][https://travis-ci.org/thea-leake/graveyard.svg?branch=master]]
 
 ** About Graveyard
 
