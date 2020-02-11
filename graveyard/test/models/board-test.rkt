@@ -27,24 +27,26 @@
 (define player2 (cdr r:players))
 
 
-;; Test gen-board - check tests working
 (define test-board (b:gen-board))
 
 (define gen-board-tests
-  (test-suite "Test board generation"
-              ;; board created w/ 32 r:cells
-              (check-equal? (length test-board)
-                            32)
-              ;; all r:cells start out hidden
-              (check-equal? (length (filter (lambda (x)
-                                             (r:cell-revealed? x))
-                                            test-board))
-                            0)
-              ;; player count split in half
-              (check-equal? (length (filter (lambda (x)
-                                              (eq? (r:cell-player x)
-                                                   player1))
-                                            test-board))
-                            16)))
+  (test-suite
+   "Test board generation"
+   (let ([board-length (length test-board)]
+         [revealed-piece-count (length
+                                (filter (lambda (x)
+                                          (r:cell-revealed? x))
+                                        test-board))]
+         [player1-piece-count (length
+                               (filter (lambda (x)
+                                         (eq? (r:cell-player x)
+                                              player1))
+                                       test-board))])
+     (check-equal? board-length
+                  32)
+     (check-equal? revealed-piece-count
+                  0)
+     (check-equal? player1-piece-count
+                  16))))
 
 (run-tests gen-board-tests)
