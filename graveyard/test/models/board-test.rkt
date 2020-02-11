@@ -42,11 +42,39 @@
                                          (eq? (r:cell-player x)
                                               player1))
                                        test-board))])
-     (check-equal? board-length
+     (check-eq? board-length
                   32)
-     (check-equal? revealed-piece-count
+     (check-eq? revealed-piece-count
                   0)
-     (check-equal? player1-piece-count
+     (check-eq? player1-piece-count
                   16))))
 
 (run-tests gen-board-tests)
+
+(define board-location-tests
+  (test-suite
+   "Test board location functions"
+
+   (test-case
+     "Test get-index-from-coordinates"
+     (let ([top-left (b:position 0 0)]
+           [bottom-right (b:position 7 3)])
+      (check-eq? (b:get-index-from-coordinates top-left)
+                 0)
+      (check-eq? (b:get-index-from-coordinates bottom-right)
+                 31)))
+
+   (test-case
+     "Test get-coords-from-index"
+     (let ([top-left-index 0]
+           [bottom-right-index 31])
+       (check-equal? (b:get-coords-from-index top-left-index)
+                     (b:position 0 0))
+       (check-equal? (b:get-coords-from-index bottom-right-index)
+                     (b:position 7 3))
+       (test-case
+         "Verify coords returned are same instance"
+         (check-eq? (b:get-coords-from-index bottom-right-index)
+                    (b:get-coords-from-index bottom-right-index)))))))
+
+(run-tests board-location-tests)
