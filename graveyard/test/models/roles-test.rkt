@@ -28,49 +28,66 @@
 
 (define role-hierarchy-value-tests
   (test-suite "Test getting role hierarchy"
-              (check-equal? (r:hierarchy-value r:leader)
+              (check-eq? (r:hierarchy-value r:leader)
                             0)
-              (check-equal? (r:hierarchy-value r:pawn)
+              (check-eq? (r:hierarchy-value r:pawn)
                             6)))
 
 (run-tests role-hierarchy-value-tests)
 
 
 (define player-roles-tests
-  (test-suite "Test player role list generation"
-              (check-equal? (length (r:player-roles player1))
-                            16)
-              (check-equal? (length (filter (lambda (x)
-                                              (eq? player1 (r:cell-player x)))
-                                            (r:player-roles player1)))
-                            16)
-              (check-equal? (length (filter r:cell-revealed?
-                                            (r:player-roles player1)))
-                            0)
-              (check-equal? (length (filter r:cell-empty?
-                                            (r:player-roles player1)))
-                            0)
-              (check-equal? (length (filter (lambda (x)
-                                              (eq? r:leader (r:cell-role x)))
-                                            (r:player-roles player1)))
-                            1)
-              (check-equal? (length (filter (lambda (x)
-                                              (eq? r:cannon (r:cell-role x)))
-                                            (r:player-roles player1)))
-                            2)
-              (check-equal? (length (filter (lambda (x)
-                                              (eq? r:pawn (r:cell-role x)))
-                                            (r:player-roles player1)))
-                            5)))
+  (test-suite
+   "Test player role list generation"
+   (let* ([role-list (r:player-roles player1)]
+          [piece-count (length role-list)]
+          [player-piece-count (length
+                               (filter (lambda (x)
+                                         (eq? player1
+                                              (r:cell-player x)))
+                                       role-list))]
+          [piece-revealed-count (length
+                                 (filter r:cell-revealed?
+                                         role-list))]
+          [empty-cell-count (length (filter r:cell-empty?
+                                            role-list))]
+          [leader-count (length
+                         (filter (lambda (x)
+                                   (eq? r:leader (r:cell-role x)))
+                                 role-list))]
+          [cannon-count (length (filter (lambda (x)
+                                          (eq? r:cannon (r:cell-role x)))
+                                        role-list))])
+     (check-eq? piece-count
+                16)
+     (check-eq? player-piece-count
+                16)
+     (check-eq? piece-revealed-count
+                0)
+     (check-eq? empty-cell-count
+                0)
+     (check-eq? leader-count
+                1)
+     (check-eq? cannon-count
+                2)
+     (test-case "Ensure identical pieces using same id"
+       (let*([is-pawn? (lambda (x) (eq? r:pawn (r:cell-role x)))]
+             [first-pawn (findf is-pawn? role-list)]
+             [pawns-same-id (length
+                             (filter (lambda (x)
+                                       (eq? first-pawn x))
+                                     role-list))])
+         (check-eq? pawns-same-id
+                   5))))))
 
 (run-tests player-roles-tests)
 
 
 (define toggle-player-tests
   (test-suite "Test toggle player"
-              (check-equal? (r:toggle-player player1)
+              (check-eq? (r:toggle-player player1)
                             player2)
-              (check-equal? (r:toggle-player player2)
+              (check-eq? (r:toggle-player player2)
                             player1)))
 
 (run-tests toggle-player-tests)
