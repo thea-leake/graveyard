@@ -20,8 +20,7 @@
                   take)
          "../../utils.rkt"
          (prefix-in r: "../../models/roles.rkt")
-         (prefix-in b: "../../models/board.rkt")
-         )
+         (prefix-in b: "../../models/board.rkt"))
 
 (define player1 (car r:players))
 (define player2 (cdr r:players))
@@ -75,6 +74,19 @@
        (test-case
          "Verify coords returned are same instance"
          (check-eq? (b:get-coords-from-index bottom-right-index)
-                    (b:get-coords-from-index bottom-right-index)))))))
+                    (b:get-coords-from-index bottom-right-index)))))
+
+   (test-case
+     "Test coords-out-of-range"
+     (let ([top-left (b:position 0 0)]
+           [bottom-right (b:position 7 3)]
+           [off-map-examples (list
+                              (b:position 7 4)
+                              (b:position -1 -3))])
+       (check-false (b:coords-out-of-range? top-left))
+       (check-false (b:coords-out-of-range? bottom-right))
+       (map check-true
+            (map b:coords-out-of-range?
+                    off-map-examples))))))
 
 (run-tests board-location-tests)
