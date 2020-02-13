@@ -41,6 +41,7 @@
                               scale
                               image-width
                               text
+                              text/font
                               above
                               overlay)
                      (only-in racket/list
@@ -132,9 +133,14 @@
 (define welcome-bitmap
   (compiled-bitmap
    (pict->bitmap
-    (text "Welcome to Queen of the Graveyard!"
-          27
-          "Goldenrod"))))
+    (text/font "Welcome to Queen of the Graveyard!"
+               27
+               "Goldenrod"
+               "Herculanum"
+               'decorative
+               'normal
+               'normal
+               #f))))
 
 (define hidden-tile-text
   (compiled-bitmap hidden-tile-text-compiled))
