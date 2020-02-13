@@ -22,7 +22,8 @@
          purple-transparent
          orange-transparent
          label-blue
-         get-color)
+         get-color
+         electric-ultramarine)
 
 (require (only-in racket/draw
                   make-color)
@@ -35,6 +36,9 @@
 
 (define dark-purple-taup
   (make-color 75 65 79))
+
+(define electric-ultramarine
+  (make-color 85 0 255))
 
 (define orange
   (color 227 112 0))

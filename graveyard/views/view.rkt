@@ -74,7 +74,7 @@
                                   (quotient (send i:welcome-bitmap get-width) 2))
                                0))]))
 
-(send welcome-message set-canvas-background c:dark-purple-taup)
+(send welcome-message set-canvas-background c:electric-ultramarine)
 
 (define player-display-table
   (new table-panel%
