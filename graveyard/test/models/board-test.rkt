@@ -91,3 +91,27 @@
                     off-map-examples))))))
 
 (run-tests board-location-tests)
+
+(define (coord-sort c1 c2)
+  (> (b:get-index-from-coordinates c2)
+      (b:get-index-from-coordinates c1)))
+
+(define coords-row-column-test
+  (test-suite "Test getting all coordinates in row and column of location"
+              (check-equal? (sort (b:coords-row-columns (b:position 2 1))
+                                  coord-sort)
+                            (sort (list
+                                   (b:position 2 0)
+                                   (b:position 0 1)
+                                   (b:position 1 1)
+                                   (b:position 2 1)
+                                   (b:position 3 1)
+                                   (b:position 4 1)
+                                   (b:position 6 1)
+                                   (b:position 5 1)
+                                   (b:position 7 1)
+                                   (b:position 2 2)
+                                   (b:position 2 3))
+                                  coord-sort))))
+
+(run-tests coords-row-column-test)
