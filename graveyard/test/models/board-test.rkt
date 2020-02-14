@@ -82,10 +82,11 @@
            [bottom-right (b:position 7 3)]
            [off-map-examples (list
                               (b:position 7 4)
-                              (b:position -1 -3))])
+                              (b:position -1 -3)
+                              (b:position 9 2))])
        (check-false (b:coords-out-of-range? top-left))
        (check-false (b:coords-out-of-range? bottom-right))
-       (map check-true
+       (for-each check-true
             (map b:coords-out-of-range?
                     off-map-examples))))))
 

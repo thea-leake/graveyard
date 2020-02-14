@@ -69,7 +69,9 @@
        (> location-count index)))
 
 (define/memo (coords-in-range? coords)
-  (index-in-range? (get-index-from-coordinates coords)))
+  (and (index-in-range? (get-index-from-coordinates coords))
+       (< (position-column coords) board-columns)
+       (< (position-row coords) board-rows)))
 
 
 (define/memo (coords-out-of-range? coords)
