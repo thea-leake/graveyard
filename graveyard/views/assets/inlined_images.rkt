@@ -136,7 +136,7 @@
     (text/font "Welcome to Queen of the Graveyard!"
                27
                "Goldenrod"
-               "Herculanum"
+               "Courier"
                'decorative
                'normal
                'normal
