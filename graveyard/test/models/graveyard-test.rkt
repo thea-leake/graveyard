@@ -39,11 +39,18 @@
           r:leader
           #f))
 
+(define player1-wraith
+  (r:cell player1
+          #t
+          r:cannon
+          #f))
+
 (define player2-vampire
   (r:cell player2
           #t
           r:advisor
           #f))
+
 
 
 ;; Unsafe-move? tests
@@ -54,6 +61,7 @@
          r:empty-location  r:empty-location   player1-zombie  player1-zombie  player2-vampire   r:empty-location  r:empty-location  r:empty-location
          r:empty-location  r:empty-location  r:empty-location player1-zombie r:empty-location   r:empty-location  r:empty-location  r:empty-location
          r:empty-location  r:empty-location r:empty-location r:empty-location r:empty-location  r:empty-location  r:empty-location  r:empty-location))
+
 (define game-state-safe-capture
   (g:turn move-with-safe-capture
         player2
@@ -66,10 +74,23 @@
          r:empty-location  r:empty-location  r:empty-location player1-zombie r:empty-location   r:empty-location  r:empty-location  r:empty-location
          r:empty-location  r:empty-location r:empty-location r:empty-location r:empty-location  r:empty-location  r:empty-location  r:empty-location))
 
+
+
 (define game-state-unsafe-capture
   (g:turn move-with-unsafe-capture
         player2
         "" #f #f #f #f))
+
+(define move-with-unsafe-capture-by-cannon
+  (list  r:empty-location  r:empty-location  r:empty-location player1-zombie r:empty-location   r:empty-location  r:empty-location  r:empty-location
+         r:empty-location  player1-wraith   player1-zombie   player1-zombie  player2-vampire   r:empty-location  r:empty-location  r:empty-location
+         r:empty-location  r:empty-location  r:empty-location player1-zombie r:empty-location   r:empty-location  r:empty-location  r:empty-location
+         r:empty-location  r:empty-location r:empty-location r:empty-location r:empty-location  r:empty-location  r:empty-location  r:empty-location))
+
+(define game-state-unsafe-capture-by-cannon
+  (g:turn move-with-unsafe-capture-by-cannon
+          player2
+          "" #f #f #f #f))
 
 ;; this allows us to get the memoized coordinates obj - as we're using eq? for lightweight comparisons
 (define src-position
@@ -78,18 +99,24 @@
 (define dest-position
   (b:get-coords-from-index 11)) ;; 3, 1
 
-(define opponent-greater-position
+(define opponent-lich-position
   (b:get-coords-from-index 10)) ; 2, 1
+
+(define opponent-cannon-position
+  (b:get-coords-from-index 9)) ; 2, 1
 
 (define unsafe-move?-tests
   (test-suite "Tests checking whether moves are safe or not"
-              (check-equal? (g:unsafe-move? game-state-safe-capture
+              (check-false (g:unsafe-move? game-state-safe-capture
                                           src-position
-                                          dest-position)
-                            #f)
+                                          dest-position))
               (check-equal? (g:unsafe-move? game-state-unsafe-capture
                                           src-position
                                           dest-position)
-                            (list opponent-greater-position))))
+                            (list opponent-lich-position))
+              (check-equal? (g:unsafe-move? game-state-unsafe-capture-by-cannon
+                                            src-position
+                                            dest-position)
+                            (list opponent-cannon-position))))
 
 (run-tests unsafe-move?-tests)
