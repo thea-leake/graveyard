@@ -408,7 +408,8 @@
                     [board (move-piece-clobber (turn-src-coords response)
                                                dest-coords
                                                (turn-board response))]
-                    [captured piece-at-dest]))
+                    [captured piece-at-dest]
+                    [src-coords #f]))
       (else
        (struct-copy turn response
                     [captured r:empty-location])))))
