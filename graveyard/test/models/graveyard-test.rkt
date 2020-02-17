@@ -143,16 +143,19 @@
          [opponent-cannon-position ;; 2, 1
           (b:get-coords-from-index 9)])
 
-    (check-false (g:unsafe-move? game-state-safe-capture
-                                 src-position
-                                 dest-position))
-    (check-equal? (g:unsafe-move? game-state-unsafe-capture
+    (test-case "A piece can capture an opponent piece and the opponent CANNOT capture it next turn"
+      (check-false (g:unsafe-move? game-state-safe-capture
                                   src-position
-                                  dest-position)
-                  (list opponent-lich-position))
-    (check-equal? (g:unsafe-move? game-state-unsafe-capture-by-cannon
-                                  src-position
-                                  dest-position)
-                  (list opponent-cannon-position))))
+                                  dest-position)))
+    (test-case "A piece can capture an opponent piece and the opponent CAN capture it next turn"
+      (check-equal? (g:unsafe-move? game-state-unsafe-capture
+                                   src-position
+                                   dest-position)
+                   (list opponent-lich-position)))
+    (test-case "A piece can capture an opponent piece and the opponent cannon CAN capture it next turn"
+      (check-equal? (g:unsafe-move? game-state-unsafe-capture-by-cannon
+                                   src-position
+                                   dest-position)
+                   (list opponent-cannon-position)))))
 
 (run-tests unsafe-move?-tests)
