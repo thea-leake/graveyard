@@ -51,11 +51,6 @@
    empty?)
   #:transparent)
 
-(define board-rows 4)
-(define board-columns 8)
-(define location-count (* board-columns
-                          board-rows))
-
 
 (define players
   (cons "Orange" "Purple"))
