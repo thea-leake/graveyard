@@ -54,17 +54,19 @@
 
 
 (define-test-suite player-move-tests
-  "Test player-move"
+  "Test player-move moves piece when a move is valid"
   (let* ([move-to-empty-location
-          (list r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location
-                r:empty-location r:empty-location   player1-zombie r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location
-                r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location
-                r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location)]
+          (list
+           r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location
+           r:empty-location r:empty-location   player1-zombie r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location
+           r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location
+           r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location)]
          [moved-to-empty-location
-          (list r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location
-                r:empty-location r:empty-location r:empty-location  player1-zombie  r:empty-location r:empty-location r:empty-location r:empty-location
-                r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location
-                r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location)]
+          (list
+           r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location
+           r:empty-location r:empty-location r:empty-location  player1-zombie  r:empty-location r:empty-location r:empty-location r:empty-location
+           r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location
+           r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location)]
          [move-selected-coords (b:get-coords-from-index 10)] ;; for memoized obj
          [move-dest-coords (b:get-coords-from-index 11)] ;; for memoized obj
          [before-move-to-empty-location-state
@@ -82,18 +84,45 @@
                   #f
                   r:empty-location
                   #f
-                  #t)])
+                  #t)]
+         [move-to-same-player-occupied-location
+          (list
+           r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location
+           r:empty-location r:empty-location   player1-zombie player1-lich     r:empty-location r:empty-location r:empty-location r:empty-location
+           r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location
+           r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location)]
 
-    (test-case "Player moving into empty adjacent location"
+         [before-move-to-same-player-occupied-location-state
+          (g:turn move-to-same-player-occupied-location
+                  player1
+                  ""
+                  #f
+                  #f
+                  move-selected-coords
+                  #t)]
+         [after-move-to-same-player-occupied-location-state
+          (g:turn move-to-same-player-occupied-location
+                  player1
+                  "Cannot capture your own piece"
+                  #f
+                  r:empty-location
+                  move-selected-coords
+                  #f)])
+
+    (test-case "A piece CAN move to an empty adjacent location"
       (check-equal? (g:player-move before-move-to-empty-location-state
                                    move-dest-coords)
-                    after-move-to-empty-location-state))))
+                    after-move-to-empty-location-state))
+    (test-case "A piece CANNOT move into a location already occupied by the same player."
+      (check-equal? (g:player-move before-move-to-same-player-occupied-location-state
+                                   move-dest-coords)
+                    after-move-to-same-player-occupied-location-state))))
 
 (run-tests player-move-tests)
 
 
 (define-test-suite unsafe-move?-tests
-  "Tests checking whether moves are safe or not"
+  "Test potential move gets list of pieces that can capture it, or false if none"
   (let* ([move-with-safe-capture
           (list
            r:empty-location r:empty-location r:empty-location player1-zombie  r:empty-location  r:empty-location r:empty-location r:empty-location
