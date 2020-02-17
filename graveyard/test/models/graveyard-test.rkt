@@ -91,70 +91,68 @@
 
 (run-tests player-move-tests)
 
-;; Unsafe-move? tests
 
+(define-test-suite unsafe-move?-tests
+  "Tests checking whether moves are safe or not"
+  (let* ([move-with-safe-capture
+          (list
+           r:empty-location r:empty-location r:empty-location player1-zombie  r:empty-location  r:empty-location r:empty-location r:empty-location
+           r:empty-location r:empty-location  player1-zombie  player1-zombie   player2-vampire  r:empty-location r:empty-location r:empty-location
+           r:empty-location r:empty-location r:empty-location player1-zombie  r:empty-location  r:empty-location r:empty-location r:empty-location
+           r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location)]
 
-(define move-with-safe-capture
-  (list  r:empty-location  r:empty-location  r:empty-location player1-zombie r:empty-location   r:empty-location  r:empty-location  r:empty-location
-         r:empty-location  r:empty-location   player1-zombie  player1-zombie  player2-vampire   r:empty-location  r:empty-location  r:empty-location
-         r:empty-location  r:empty-location  r:empty-location player1-zombie r:empty-location   r:empty-location  r:empty-location  r:empty-location
-         r:empty-location  r:empty-location r:empty-location r:empty-location r:empty-location  r:empty-location  r:empty-location  r:empty-location))
+         [game-state-safe-capture
+          (g:turn move-with-safe-capture
+                  player2
+                  "" #f #f #f #f)]
 
-(define game-state-safe-capture
-  (g:turn move-with-safe-capture
-        player2
-        "" #f #f #f #f))
+         [move-with-unsafe-capture
+          (list
+           r:empty-location r:empty-location r:empty-location player1-zombie   r:empty-location r:empty-location r:empty-location r:empty-location
+           r:empty-location r:empty-location  player1-lich    player1-zombie   player2-vampire  r:empty-location r:empty-location r:empty-location
+           r:empty-location r:empty-location r:empty-location player1-zombie   r:empty-location r:empty-location r:empty-location r:empty-location
+           r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location)]
 
+         [game-state-unsafe-capture
+          (g:turn move-with-unsafe-capture
+                  player2
+                  "" #f #f #f #f)]
 
-(define move-with-unsafe-capture
-  (list  r:empty-location  r:empty-location  r:empty-location player1-zombie r:empty-location   r:empty-location  r:empty-location  r:empty-location
-         r:empty-location  r:empty-location   player1-lich    player1-zombie  player2-vampire   r:empty-location  r:empty-location  r:empty-location
-         r:empty-location  r:empty-location  r:empty-location player1-zombie r:empty-location   r:empty-location  r:empty-location  r:empty-location
-         r:empty-location  r:empty-location r:empty-location r:empty-location r:empty-location  r:empty-location  r:empty-location  r:empty-location))
+         [move-with-unsafe-capture-by-cannon
+          (list
+           r:empty-location r:empty-location r:empty-location player1-zombie   r:empty-location r:empty-location r:empty-location r:empty-location
+           r:empty-location player1-wraith   player1-zombie   player1-zombie   player2-vampire  r:empty-location r:empty-location r:empty-location
+           r:empty-location r:empty-location r:empty-location player1-zombie   r:empty-location r:empty-location r:empty-location r:empty-location
+           r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location)]
 
+         [game-state-unsafe-capture-by-cannon
+          (g:turn move-with-unsafe-capture-by-cannon
+                  player2
+                  "" #f #f #f #f)]
 
+         ;; this allows us to get the memoized coordinates obj - as we're using eq? for lightweight comparisons
+         [src-position             ;; 4, 1
+          (b:get-coords-from-index 12)]
 
-(define game-state-unsafe-capture
-  (g:turn move-with-unsafe-capture
-        player2
-        "" #f #f #f #f))
+         [dest-position            ;; 3, 1
+          (b:get-coords-from-index 11)]
 
-(define move-with-unsafe-capture-by-cannon
-  (list  r:empty-location  r:empty-location  r:empty-location player1-zombie r:empty-location   r:empty-location  r:empty-location  r:empty-location
-         r:empty-location  player1-wraith   player1-zombie   player1-zombie  player2-vampire   r:empty-location  r:empty-location  r:empty-location
-         r:empty-location  r:empty-location  r:empty-location player1-zombie r:empty-location   r:empty-location  r:empty-location  r:empty-location
-         r:empty-location  r:empty-location r:empty-location r:empty-location r:empty-location  r:empty-location  r:empty-location  r:empty-location))
+         [opponent-lich-position   ;; 2, 1
+          (b:get-coords-from-index 10)]
 
-(define game-state-unsafe-capture-by-cannon
-  (g:turn move-with-unsafe-capture-by-cannon
-          player2
-          "" #f #f #f #f))
+         [opponent-cannon-position ;; 2, 1
+          (b:get-coords-from-index 9)])
 
-;; this allows us to get the memoized coordinates obj - as we're using eq? for lightweight comparisons
-(define src-position
-  (b:get-coords-from-index 12)) ;; 4, 1
-
-(define dest-position
-  (b:get-coords-from-index 11)) ;; 3, 1
-
-(define opponent-lich-position
-  (b:get-coords-from-index 10)) ; 2, 1
-
-(define opponent-cannon-position
-  (b:get-coords-from-index 9)) ; 2, 1
-
-(define unsafe-move?-tests
-  (test-suite "Tests checking whether moves are safe or not"
-              (check-false (g:unsafe-move? game-state-safe-capture
-                                          src-position
-                                          dest-position))
-              (check-equal? (g:unsafe-move? game-state-unsafe-capture
-                                          src-position
-                                          dest-position)
-                            (list opponent-lich-position))
-              (check-equal? (g:unsafe-move? game-state-unsafe-capture-by-cannon
-                                            src-position
-                                            dest-position)
-                            (list opponent-cannon-position))))
+    (check-false (g:unsafe-move? game-state-safe-capture
+                                 src-position
+                                 dest-position))
+    (check-equal? (g:unsafe-move? game-state-unsafe-capture
+                                  src-position
+                                  dest-position)
+                  (list opponent-lich-position))
+    (check-equal? (g:unsafe-move? game-state-unsafe-capture-by-cannon
+                                  src-position
+                                  dest-position)
+                  (list opponent-cannon-position))))
 
 (run-tests unsafe-move?-tests)
