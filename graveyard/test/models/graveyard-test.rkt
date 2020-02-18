@@ -229,6 +229,44 @@
 
 (run-tests test-coords-selected?)
 
+
+(define-test-suite test-gen-init-turn
+  "Generates a turn struct with state for a game start"
+  (let* ([init-turn (g:gen-init-turn "CAAATS")]
+
+         [compare-board (lambda ()
+                          (equal? (g:turn-board init-turn)
+                                  (g:gen-init-turn "a message")))])
+
+    (test-case "a different board is generated on different invocations"
+      (check-false (and (compare-board)   ;; using and to check again on the chance a duplicate board randomly created
+                        (compare-board))))
+
+    (test-case "player set to undecided"
+      (check-equal? (g:turn-player init-turn)
+                    "Undecided"))
+
+    (test-case "first turn is set to true"
+      (check-true (g:turn-first? init-turn)))
+
+    (test-case "init turn has the message passed to gen-init-turn"
+      (check-equal? (g:turn-message init-turn)
+                    "CAAATS"))
+
+    (test-case "captured piece is set to none-role"
+      (check-eq? (g:turn-captured init-turn)
+                 r:none-role))
+
+    (test-case "selected position is set to none-position"
+      (check-eq? (g:turn-src-coords init-turn)
+                 b:none-position))
+
+    (test-case "valid move set to false -- no moves as of yet"
+      (check-false (g:turn-valid? init-turn)))))
+
+(run-tests test-gen-init-turn)
+
+
 (define-test-suite player-move-tests
   "Test player-move moves piece when a move is valid"
   (let* ([move-to-none-role
