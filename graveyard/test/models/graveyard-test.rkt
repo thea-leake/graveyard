@@ -91,6 +91,32 @@
 
 (run-tests test-location-hidden?)
 
+
+(define-test-suite test-role-at-location
+  "Gets the role at a location"
+  (let* ([board
+          (list
+           r:none-role r:none-role  r:none-role   r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role player1-zombie r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role  r:none-role   r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role  r:none-role   r:none-role r:none-role r:none-role r:none-role r:none-role)]
+
+         [coords-of-piece (b:get-coords-from-index 10)]
+
+         [empty-coords (b:get-coords-from-index 11)])
+
+    (test-case "Gets the 'Zombie' role of a zombie on the board"
+      (check-equal? (g:role-at-location coords-of-piece
+                                        board)
+                    "Zombie"))
+
+    (test-case "Gets the 'Empty' role of an empty location on the board"
+      (check-equal? (g:role-at-location empty-coords
+                                        board)
+                    "Empty"))))
+
+(run-tests test-role-at-location)
+
 (define-test-suite test-player-flip-location
   "Tests Flipping piece from hidden to visible"
   (let* ([-hidden-role- player1-zombie-hidden]
