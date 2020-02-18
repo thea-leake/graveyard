@@ -33,6 +33,12 @@
           r:elephant
           #f))
 
+(define player1-zombie-hidden
+  (r:cell player1
+          #f
+          r:elephant
+          #f))
+
 (define player1-lich
   (r:cell player1
           #t
@@ -51,6 +57,50 @@
           r:advisor
           #f))
 
+
+(define-test-suite test-player-flip-location
+  "Tests Flipping piece from hidden to visible"
+  (let* ([-hidden-role- player1-zombie-hidden]
+         [piece-hidden-board
+          (list
+           r:none-role r:none-role  r:none-role  r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role -hidden-role- r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role  r:none-role  r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role  r:none-role  r:none-role r:none-role r:none-role r:none-role r:none-role)]
+
+         [piece-revealed-board
+          (list
+           r:none-role r:none-role  r:none-role   r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role player1-zombie r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role  r:none-role   r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role  r:none-role   r:none-role r:none-role r:none-role r:none-role r:none-role)]
+
+         [coords-to-flip (b:get-coords-from-index 10)]
+
+         [before-flip
+          (g:turn piece-hidden-board
+                  player1
+                  "some message"
+                  #f
+                  r:none-role
+                  b:none-position
+                  #t)]
+
+         [after-flip
+          (g:turn piece-revealed-board
+                  player2
+                  "Zombie"
+                  #f
+                  r:none-role
+                  b:none-position
+                  #t)])
+
+    (test-case "Flipping a hidden piece reveals that piece and toggles the player"
+      (check-equal? (g:player-flip-location before-flip
+                                            coords-to-flip)
+                    after-flip))))
+
+(run-tests test-player-flip-location)
 
 (define-test-suite test-coords-selected?
   "Test Whether coords have been selected by a player"
