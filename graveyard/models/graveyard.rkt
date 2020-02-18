@@ -147,7 +147,7 @@
 
 (define (empty-coordinates coord board) ;; updates location to empty
   (update-coordinates coord
-                      r:empty-location
+                      r:none-role
                       board))
 
 
@@ -412,4 +412,4 @@
                     [src-coords #f]))
       (else
        (struct-copy turn response
-                    [captured r:empty-location])))))
+                    [captured r:none-role])))))

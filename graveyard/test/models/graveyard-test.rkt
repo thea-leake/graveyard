@@ -55,42 +55,45 @@
 
 (define-test-suite player-move-tests
   "Test player-move moves piece when a move is valid"
-  (let* ([move-to-empty-location
+  (let* ([move-to-none-role
           (list
-           r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location
-           r:empty-location r:empty-location   player1-zombie r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location
-           r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location
-           r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location)]
-         [moved-to-empty-location
+           r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role   player1-zombie r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role)]
+         [moved-to-none-role
           (list
-           r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location
-           r:empty-location r:empty-location r:empty-location  player1-zombie  r:empty-location r:empty-location r:empty-location r:empty-location
-           r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location
-           r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location)]
+           r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role r:none-role  player1-zombie  r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role)]
+
          [move-selected-coords (b:get-coords-from-index 10)] ;; for memoized obj
+
          [move-dest-coords (b:get-coords-from-index 11)] ;; for memoized obj
-         [before-move-to-empty-location-state
-          (g:turn move-to-empty-location
+
+         [before-move-to-none-role-state
+          (g:turn move-to-none-role
                   player1
                   ""
                   #f
                   #f
                   move-selected-coords
                   #t)]
-         [after-move-to-empty-location-state
-          (g:turn moved-to-empty-location
+         [after-move-to-none-role-state
+          (g:turn moved-to-none-role
                   player2
                   "Valid move."
                   #f
-                  r:empty-location
+                  r:none-role
                   #f
                   #t)]
          [move-to-same-player-occupied-location
           (list
-           r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location
-           r:empty-location r:empty-location   player1-zombie player1-lich     r:empty-location r:empty-location r:empty-location r:empty-location
-           r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location
-           r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location)]
+           r:none-role r:none-role r:none-role    r:none-role  r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role player1-zombie player1-lich r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role r:none-role    r:none-role  r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role r:none-role    r:none-role  r:none-role r:none-role r:none-role r:none-role)]
 
          [before-move-to-same-player-occupied-location-state
           (g:turn move-to-same-player-occupied-location
@@ -105,14 +108,14 @@
                   player1
                   "Cannot capture your own piece"
                   #f
-                  r:empty-location
+                  r:none-role
                   move-selected-coords
                   #f)])
 
     (test-case "A piece CAN move to an empty adjacent location"
-      (check-equal? (g:player-move before-move-to-empty-location-state
+      (check-equal? (g:player-move before-move-to-none-role-state
                                    move-dest-coords)
-                    after-move-to-empty-location-state))
+                    after-move-to-none-role-state))
     (test-case "A piece CANNOT move into a location already occupied by the same player."
       (check-equal? (g:player-move before-move-to-same-player-occupied-location-state
                                    move-dest-coords)
@@ -125,10 +128,10 @@
   "Test potential move gets list of pieces that can capture it, or false if none"
   (let* ([move-with-safe-capture
           (list
-           r:empty-location r:empty-location r:empty-location player1-zombie  r:empty-location  r:empty-location r:empty-location r:empty-location
-           r:empty-location r:empty-location  player1-zombie  player1-zombie   player2-vampire  r:empty-location r:empty-location r:empty-location
-           r:empty-location r:empty-location r:empty-location player1-zombie  r:empty-location  r:empty-location r:empty-location r:empty-location
-           r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location)]
+           r:none-role r:none-role r:none-role    player1-zombie r:none-role     r:none-role r:none-role r:none-role
+           r:none-role r:none-role player1-zombie player1-zombie player2-vampire r:none-role r:none-role r:none-role
+           r:none-role r:none-role r:none-role    player1-zombie r:none-role     r:none-role r:none-role r:none-role
+           r:none-role r:none-role r:none-role    r:none-role    r:none-role     r:none-role r:none-role r:none-role)]
 
          [game-state-safe-capture
           (g:turn move-with-safe-capture
@@ -137,10 +140,10 @@
 
          [move-with-unsafe-capture
           (list
-           r:empty-location r:empty-location r:empty-location player1-zombie   r:empty-location r:empty-location r:empty-location r:empty-location
-           r:empty-location r:empty-location  player1-lich    player1-zombie   player2-vampire  r:empty-location r:empty-location r:empty-location
-           r:empty-location r:empty-location r:empty-location player1-zombie   r:empty-location r:empty-location r:empty-location r:empty-location
-           r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location)]
+           r:none-role r:none-role r:none-role  player1-zombie r:none-role     r:none-role     r:none-role r:none-role
+           r:none-role r:none-role player1-lich player1-zombie player2-vampire r:none-role     r:none-role r:none-role
+           r:none-role r:none-role r:none-role  player1-zombie r:none-role     r:none-role     r:none-role r:none-role
+           r:none-role r:none-role r:none-role  r:none-role    r:none-role     r:none-role     r:none-role r:none-role)]
 
          [game-state-unsafe-capture
           (g:turn move-with-unsafe-capture
@@ -149,10 +152,10 @@
 
          [move-with-unsafe-capture-by-cannon
           (list
-           r:empty-location r:empty-location r:empty-location player1-zombie   r:empty-location r:empty-location r:empty-location r:empty-location
-           r:empty-location player1-wraith   player1-zombie   player1-zombie   player2-vampire  r:empty-location r:empty-location r:empty-location
-           r:empty-location r:empty-location r:empty-location player1-zombie   r:empty-location r:empty-location r:empty-location r:empty-location
-           r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location r:empty-location)]
+           r:none-role r:none-role    r:none-role    player1-zombie   r:none-role     r:none-role r:none-role r:none-role
+           r:none-role player1-wraith player1-zombie player1-zombie   player2-vampire r:none-role r:none-role r:none-role
+           r:none-role r:none-role    r:none-role    player1-zombie   r:none-role     r:none-role r:none-role r:none-role
+           r:none-role r:none-role    r:none-role    r:none-role      r:none-role     r:none-role r:none-role r:none-role)]
 
          [game-state-unsafe-capture-by-cannon
           (g:turn move-with-unsafe-capture-by-cannon

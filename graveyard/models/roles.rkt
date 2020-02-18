@@ -33,7 +33,7 @@
          cannon
          pawn
          empty-role
-         empty-location
+         none-role
          players
          player-roles
          toggle-player
@@ -102,7 +102,7 @@
          role       ;;
          #f)))       ;; empty
 
-(define empty-location
+(define none-role
   (cell #f         ;; player
         #t         ;; revealed
         empty-role ;; role
