@@ -57,6 +57,11 @@
           r:advisor
           #f))
 
+(define player2-skeleton
+  (r:cell player2
+          #t
+          r:horse
+          #f))
 
 (define-test-suite test-location-hidden?
   "Checks whether a location is hidden or revealed"
@@ -338,6 +343,29 @@
 
 (run-tests player-move-tests)
 
+
+(define-test-suite test-player-lost?
+  "Checks to see if a player has lost before start of players turn"
+  (let* ([all-player2-pieces-captured
+          (list
+           r:none-role r:none-role r:none-role    r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role player1-zombie r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role r:none-role    r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role r:none-role    r:none-role r:none-role r:none-role r:none-role r:none-role)]
+
+         [all-player2-pieces-captured-state
+          (g:turn all-player2-pieces-captured
+                  player2
+                  "skeleton captured.."
+                  #f
+                  player2-skeleton
+                  b:none-position
+                  #t)])
+
+    (test-case "when all a players pieces have been captured"
+      (check-true (g:player-lost? all-player2-pieces-captured-state)))))
+
+(run-tests test-player-lost?)
 
 (define-test-suite unsafe-move?-tests
   "Test potential move gets list of pieces that can capture it, or false if none"
