@@ -34,6 +34,7 @@
 (provide player-move
          player-flip-location
          location-hidden?
+         coords-selected?
          flip-coordinates
          role-at-location
          player-at-location
@@ -64,14 +65,14 @@
 
 
 (define (gen-init-turn message)
-  (turn (b:gen-board) ;; board
-        "Undecided" ;; player
-        message     ;; message
-        #t          ;; first-turn
+  (turn (b:gen-board)   ;; board
+        "Undecided"     ;; player
+        message         ;; message
+        #t              ;; first-turn
         ;; Default values not used yet
-        r:none-role ;; captured
-        #f  ;; selected-coords
-        #f  ;; valid? - was move valid?
+        r:none-role     ;; captured
+        b:none-position ;; selected-coords
+        #f              ;; valid? - was move valid?
         ))
 
 
@@ -267,7 +268,6 @@
                                       board)))))
 
 
-
 (define (is-valid-move? state dest-coords)
   (let ([board (turn-board state)]
         [src-coords (turn-src-coords state)]
@@ -304,6 +304,10 @@
                                    coords
                                    board)
          coords)))
+
+(define (coords-selected? state)
+  (not (eq? b:none-position
+            (turn-src-coords state))))
 
 
 (define (player-selectable-coords state)
@@ -390,7 +394,7 @@
                  [player next-player]
                  [message (role-at-location coords
                                             (turn-board state))]
-                 [src-coords #f]
+                 [src-coords b:none-position]
                  [first? #f])))
 
 
@@ -409,7 +413,7 @@
                                                dest-coords
                                                (turn-board response))]
                     [captured piece-at-dest]
-                    [src-coords #f]))
+                    [src-coords b:none-position]))
       (else
        (struct-copy turn response
                     [captured r:none-role])))))

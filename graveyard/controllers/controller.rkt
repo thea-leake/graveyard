@@ -85,7 +85,7 @@
                                        location-coords)])
     (event-handled (struct-copy g:turn updated-game
                                 [message message]
-                                [src-coords #f]))))
+                                [src-coords b:none-position]))))
 
 
 (define (raise-message state coords)
@@ -123,7 +123,7 @@
 
 (define (handle-tile-click state location-coords)
   (cond
-    ((g:turn-src-coords state) (finish-move-turn state location-coords))
+    ((g:coords-selected? state) (finish-move-turn state location-coords))
     ((g:location-hidden? location-coords (g:turn-board state))
      (raise-location state location-coords))
     ((eq? (g:turn-player state)

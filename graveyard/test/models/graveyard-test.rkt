@@ -77,7 +77,7 @@
                   player1
                   ""
                   #f
-                  #f
+                  r:none-role
                   move-selected-coords
                   #t)]
          [after-move-to-none-role-state
@@ -86,7 +86,7 @@
                   "Valid move."
                   #f
                   r:none-role
-                  #f
+                  b:none-position
                   #t)]
          [move-to-same-player-occupied-location
           (list
@@ -100,7 +100,7 @@
                   player1
                   ""
                   #f
-                  #f
+                  r:none-role
                   move-selected-coords
                   #t)]
          [after-move-to-same-player-occupied-location-state

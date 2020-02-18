@@ -97,7 +97,7 @@
 (define (ai-builder choose-locations-fn)
   (lambda (turn prev-turn)
     (cond
-      ((g:turn-src-coords turn) (ai-state (choose-dest prev-turn)     ;; turn choice src
+      ((g:coords-selected? turn) (ai-state (choose-dest prev-turn)     ;; turn choice src
                                           #f))                        ;; next turn dest
       (else (let* ([chosen-locations
                     (choose-locations-fn turn )]

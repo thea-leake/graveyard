@@ -24,7 +24,8 @@
          (prefix-in u: "../utils.rkt")
          (prefix-in r: "roles.rkt"))
 
-(provide board-coordinates
+(provide none-position
+         board-coordinates
          board-columns
          board-rows
          board-indexes
@@ -40,6 +41,10 @@
   (column
    row)
   #:transparent)
+
+(define none-position
+  (position #f
+            #f))
 
 
 (define board-rows 4)
