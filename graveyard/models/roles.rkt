@@ -32,7 +32,7 @@
          horse
          cannon
          pawn
-         empty-role
+         empty
          none-role
          players
          player-roles
@@ -64,13 +64,13 @@
 (define horse "Skeleton")
 (define cannon "Wraith")
 (define pawn "Poltergeist")
-(define empty-role "Empty")
+(define empty "Empty")
 
 
 ;; it is worth noting that this is not referenced when the cannon is capturing
 ;; cannons can capture any unit, and any unit except soldier can capture the cannon
 (define role-hierarchy
-  (list leader advisor elephant chariot horse cannon pawn empty-role))
+  (list leader advisor elephant chariot horse cannon pawn empty))
 
 (define/memo (hierarchy-value role)
   (index-of role-hierarchy role))
@@ -105,7 +105,7 @@
 (define none-role
   (cell #f         ;; player
         #t         ;; revealed
-        empty-role ;; role
+        empty ;; role
         #t))       ;; empty
 
 
