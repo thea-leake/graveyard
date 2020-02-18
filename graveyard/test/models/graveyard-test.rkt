@@ -58,6 +58,39 @@
           #f))
 
 
+(define-test-suite test-location-hidden?
+  "Checks whether a location is hidden or revealed"
+(let* ([-hidden-role- player1-zombie-hidden]
+         [piece-hidden-board
+          (list
+           r:none-role r:none-role  r:none-role  r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role -hidden-role- r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role  r:none-role  r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role  r:none-role  r:none-role r:none-role r:none-role r:none-role r:none-role)]
+
+         [piece-revealed-board
+          (list
+           r:none-role r:none-role  r:none-role   r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role player1-zombie r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role  r:none-role   r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role  r:none-role   r:none-role r:none-role r:none-role r:none-role r:none-role)]
+
+         [coords-of-piece (b:get-coords-from-index 10)]
+
+         [empty-coords (b:get-coords-from-index 11)])
+
+    (test-case "a piece at a hidden location"
+      (check-true (g:location-hidden? coords-of-piece
+                                      piece-hidden-board)))
+    (test-case "a piece at a revealed location"
+      (check-false (g:location-hidden? coords-of-piece
+                                       piece-revealed-board)))
+    (test-case "a piece at an empty location"
+      (check-false (g:location-hidden? coords-of-piece
+                                       piece-revealed-board)))))
+
+(run-tests test-location-hidden?)
+
 (define-test-suite test-player-flip-location
   "Tests Flipping piece from hidden to visible"
   (let* ([-hidden-role- player1-zombie-hidden]
