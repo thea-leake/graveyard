@@ -68,8 +68,8 @@
     (test-case "Correct coords returned for bottom right location index"
       (check-equal? (b:get-coords-from-index bottom-right-index)
                    (b:position 7 3)))
-    (test-case
-        "Verify coords returned are same instance"
+
+    (test-case "Verify coords returned are same instance"
       (check-eq? (b:get-coords-from-index bottom-right-index)
                  (b:get-coords-from-index bottom-right-index)))))
 
