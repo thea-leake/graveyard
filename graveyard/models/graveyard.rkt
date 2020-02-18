@@ -35,7 +35,6 @@
          player-flip-location
          location-hidden?
          coords-selected?
-         flip-coordinates
          role-at-location
          player-at-location
          player-lost?
