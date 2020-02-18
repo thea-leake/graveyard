@@ -117,6 +117,38 @@
 
 (run-tests test-role-at-location)
 
+(define-test-suite test-player-at-location
+  "Tests getting player of piece at location"
+  (let* ([board
+          (list
+           r:none-role r:none-role   r:none-role   r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role player1-zombie  r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role player2-vampire r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role   r:none-role   r:none-role r:none-role r:none-role r:none-role r:none-role)]
+
+         [player1-coords (b:get-coords-from-index 10)]
+
+         [player2-coords (b:get-coords-from-index 18)]
+
+         [empty-coords (b:get-coords-from-index 11)])
+
+    (test-case "Gets player for piece belonging to player1"
+      (check-eq? (g:player-at-location player1-coords
+                                       board)
+                 player1))
+
+    (test-case "Gets player for piece belonging to player2"
+      (check-eq? (g:player-at-location player2-coords
+                                       board)
+                 player2))
+
+    (test-case "Gets 'None' for piece belonging to neither"
+      (check-equal? (g:player-at-location empty-coords
+                                          board)
+                    "None"))))
+
+(run-tests test-player-at-location)
+
 (define-test-suite test-player-flip-location
   "Tests Flipping piece from hidden to visible"
   (let* ([-hidden-role- player1-zombie-hidden]
