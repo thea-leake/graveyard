@@ -52,6 +52,27 @@
           #f))
 
 
+(define-test-suite test-coords-selected?
+  "Test Whether coords have been selected by a player"
+  (let* ([test-board
+          (list
+           r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role   player1-zombie r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role)]
+         [selected-coords (b:get-coords-from-index 10)]
+         [selected-turn
+          (g:turn test-board
+                  player1
+                  ""
+                  #f
+                  r:none-role
+                  selected-coords
+                  #t)])
+    (test-case "A location is selected"
+     (check-true (g:coords-selected? selected-turn)))))
+
+(run-tests test-coords-selected?)
 
 (define-test-suite player-move-tests
   "Test player-move moves piece when a move is valid"
