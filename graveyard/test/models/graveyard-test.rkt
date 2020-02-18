@@ -56,11 +56,13 @@
   "Test Whether coords have been selected by a player"
   (let* ([test-board
           (list
-           r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role
-           r:none-role r:none-role   player1-zombie r:none-role r:none-role r:none-role r:none-role r:none-role
-           r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role
-           r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role)]
+           r:none-role r:none-role r:none-role    r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role player1-zombie r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role r:none-role    r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role r:none-role    r:none-role r:none-role r:none-role r:none-role r:none-role)]
+
          [selected-coords (b:get-coords-from-index 10)]
+
          [selected-turn
           (g:turn test-board
                   player1
@@ -69,6 +71,7 @@
                   r:none-role
                   selected-coords
                   #t)])
+
     (test-case "A location is selected"
      (check-true (g:coords-selected? selected-turn)))))
 
@@ -78,16 +81,16 @@
   "Test player-move moves piece when a move is valid"
   (let* ([move-to-none-role
           (list
-           r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role
-           r:none-role r:none-role   player1-zombie r:none-role r:none-role r:none-role r:none-role r:none-role
-           r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role
-           r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role)]
+           r:none-role r:none-role r:none-role    r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role player1-zombie r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role r:none-role    r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role r:none-role    r:none-role r:none-role r:none-role r:none-role r:none-role)]
          [moved-to-none-role
           (list
-           r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role
-           r:none-role r:none-role r:none-role  player1-zombie  r:none-role r:none-role r:none-role r:none-role
-           r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role
-           r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role)]
+           r:none-role r:none-role r:none-role r:none-role    r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role r:none-role player1-zombie r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role r:none-role r:none-role    r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role r:none-role r:none-role    r:none-role r:none-role r:none-role r:none-role)]
 
          [move-selected-coords (b:get-coords-from-index 10)] ;; for memoized obj
 
@@ -101,6 +104,7 @@
                   r:none-role
                   move-selected-coords
                   #t)]
+
          [after-move-to-none-role-state
           (g:turn moved-to-none-role
                   player2
