@@ -100,12 +100,12 @@
    (cell player     ;; player
          #f         ;; revealed
          role       ;;
-         #f)))       ;; empty
+         #f)))      ;; empty
 
 (define none-role
-  (cell #f         ;; player
+  (cell "None"     ;; player
         #t         ;; revealed
-        empty ;; role
+        empty      ;; role
         #t))       ;; empty
 
 

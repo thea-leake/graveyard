@@ -69,7 +69,7 @@
         message     ;; message
         #t          ;; first-turn
         ;; Default values not used yet
-        #f  ;; captured
+        r:none-role ;; captured
         #f  ;; selected-coords
         #f  ;; valid? - was move valid?
         ))
