@@ -70,10 +70,21 @@
                   #f
                   r:none-role
                   selected-coords
+                  #t)]
+
+         [unselected-turn
+          (g:turn test-board
+                  player1
+                  ""
+                  #f
+                  r:none-role
+                  b:none-position
                   #t)])
 
     (test-case "A location is selected"
-     (check-true (g:coords-selected? selected-turn)))))
+      (check-true (g:coords-selected? selected-turn)))
+    (test-case "A location is NOT selected"
+      (check-false (g:coords-selected? unselected-turn)))))
 
 (run-tests test-coords-selected?)
 
