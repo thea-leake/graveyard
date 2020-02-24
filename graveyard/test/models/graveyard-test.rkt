@@ -487,6 +487,7 @@
                   player2-skeleton
                   b:none-position
                   #t)])
+
     (test-case "when all a players pieces are captured"
       (let* ([available-moves
               (g:valid-player-turns all-player2-pieces-captured-state)]
@@ -496,12 +497,26 @@
         (check-equal? available-captures
                       '())))
 
-    (test-case "when a player has moves available"
+    (test-case "when a player is unable to move"
       (let* ([available-moves
               (g:valid-player-turns player2-unable-to-move-state)]
              [available-captures ((g:actions-captures-thunk available-moves))])
         (check-match available-moves
                      (g:actions #f '() '() _))
+        (check-equal? available-captures
+                      '())))
+
+    (test-case "when a player has moves available"
+      (let* ([available-moves
+              (g:valid-player-turns player2-move-available-state)]
+             [available-captures ((g:actions-captures-thunk available-moves))])
+        (check-match available-moves
+                     (g:actions
+                      #t
+                      (list (list (b:position 0 0)
+                                  (b:position 1 0)))
+                      '()
+                      _))
         (check-equal? available-captures
                       '())))
 
