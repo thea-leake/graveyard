@@ -487,15 +487,35 @@
                   player2-skeleton
                   b:none-position
                   #t)])
-    (test-case "No pieces available to move"
+    (test-case "when all a players pieces are captured"
       (let* ([available-moves
               (g:valid-player-turns all-player2-pieces-captured-state)]
              [available-captures ((g:actions-captures-thunk available-moves))])
         (check-match available-moves
                      (g:actions #f '() '() _))
         (check-equal? available-captures
-                     '())))
-    ))
+                      '())))
+
+    (test-case "when a player has moves available"
+      (let* ([available-moves
+              (g:valid-player-turns player2-unable-to-move-state)]
+             [available-captures ((g:actions-captures-thunk available-moves))])
+        (check-match available-moves
+                     (g:actions #f '() '() _))
+        (check-equal? available-captures
+                      '())))
+
+    (test-case "when a player has a flip available"
+      (let* ([available-moves
+              (g:valid-player-turns player2-flip-available-state)]
+             [available-captures ((g:actions-captures-thunk available-moves))])
+        (check-match available-moves
+                     (g:actions #t
+                                '()
+                                (list (b:position 7 2))
+                                _))
+        (check-equal? available-captures
+                      '())))))
 
 (run-tests valid-player-turns-tests)
 
