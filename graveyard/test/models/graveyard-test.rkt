@@ -422,6 +422,83 @@
 
 (run-tests test-player-lost?)
 
+(define-test-suite valid-player-turns-tests
+  "Test getting valid moves for a player/turn"
+  (let* ([all-player2-pieces-captured
+          (list
+           r:none-role r:none-role r:none-role    r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role player1-zombie r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role r:none-role    r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role r:none-role r:none-role    r:none-role r:none-role r:none-role r:none-role r:none-role)]
+
+         [player2-unable-to-move
+          (list
+           player2-skeleton player1-zombie r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role
+           player1-zombie   player1-zombie r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role      r:none-role    r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role      r:none-role    r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role)]
+
+         [player2-flip-available
+          (list
+           player2-skeleton player1-zombie r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role
+           player1-zombie   player1-zombie r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role      r:none-role    r:none-role r:none-role r:none-role r:none-role r:none-role player1-zombie-hidden
+           r:none-role      r:none-role    r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role)]
+
+         [player2-move-available
+          (list
+           player2-skeleton r:none-role    r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role
+           player1-zombie   player1-zombie r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role      r:none-role    r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role      r:none-role    r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role)]
+
+         [all-player2-pieces-captured-state
+          (g:turn all-player2-pieces-captured
+                  player2
+                  "skeleton captured.."
+                  #f
+                  player2-skeleton
+                  b:none-position
+                  #t)]
+
+         [player2-unable-to-move-state
+          (g:turn player2-unable-to-move
+                  player2
+                  "skeleton captured.."
+                  #f
+                  player2-skeleton
+                  b:none-position
+                  #t)]
+
+         [player2-flip-available-state
+          (g:turn player2-flip-available
+                  player2
+                  "skeleton captured.."
+                  #f
+                  player2-skeleton
+                  b:none-position
+                  #t)]
+
+         [player2-move-available-state
+          (g:turn player2-move-available
+                  player2
+                  "skeleton captured.."
+                  #f
+                  player2-skeleton
+                  b:none-position
+                  #t)])
+    (test-case "No pieces available to move"
+      (let* ([available-moves
+              (g:valid-player-turns all-player2-pieces-captured-state)]
+             [available-captures ((g:actions-captures-thunk available-moves))])
+        (check-match available-moves
+                     (g:actions #f '() '() _))
+        (check-equal? available-captures
+                     '())))
+    ))
+
+(run-tests valid-player-turns-tests)
+
 (define-test-suite unsafe-move?-tests
   "Test potential move gets list of pieces that can capture it, or false if none"
   (let* ([move-with-safe-capture
