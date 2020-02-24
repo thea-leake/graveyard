@@ -452,6 +452,13 @@
            r:none-role      r:none-role    r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role
            r:none-role      r:none-role    r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role)]
 
+         [player2-captures-available
+          (list
+           player2-vampire  r:none-role    r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role
+           player1-zombie   player1-zombie r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role      r:none-role    r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role      r:none-role    r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role)]
+
          [all-player2-pieces-captured-state
           (g:turn all-player2-pieces-captured
                   player2
@@ -481,6 +488,14 @@
 
          [player2-move-available-state
           (g:turn player2-move-available
+                  player2
+                  "skeleton captured.."
+                  #f
+                  player2-skeleton
+                  b:none-position
+                  #t)]
+         [player2-captures-available-state
+          (g:turn player2-captures-available
                   player2
                   "skeleton captured.."
                   #f
@@ -530,9 +545,26 @@
                                 (list (b:position 7 2))
                                 _))
         (check-equal? available-captures
-                      '())))))
+                      '())))
+
+    (test-case "when a player has captures available"
+      (let* ([available-moves
+              (g:valid-player-turns player2-captures-available-state)]
+             [available-captures ((g:actions-captures-thunk available-moves))])
+        (check-match available-moves
+                     (g:actions #t
+                                (list (list (b:position 0 0)
+                                            (b:position 1 0)
+                                            (b:position 0 1)))
+                                '()
+                                _
+                                ))
+        (check-equal? available-captures
+                      (list (list (b:position 0 0)
+                                  (b:position 0 1))))))))
 
 (run-tests valid-player-turns-tests)
+
 
 (define-test-suite unsafe-move?-tests
   "Test potential move gets list of pieces that can capture it, or false if none"
