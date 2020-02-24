@@ -360,6 +360,13 @@
            r:none-role      r:none-role    r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role
            r:none-role      r:none-role    r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role)]
 
+         [player2-flip-available
+          (list
+           player2-skeleton player1-zombie r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role
+           player1-zombie   player1-zombie r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role      r:none-role    r:none-role r:none-role r:none-role r:none-role r:none-role player1-zombie-hidden
+           r:none-role      r:none-role    r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role)]
+
          [all-player2-pieces-captured-state
           (g:turn all-player2-pieces-captured
                   player2
@@ -368,6 +375,7 @@
                   player2-skeleton
                   b:none-position
                   #t)]
+
          [player2-unable-to-move-state
           (g:turn player2-unable-to-move
                   player2
@@ -375,12 +383,24 @@
                   #f
                   player2-skeleton
                   b:none-position
-                  #t)])
+                  #t)]
+
+         [player2-flip-available-state
+          (g:turn player2-flip-available
+                  player2
+                  "skeleton captured.."
+                  #f
+                  player2-skeleton
+                  b:none-position
+                  #t)]
+         )
 
     (test-case "when all a players pieces have been captured"
       (check-true (g:player-lost? all-player2-pieces-captured-state)))
     (test-case "when a player has no moves available"
-      (check-true (g:player-lost? player2-unable-to-move-state)))))
+      (check-true (g:player-lost? player2-unable-to-move-state)))
+    (test-case "when there is a location available to flip"
+      (check-false (g:player-lost? player2-flip-available-state)))))
 
 (run-tests test-player-lost?)
 
