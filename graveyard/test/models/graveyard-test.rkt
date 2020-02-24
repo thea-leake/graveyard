@@ -367,6 +367,13 @@
            r:none-role      r:none-role    r:none-role r:none-role r:none-role r:none-role r:none-role player1-zombie-hidden
            r:none-role      r:none-role    r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role)]
 
+         [player2-move-available
+          (list
+           player2-skeleton r:none-role    r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role
+           player1-zombie   player1-zombie r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role      r:none-role    r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role
+           r:none-role      r:none-role    r:none-role r:none-role r:none-role r:none-role r:none-role r:none-role)]
+
          [all-player2-pieces-captured-state
           (g:turn all-player2-pieces-captured
                   player2
@@ -393,6 +400,15 @@
                   player2-skeleton
                   b:none-position
                   #t)]
+
+         [player2-move-available-state
+          (g:turn player2-move-available
+                  player2
+                  "skeleton captured.."
+                  #f
+                  player2-skeleton
+                  b:none-position
+                  #t)]
          )
 
     (test-case "when all a players pieces have been captured"
@@ -400,7 +416,9 @@
     (test-case "when a player has no moves available"
       (check-true (g:player-lost? player2-unable-to-move-state)))
     (test-case "when there is a location available to flip"
-      (check-false (g:player-lost? player2-flip-available-state)))))
+      (check-false (g:player-lost? player2-flip-available-state)))
+    (test-case "when there is a move available"
+      (check-false (g:player-lost? player2-move-available-state)))))
 
 (run-tests test-player-lost?)
 
