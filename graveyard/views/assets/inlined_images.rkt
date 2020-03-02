@@ -31,7 +31,6 @@
                   range)
          (for-syntax (prefix-in s: "../image_settings.rkt")
                      (prefix-in r: "../../models/roles/roles.rkt")
-                     (prefix-in b: "../../models/board/board.rkt")
                      racket/base
                      (only-in pict
                               pict->bitmap)
