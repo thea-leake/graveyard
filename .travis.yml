@@ -1,6 +1,8 @@
 dist: bionic
 before_install:
-  - sudo apt-get -y install racket racket-doc
+  - sudo add-apt-repository ppa:plt/racket
+  - sudo apt-get update
+  - sudo apt-get -y install racket=7.5+ppa1-2~bionic1 racket-doc
 
 install:
  - make deps
