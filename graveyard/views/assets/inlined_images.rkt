@@ -22,16 +22,16 @@
          selected-image)
 
 (require images/compile-time
-         (prefix-in r: "../../models/roles.rkt")
-         (prefix-in b: "../../models/board.rkt")
+         (prefix-in r: "../../models/roles/roles.rkt")
+         (prefix-in b: "../../models/board/board.rkt")
          (prefix-in s: "../image_settings.rkt")
          (only-in racket/list
                   take
                   drop
                   range)
          (for-syntax (prefix-in s: "../image_settings.rkt")
-                     (prefix-in r: "../../models/roles.rkt")
-                     (prefix-in b: "../../models/board.rkt")
+                     (prefix-in r: "../../models/roles/roles.rkt")
+                     (prefix-in b: "../../models/board/board.rkt")
                      racket/base
                      (only-in pict
                               pict->bitmap)

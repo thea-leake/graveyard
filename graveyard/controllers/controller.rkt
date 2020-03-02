@@ -22,8 +22,8 @@
                   string-join)
          (only-in racket/class
                   send)
-         (prefix-in b: "../models/board.rkt")
-         (prefix-in r: "../models/roles.rkt")
+         (prefix-in b: "../models/board/board.rkt")
+         (prefix-in r: "../models/roles/roles.rkt")
          (prefix-in g: "../models/graveyard.rkt")
          (prefix-in ai: "ai.rkt")
          (prefix-in t: "../views/tile.rkt")
