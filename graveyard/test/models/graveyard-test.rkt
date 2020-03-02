@@ -18,10 +18,9 @@
          rackunit/text-ui
          (only-in racket/list
                   take)
-         "../../utils.rkt"
          (prefix-in g: "../../models/graveyard.rkt")
-         (prefix-in r: "../../models/roles.rkt")
-         (prefix-in b: "../../models/board.rkt")
+         (prefix-in r: "../../models/roles/roles.rkt")
+         (prefix-in b: "../../models/board/board.rkt")
          )
 
 (define player1 (car r:players))
@@ -147,10 +146,10 @@
                                        board)
                  player2))
 
-    (test-case "Gets 'None' for piece belonging to neither"
+    (test-case "Gets #f for piece belonging to neither"
       (check-equal? (g:player-at-location empty-coords
                                           board)
-                    "None"))))
+                    #f))))
 
 (run-tests test-player-at-location)
 

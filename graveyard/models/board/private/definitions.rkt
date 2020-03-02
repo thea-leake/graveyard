@@ -21,7 +21,8 @@
          board-indexes
          location-count
          (struct-out position)
-         Position)
+         Position
+         none-position)
 
 
 (define-type None False)
@@ -68,3 +69,5 @@
   #:transparent)
 
 (define-type Position (U position None))
+
+(define none-position : Position #f)

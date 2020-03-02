@@ -24,7 +24,8 @@
          coords-row-columns
          gen-board
          Position
-         (struct-out position))
+         (struct-out position)
+         none-position)
 
 
 (require (only-in racket/list

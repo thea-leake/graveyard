@@ -27,9 +27,8 @@
          (only-in memoize
                   define/memo
                   memo-lambda)
-         (prefix-in u: "../utils.rkt")
-         (prefix-in b: "board.rkt")
-         (prefix-in r: "roles.rkt"))
+         (prefix-in b: "board/board.rkt")
+         (prefix-in r: "roles/roles.rkt"))
 
 (provide player-move
          player-flip-location
