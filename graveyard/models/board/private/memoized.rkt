@@ -13,44 +13,17 @@
 ;; limitations under the License.
 
 #lang racket/base
-(require (only-in racket/list
-                  range
-                  flatten
-                  make-list
-                  shuffle)
-         (only-in memoize
+(require (only-in memoize
                   define/memo
                   memo-lambda)
-         (prefix-in u: "../utils.rkt")
-         (prefix-in r: "roles.rkt"))
+         "definitions.rkt")
 
-(provide none-position
-         board-coordinates
-         board-columns
-         board-rows
-         board-indexes
+
+(provide board-coordinates
          get-index-from-coordinates
          get-coords-from-index
          coords-out-of-range?
-         coords-row-columns
-         gen-board
-         (struct-out position))
-
-
-(struct position
-  (column
-   row)
-  #:transparent)
-
-(define none-position
-  (position #f
-            #f))
-
-
-(define board-rows 4)
-(define board-columns 8)
-(define location-count (* board-columns
-                          board-rows))
+         coords-row-columns)
 
 (define/memo (get-index-from-coordinates coords)
   (let ([x (position-column coords)]
@@ -65,7 +38,6 @@
                      board-columns)])
     (position x y)))
 
-(define board-indexes (range location-count))
 
 (define board-coordinates (map get-coords-from-index board-indexes))
 
@@ -90,9 +62,3 @@
               (or (check position-row check-coords)
                   (check position-column check-coords)))
             board-coordinates)))
-
-
-
-(define (gen-board)
-  (shuffle (append (r:player-roles (car r:players))
-                   (r:player-roles (cdr r:players)))))

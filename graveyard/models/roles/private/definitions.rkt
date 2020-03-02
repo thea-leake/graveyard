@@ -34,7 +34,9 @@
          cannon-max-pieces)
 
 
-(struct None ())
+(define-type None False)
+
+(define none : None #f)
 
 (define-type Player (U String None))
 
@@ -70,7 +72,7 @@
 
 
 (define none-role
-  (cell (None)       ;; player
+  (cell none       ;; player
         #t         ;; revealed
         empty      ;; role
         #t))       ;; empty
