@@ -23,13 +23,14 @@
 
 (require images/compile-time
          (prefix-in r: "../../models/roles/roles.rkt")
-         (prefix-in b: "../../models/board/board.rkt")
          (prefix-in s: "../image_settings.rkt")
+         (prefix-in b: "../../models/board/board.rkt")
          (only-in racket/list
                   take
                   drop
                   range)
          (for-syntax (prefix-in s: "../image_settings.rkt")
+                     (prefix-in b: "../../models/board/board.rkt")
                      (prefix-in r: "../../models/roles/roles.rkt")
                      racket/base
                      (only-in pict
