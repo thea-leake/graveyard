@@ -35,12 +35,5 @@
          flip
          (struct-out cell))
 
-(require "private/definitions.rkt")
-
-(require/typed
-    "private/memoized.rkt"
-  [hierarchy-value (-> Role Integer)]
-  [player-roles (-> Player (Listof cell))]
-  [toggle-player (-> Player Player)]
-  [flip (-> cell cell)])
-
+(require "private/definitions.rkt"
+         "private/memoized.rkt")

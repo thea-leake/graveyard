@@ -13,48 +13,57 @@
 ;; limitations under the License.
 
 
-#lang racket/base
+#lang typed/racket/base
 (provide player-roles
          toggle-player
          flip
          hierarchy-value
          role-hierarchy)
-(require (only-in racket/list
-                  index-of)
-         (only-in memoize
-                  define/memo
-                  memo-lambda)
+(require (only-in tmemoize
+                  memoized
+                  memoize)
          "definitions.rkt")
 
+(require/typed racket/list
+  [index-of (-> (Listof Role) Role Integer)])
 
-(define/memo (hierarchy-value role)
-  (index-of role-hierarchy role))
+
+(memoized
+ (: hierarchy-value (-> Role Integer))
+ (define (hierarchy-value role)
+   (index-of role-hierarchy role)))
 
 
 ;; the memoized lambda lets us memoize the the pieces of the same data
 ;; so they share the same obj id - which lets us memoize more effectively
 ;; further down the line w/ only obj id checks
 ;; using a memoized lambda instead of define/memo to allow these object to be cleaned up by GC when no longer used.
+(: piece-maker (-> (-> Player Role cell)))
 (define (piece-maker)
-  (memo-lambda (player role)
-               (cell player     ;; player
-                     #f         ;; revealed
-                     role       ;;
-                     #f)))      ;; empty
+  (memoize (lambda ([player : Player] [role : Role])
+     (cell player     ;; player
+           #f         ;; revealed
+           role       ;;
+           #f))))      ;; empty
 
+(: player-roles (-> Player (Listof cell)))
 (define (player-roles team)
-  (let ([mkpiece (piece-maker)])
-    (map (lambda (role) (mkpiece team role))
+  (let ([mkpiece : (-> Player Role cell) (piece-maker)])
+    (map (lambda ([role : Role]) (mkpiece team role))
          player-start-roles)))
 
 
-(define/memo (toggle-player player)
-  (if (eq? player (car players))
-      (cdr players)
-      (car players)))
+(memoized
+ (: toggle-player (-> Player Player))
+ (define (toggle-player player)
+   (if (eq? player (car players))
+       (cdr players)
+       (car players))))
 
 
-(define/memo (flip piece)
-  (struct-copy cell piece
-               [revealed? #t]))
+(memoized
+ (: flip (-> cell cell))
+ (define(flip piece)
+   (struct-copy cell piece
+                [revealed? #t])))
 
