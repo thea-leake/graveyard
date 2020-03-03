@@ -1,5 +1,5 @@
 SRC_DIR = graveyard
-DEP_PACKAGES = memoize table-panel https://github.com/souravdatta/tmemoize
+DEP_PACKAGES = memoize table-panel https://github.com/souravdatta/tmemoize.git
 BYTECODE_DIR = $(SRC_DIR)/compiled
 GUI_PATH = $(SRC_DIR)/views/start_view.rkt
 SRC_FILES  = $(GUI_PATH) $(SRC_PATH)
