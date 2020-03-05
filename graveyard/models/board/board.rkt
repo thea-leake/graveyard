@@ -12,7 +12,7 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-#lang typed/racket/base
+#lang typed/racket/base #:with-refinements
 
 (provide board-coordinates
          board-columns
@@ -28,25 +28,124 @@
          none-position)
 
 
-(require (only-in racket/list
-                  range
-                  flatten
-                  make-list
-                  shuffle)
-         "private/definitions.rkt"
+(require (only-in tmemoize
+                  memoized
+                  memoize
+                  )
          (prefix-in r: "../roles/roles.rkt"))
-
-(require/typed "private/memoized.rkt"
-  [board-coordinates (Listof Position)]
-  [get-index-from-coordinates (-> Position Index)]
-  [get-coords-from-index (-> Index Position)]
-  [coords-out-of-range? (-> Position Boolean)]
-  [coords-row-columns (-> Position (Listof Position))])
 
 (require/typed racket/list
   [shuffle (-> (Listof r:cell)
                (Listof r:cell))])
 
+
+
+(define-type None False)
+
+(define none : None #f)
+
+
+(define board-rows : Integer
+  4)
+
+(define board-columns : Integer
+  8)
+
+(define location-count : Integer
+  (* board-columns
+     board-rows))
+
+(define-type Column
+  (Refine [n : Integer]
+          (and (> 8 n)
+               (<= 0 n))))
+
+
+(define-type Row
+  (Refine [n : Integer]
+          (and (> 4 n)
+               (<= 0 n))))
+
+(define-type Dimension (U Column Row))
+
+(define-type Index
+  (Refine [n : Integer]
+          (and (> 32 n)
+               (<= 0 n))))
+
+
+(require/typed racket/list
+  [range (-> Integer (Listof Index))])
+
+(define board-indexes : (Listof Index)
+  (range location-count))
+
+(struct position
+  ([column : Column]
+   [row : Row])
+  #:transparent)
+
+(define-type Position (U position None))
+(define none-position : Position #f)
+
+(memoized
+ (: get-index-from-coordinates (-> position Index))
+ (define (get-index-from-coordinates coords)
+   (let ([x : Column  (position-column coords)]
+         [y : Row (position-row coords)])
+     (cast (+ (* y board-columns)
+              x)
+           Index))))
+
+(memoized
+ (: get-coords-from-index (-> Index position))
+ (define (get-coords-from-index index)
+   (let ([x : Column (cast (remainder index
+                                     board-columns)
+                          Column)]
+         [y : Row (cast (quotient index
+                                 board-columns)
+                       Row)])
+     (position x y))))
+
+
+(define board-coordinates : (Listof position)
+  (map get-coords-from-index board-indexes))
+
+(memoized
+ (: index-in-range? (-> Index Boolean))
+ (define (index-in-range? index)
+   (and (<= 0 index)
+        (> location-count index))))
+
+(memoized
+ (: coords-in-range? (-> position Boolean))
+ (define (coords-in-range? coords)
+   (and (index-in-range? (get-index-from-coordinates coords))
+        (< (position-column coords) board-columns)
+        (< (position-row coords) board-rows))))
+
+
+(memoized
+ (: coords-out-of-range? (-> position Boolean))
+ (define (coords-out-of-range? coords)
+   (not (coords-in-range? coords))))
+
+(memoized
+ (: coords-row-columns (-> position (Listof position)))
+ (define (coords-row-columns coords)
+   (let ([check : (-> (-> position Dimension)
+                      position
+                      Boolean)
+                (lambda (
+                         [fn : (-> position Dimension)]
+                         [check-coords : position])
+                  (= (fn check-coords)
+                     (fn coords)))])
+     (filter (lambda ([check-coords : position])
+               (or (check position-row check-coords)
+                   (check position-column check-coords)))
+             board-coordinates))))
 
 (define (gen-board)
   (shuffle (append (r:player-roles (car r:players))
