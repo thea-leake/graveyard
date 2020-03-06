@@ -18,7 +18,7 @@
          rackunit/text-ui
          (only-in racket/list
                   take)
-         (prefix-in r: "../../models/roles/roles.rkt")
+         (prefix-in r: "../../models/roles.rkt")
          )
 
 (define player1 (car r:players))

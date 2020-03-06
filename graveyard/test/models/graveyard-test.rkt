@@ -19,8 +19,8 @@
          (only-in racket/list
                   take)
          (prefix-in g: "../../models/graveyard.rkt")
-         (prefix-in r: "../../models/roles/roles.rkt")
-         (prefix-in b: "../../models/board/board.rkt")
+         (prefix-in r: "../../models/roles.rkt")
+         (prefix-in b: "../../models/board.rkt")
          )
 
 (define player1 (car r:players))

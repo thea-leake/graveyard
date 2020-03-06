@@ -34,9 +34,9 @@
                   overlay
                   rectangle
                   image-width)
-         (prefix-in b: "../models/board/board.rkt")
+         (prefix-in b: "../models/board.rkt")
          (prefix-in g: "../models/graveyard.rkt")
-         (prefix-in r: "../models/roles/roles.rkt")
+         (prefix-in r: "../models/roles.rkt")
          (prefix-in c: "colors.rkt")
          (prefix-in i: "assets/inlined_images.rkt")
          (prefix-in s: "image_settings.rkt"))

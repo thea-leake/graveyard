@@ -34,7 +34,7 @@
                   vertical-pane%)
          (only-in table-panel
                   table-panel%)
-         (prefix-in b: "../models/board/board.rkt")
+         (prefix-in b: "../models/board.rkt")
          (prefix-in c: "colors.rkt")
          (prefix-in i: "images.rkt"))
 

@@ -32,7 +32,7 @@
                   memoized
                   memoize
                   )
-         (prefix-in r: "../roles/roles.rkt"))
+         (prefix-in r: "roles.rkt"))
 
 (require/typed racket/list
   [shuffle (-> (Listof r:cell)
