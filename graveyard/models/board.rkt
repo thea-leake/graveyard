@@ -24,6 +24,9 @@
          coords-row-columns
          gen-board
          Position
+         Row
+         Column
+         Index
          (struct-out position)
          none-position)
 
@@ -89,23 +92,26 @@
 (define none-position : Position #f)
 
 (memoized
- (: get-index-from-coordinates (-> position Index))
- (define (get-index-from-coordinates coords)
-   (let ([x : Column  (position-column coords)]
-         [y : Row (position-row coords)])
-     (cast (+ (* y board-columns)
-              x)
-           Index))))
+ (: get-index-from-coordinates (-> Position Index))
+ (define (get-index-from-coordinates coords?)
+   (case coords?
+     [(none-position) (error "No index for None position")]
+     [else (let* ([coords (cast coords? position)]
+               [x : Column  (position-column coords)]
+               [y : Row (position-row coords)])
+          (cast (+ (* y board-columns)
+                   x)
+                Index))])))
 
 (memoized
  (: get-coords-from-index (-> Index position))
  (define (get-coords-from-index index)
    (let ([x : Column (cast (remainder index
-                                     board-columns)
-                          Column)]
+                                      board-columns)
+                           Column)]
          [y : Row (cast (quotient index
-                                 board-columns)
-                       Row)])
+                                  board-columns)
+                        Row)])
      (position x y))))
 
 
@@ -119,33 +125,40 @@
         (> location-count index))))
 
 (memoized
- (: coords-in-range? (-> position Boolean))
- (define (coords-in-range? coords)
-   (and (index-in-range? (get-index-from-coordinates coords))
-        (< (position-column coords) board-columns)
-        (< (position-row coords) board-rows))))
+ (: coords-in-range? (-> Position Boolean))
+ (define (coords-in-range? coords?)
+   (case coords?
+     [(none-position) #f]
+     [else (let ([coords (cast coords? position)])
+             (and (index-in-range? (get-index-from-coordinates coords))
+                  (< (position-column coords) board-columns)
+                  (< (position-row coords) board-rows)))])))
 
 
 (memoized
- (: coords-out-of-range? (-> position Boolean))
+ (: coords-out-of-range? (-> Position Boolean))
  (define (coords-out-of-range? coords)
    (not (coords-in-range? coords))))
 
 (memoized
- (: coords-row-columns (-> position (Listof position)))
- (define (coords-row-columns coords)
-   (let ([check : (-> (-> position Dimension)
-                      position
-                      Boolean)
-                (lambda (
-                         [fn : (-> position Dimension)]
-                         [check-coords : position])
-                  (= (fn check-coords)
-                     (fn coords)))])
-     (filter (lambda ([check-coords : position])
-               (or (check position-row check-coords)
-                   (check position-column check-coords)))
-             board-coordinates))))
+ (: coords-row-columns (-> Position (Listof position)))
+ (define (coords-row-columns coords?)
+   (case coords?
+     [(none-position) '()]
+     [else
+      (let* ([coords (cast coords? position)]
+             [check : (-> (-> position Dimension)
+                         position
+                         Boolean)
+                   (lambda (
+                            [fn : (-> position Dimension)]
+                            [check-coords : position])
+                     (= (fn check-coords)
+                        (fn coords)))])
+        (filter (lambda ([check-coords : position])
+                  (or (check position-row check-coords)
+                      (check position-column check-coords)))
+                board-coordinates))])))
 
 (define (gen-board)
   (shuffle (append (r:player-roles (car r:players))
