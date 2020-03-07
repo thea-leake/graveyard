@@ -73,7 +73,7 @@
 
 (define-type Index
   (Refine [n : Integer]
-          (and (> 32 n)
+          (and (>= 32 n)
                (<= 0 n))))
 
 
