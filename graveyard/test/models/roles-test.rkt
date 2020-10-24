@@ -18,8 +18,6 @@
          rackunit/text-ui
          (only-in racket/list
                   take)
-         "../../utils.rkt"
-         (prefix-in g: "../../models/graveyard.rkt")
          (prefix-in r: "../../models/roles.rkt")
          )
 

@@ -12,19 +12,11 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-#lang racket/base
-(require (only-in racket/list
-                  range
-                  flatten
-                  make-list
-                  shuffle
-                  index-of)
-         (only-in memoize
-                  define/memo
-                  memo-lambda)
-         (prefix-in u: "../utils.rkt"))
+#lang typed/racket/base
 
-(provide role-hierarchy
+(provide Player
+         Role
+         role-hierarchy
          leader
          advisor
          elephant
@@ -44,42 +36,68 @@
          (struct-out cell))
 
 
+(require tmemoize)
+(require/typed
+    racket/list
+  [flatten (-> (Listof(Listof String)) (Listof String))]
+  [make-list (-> Integer String (Listof Role))]
+  [index-of (-> (Listof Role) Role Integer)])
+
+
+(define-type None False)
+
+(define none : None #f)
+
+(define-type Player (U String None))
+
+(define-type Role String)
+
+
 (struct cell
-  (player
-   revealed?
-   role
-   empty?)
+  ([player : Player]
+   [revealed? : Boolean]
+   [role : Role]
+   [empty? : Boolean])
   #:transparent)
 
 
+;; roles
+(define leader : Role "Lich")
+(define advisor : Role "Vampire")
+(define elephant : Role "Zombie")
+(define chariot : Role "Ghoul")
+(define horse : Role "Skeleton")
+(define cannon : Role "Wraith")
+(define pawn : Role "Poltergeist")
+(define empty : Role "Empty")
+
+
+(: players (Pair Player Player))
 (define players
   (cons "Orange" "Purple"))
 
 
-;; roles
-(define leader "Lich")
-(define advisor "Vampire")
-(define elephant "Zombie")
-(define chariot "Ghoul")
-(define horse "Skeleton")
-(define cannon "Wraith")
-(define pawn "Poltergeist")
-(define empty "Empty")
+(define none-role
+  (cell none       ;; player
+        #t         ;; revealed
+        empty      ;; role
+        #t))       ;; empty
 
 
 ;; it is worth noting that this is not referenced when the cannon is capturing
 ;; cannons can capture any unit, and any unit except soldier can capture the cannon
+(: role-hierarchy (Listof Role))
 (define role-hierarchy
   (list leader advisor elephant chariot horse cannon pawn empty))
-
-(define/memo (hierarchy-value role)
-  (index-of role-hierarchy role))
 
 
 ;; number of pieces that can be involve in a cannon move
 ;; cannon, piece cannon jumps over, piece cannon takes
-(define cannon-max-pieces 3)
+(define cannon-max-pieces : Integer 3)
 
+
+
+(: player-start-roles (Listof String))
 (define player-start-roles
   (flatten
    (list (make-list 1 leader)
@@ -90,37 +108,43 @@
          (make-list 5 pawn)
          (make-list 2 cannon))))
 
+(memoized
+ (: hierarchy-value (-> Role Integer))
+ (define (hierarchy-value role)
+   (index-of role-hierarchy role)))
+
 
 ;; the memoized lambda lets us memoize the the pieces of the same data
 ;; so they share the same obj id - which lets us memoize more effectively
 ;; further down the line w/ only obj id checks
 ;; using a memoized lambda instead of define/memo to allow these object to be cleaned up by GC when no longer used.
+(: piece-maker (-> (-> Player Role cell)))
 (define (piece-maker)
-  (memo-lambda (player role)
-   (cell player     ;; player
-         #f         ;; revealed
-         role       ;;
-         #f)))      ;; empty
-
-(define none-role
-  (cell "None"     ;; player
-        #t         ;; revealed
-        empty      ;; role
-        #t))       ;; empty
+  (memoize (lambda ([player : Player] [role : Role])
+             (cell player     ;; player
+                   #f         ;; revealed
+                   role       ;;
+                   #f))))      ;; empty
 
 
+(: player-roles (-> Player (Listof cell)))
 (define (player-roles team)
-  (let ([mkpiece (piece-maker)])
-    (map (lambda (role) (mkpiece team role))
-        player-start-roles)))
+  (let ([mkpiece : (-> Player Role cell) (piece-maker)])
+    (map (lambda ([role : Role]) (mkpiece team role))
+         player-start-roles)))
 
 
-(define/memo (toggle-player player)
-  (if (equal? player (car players))
-      (cdr players)
-      (car players)))
+(memoized
+ (: toggle-player (-> Player Player))
+ (define (toggle-player player)
+   (if (eq? player (car players))
+       (cdr players)
+       (car players))))
 
 
-(define/memo (flip piece)
-  (struct-copy cell piece
-               [revealed? #t]))
+(memoized
+ (: flip (-> cell cell))
+ (define(flip piece)
+   (struct-copy cell piece
+                [revealed? #t])))
+

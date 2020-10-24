@@ -22,7 +22,7 @@
                   button%)
          (prefix-in v: "view.rkt")
          (prefix-in ctrl: "../controllers/controller.rkt")
-         (prefix-in m: "multiplayer-start-view.rkt"))
+         (prefix-in m: "single-player-start-view.rkt"))
 
 
 (define start-game-dialog

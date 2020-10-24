@@ -18,7 +18,6 @@
          rackunit/text-ui
          (only-in racket/list
                   take)
-         "../../utils.rkt"
          (prefix-in r: "../../models/roles.rkt")
          (prefix-in b: "../../models/board.rkt"))
 
@@ -95,13 +94,7 @@
   "Test coords-out-of-range"
   (let ([top-left (b:position 0 0)]
 
-        [bottom-right (b:position 7 3)]
-
-        [y-axis-off (b:position 7 4)]
-
-        [x-axis-off (b:position 9 2)]
-
-        [both-axi-off (b:position -1 -3)])
+        [bottom-right (b:position 7 3)])
 
     (test-case "Check top left cords on board"
       (check-false (b:coords-out-of-range? top-left)))
@@ -110,13 +103,19 @@
       (check-false (b:coords-out-of-range? bottom-right)))
 
     (test-case "Check y axis off board"
-      (check-true (b:coords-out-of-range? y-axis-off)))
+      (check-exn exn:fail:contract?
+                 (lambda ()
+                   (b:coords-out-of-range? (b:position 7 4)))))
 
     (test-case "Check x axis off board"
-      (check-true (b:coords-out-of-range? x-axis-off)))
+      (check-exn exn:fail:contract?
+                 (lambda ()
+                   (b:coords-out-of-range? (b:position 9 2)))))
 
     (test-case "Check both axi off board"
-      (check-true (b:coords-out-of-range? both-axi-off)))))
+      (check-exn exn:fail:contract?
+                 (lambda ()
+                   (b:coords-out-of-range? (b:position -1 13)))))))
 
 (run-tests coords-out-of-range-tests)
 
