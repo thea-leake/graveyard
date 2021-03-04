@@ -27,7 +27,6 @@
          (prefix-in g: "../models/graveyard.rkt")
          (prefix-in ai: "ai.rkt")
          (prefix-in t: "../views/tile.rkt")
-         (prefix-in i: "../views/images.rkt")
          (prefix-in v: "../views/view.rkt")
          (prefix-in ev: "../views/end_view.rkt"))
 
@@ -69,7 +68,7 @@
   state)
 
 
-(define (finish-move-message state location-coords)
+(define (finish-move-message state)
   (let ([captured-piece (g:turn-captured state)])
     (if (r:cell-empty? captured-piece)
         (g:turn-message state)
@@ -81,8 +80,7 @@
 (define (finish-move-turn state location-coords)
   (let* ([updated-game (g:player-move state
                                       location-coords)]
-         [message (finish-move-message updated-game
-                                       location-coords)])
+         [message (finish-move-message updated-game)])
     (event-handled (struct-copy g:turn updated-game
                                 [message message]
                                 [src-coords b:none-position]))))
@@ -191,8 +189,7 @@
  (thread
   (lambda ()
     (player-won (multi-player-init-turn init-turn)
-                (lambda ()
-                  (void))))))
+                void))))
 
 (define (single-player [difficulty 'easy])
   (thread
