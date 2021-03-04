@@ -181,7 +181,8 @@
          (handle-tile-click init-state
                             (channel-get human-player-channel))])
     (event-loop event-result
-                get-human-choice)))
+                (lambda (_)
+                  (get-human-choice)))))
 
 
 (define (multi-player)
