@@ -1,4 +1,4 @@
-;; Copyright 2019 Thea Leake
+;; Copyright 2019-2021 Thea Leake
 
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -18,8 +18,7 @@
                   filter-not
                   empty?
                   filter-map)
-         (prefix-in g: "../models/graveyard.rkt")
-         (prefix-in u: "../utils.rkt"))
+         (prefix-in g: "../models/graveyard.rkt"))
 
 (provide start-ai)
 
@@ -107,19 +106,19 @@
                         chosen-dest))))))                              ;; next turn dest
 
 
-(define (ai-player chnl ai-logic)
-  (let loop ([message (channel-get chnl)]
+(define (ai-player input-chnl output-chnl ai-logic)
+  (let loop ([new-ai-turn (channel-get input-chnl)]
              [ai-prev-turn (ai-state #f
                                      #f)])
-    (when message
+    (when new-ai-turn
       (sleep turn-wait-time)
-      (let ([ai-decision (ai-logic message ai-prev-turn)])
-        (channel-put chnl
+      (let ([ai-decision (ai-logic new-ai-turn ai-prev-turn)])
+        (channel-put output-chnl
                      (ai-state-turn-response ai-decision))
-        (loop (channel-get chnl)
+        (loop (channel-get input-chnl)
               ai-decision)))))
 
-(define (start-ai chnl difficulty)
+(define (start-ai input-chnl output-chnl difficulty)
   (let ([ai-logic
          (ai-builder
           (case difficulty
@@ -127,4 +126,4 @@
             ('medium choose-locations-medium)))])
     (thread
      (lambda ()
-       (ai-player chnl ai-logic)))))
+       (ai-player input-chnl output-chnl ai-logic)))))

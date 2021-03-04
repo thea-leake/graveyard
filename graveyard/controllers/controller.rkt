@@ -1,4 +1,4 @@
-;; Copyright 2019 Thea Leake
+;; Copyright 2019-2021 Thea Leake
 
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
 #lang racket/base
 
 
-(provide single-player
-         multi-player)
+(provide local-single-player
+         local-multi-player)
 
 (require (only-in racket/string
                   string-join)
@@ -33,7 +33,7 @@
 (define init-turn
   (g:gen-init-turn "First Necromancer: pick a corpse to raise!"))
 
-(define human-player-channel (make-channel))
+(define gui-player-channel (make-channel))
 
 (define computer-player-channel (make-channel))
 
@@ -42,7 +42,7 @@
   (map (lambda (piece coords)
          (t:make-tile v:board-table
                       (lambda ()
-                        (channel-put human-player-channel coords))
+                        (channel-put gui-player-channel coords))
                       piece
                       coords))
        (g:turn-board init-turn)
@@ -140,12 +140,12 @@
 
 
 (define (clear-player-channel)
-  (when (channel-try-get human-player-channel)
+  (when (channel-try-get gui-player-channel)
     (clear-player-channel)))
 
 (define (get-human-choice)
   (clear-player-channel)
-  (channel-get human-player-channel))
+  (channel-get gui-player-channel))
 
 
 (define (get-computer-choice state)
@@ -167,7 +167,7 @@
 (define (single-player-init-turn init-state)
   (let* ([second-turn
          (handle-tile-click init-state
-                            (channel-get human-player-channel))]
+                            (channel-get gui-player-channel))]
          [second-player (g:turn-player second-turn)])
     (event-loop second-turn
                 (lambda (state)
@@ -179,19 +179,19 @@
 (define (multi-player-init-turn init-state)
   (let ([event-result
          (handle-tile-click init-state
-                            (channel-get human-player-channel))])
+                            (channel-get gui-player-channel))])
     (event-loop event-result
                 (lambda (_)
                   (get-human-choice)))))
 
 
-(define (multi-player)
+(define (local-multi-player)
  (thread
   (lambda ()
     (player-won (multi-player-init-turn init-turn)
                 void))))
 
-(define (single-player [difficulty 'easy])
+(define (local-single-player [difficulty 'easy])
   (thread
    (lambda ()
      (ai:start-ai computer-player-channel difficulty)
