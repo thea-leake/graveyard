@@ -61,7 +61,7 @@
 
 
 (define (raise-location state location-coords)
-  (let ([handled-turn (g:player-flip-location state)])
+  (let ([handled-turn (g:player-flip-location state location-coords)])
     (struct-copy g:turn handled-turn
                  [message (raise-message state
                                          location-coords )])))
@@ -126,7 +126,7 @@
 ;; Starts and runs a single player game.
 ;; Returns when the game is won
 (define (single-player-start-game init-state)
-  (let ([update-ui (gu:ui-updater gui-player-channel init-state)])
+  (let ([update-ui (gu:ui-updater gui-player-channel)])
     (event-loop init-state
                 update-ui
                 (lambda (state)
@@ -140,7 +140,7 @@
 ;; Starts and runs a multi player game
 ;; Finishes when the game is won
 (define (multi-player-start-game init-state)
-  (let ([update-ui (gu:ui-updater gui-player-channel init-state)])
+  (let ([update-ui (gu:ui-updater gui-player-channel)])
     (event-loop init-state
                 update-ui
                 (lambda (_)

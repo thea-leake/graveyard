@@ -46,7 +46,7 @@
                     (g:turn-board state)
                     b:board-coordinates)))))
 
-(define (ui-updater gui-player-channel init-turn)
+(define (ui-updater gui-player-channel)
   (let ([update-board (board-updater gui-player-channel)])
     (lambda (state)
       (update-board state)
