@@ -1,4 +1,4 @@
-;; Copyright 2019 Thea Leake
+;; Copyright 2019-2021 Thea Leake
 
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -50,6 +50,6 @@
        [callback (lambda (button event)
                    (send start-game-dialog show #f)
                    (send v:game-window show #t)
-                   (ctrl:multi-player))]))
+                   (ctrl:local-multi-player))]))
 
 (send start-game-dialog show #t)

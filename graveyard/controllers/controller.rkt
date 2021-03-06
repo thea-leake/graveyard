@@ -20,52 +20,20 @@
 
 (require (only-in racket/string
                   string-join)
-         (only-in racket/class
-                  send)
          (prefix-in b: "../models/board.rkt")
          (prefix-in r: "../models/roles.rkt")
          (prefix-in g: "../models/graveyard.rkt")
          (prefix-in ai: "ai.rkt")
-         (prefix-in t: "../views/tile.rkt")
-         (prefix-in v: "../views/view.rkt")
-         (prefix-in ev: "../views/end_view.rkt"))
+         (prefix-in gu: "gui.rkt"))
 
-(define init-turn
-  (g:gen-init-turn "First Necromancer: pick a corpse to raise!"))
-
-(define gui-player-channel (make-channel))
 
 (define computer-player-channel (make-channel))
 
-
-(define tile-list
-  (map (lambda (piece coords)
-         (t:make-tile v:board-table
-                      (lambda ()
-                        (channel-put gui-player-channel coords))
-                      piece
-                      coords))
-       (g:turn-board init-turn)
-       b:board-coordinates))
+(define gui-player-channel (make-channel))
 
 
-(define (update-board state)
-  (for-each (lambda (tile-piece-coords)
-              (t:update-tile state tile-piece-coords))
-            (map t:location
-                 tile-list
-                 (g:turn-board state)
-                 b:board-coordinates)))
-
-(define (update-ui state)
-  (update-board state)
-  (send v:player-display set-label (string-join (list "Current Necromancer:" (g:turn-player state))))
-  (send v:player-message set-label (g:turn-message state)))
-
-
-(define (event-handled state)
-  (update-ui state)
-  state)
+(define (init-turn)
+  (g:gen-init-turn "First Necromancer: pick a corpse to raise!"))
 
 
 (define (finish-move-message state)
@@ -81,9 +49,9 @@
   (let* ([updated-game (g:player-move state
                                       location-coords)]
          [message (finish-move-message updated-game)])
-    (event-handled (struct-copy g:turn updated-game
-                                [message message]
-                                [src-coords b:none-position]))))
+    (struct-copy g:turn updated-game
+                 [message message]
+                 [src-coords b:none-position])))
 
 
 (define (raise-message state coords)
@@ -93,12 +61,10 @@
 
 
 (define (raise-location state location-coords)
-  (let ([handled-turn (g:player-flip-location state
-                                              location-coords)])
-    (event-handled
-     (struct-copy g:turn handled-turn
-                  [message (raise-message state
-                                          location-coords )]))))
+  (let ([handled-turn (g:player-flip-location state)])
+    (struct-copy g:turn handled-turn
+                 [message (raise-message state
+                                         location-coords )])))
 
 
 (define (move-message state location-coords)
@@ -109,17 +75,17 @@
 
 
 (define (move-src-event state location-coords)
-  (event-handled (struct-copy g:turn state
-                              [src-coords location-coords]
-                              [message (move-message state location-coords)])))
+  (struct-copy g:turn state
+               [src-coords location-coords]
+               [message (move-message state location-coords)]))
 
 
 (define (wrong-player state)
-  (event-handled (struct-copy g:turn state
-                              [message "Selected other necromancers piece."])))
+  (struct-copy g:turn state
+               [message "Selected other necromancers piece."]))
 
 
-(define (handle-tile-click state location-coords)
+(define (handle-player-action state location-coords)
   (cond
     ((g:coords-selected? state) (finish-move-turn state location-coords))
     ((g:location-hidden? location-coords (g:turn-board state))
@@ -129,14 +95,6 @@
      (move-src-event state location-coords))
     (else (wrong-player state))))
 
-
-(define (player-won player cleanup-thunk)
-  (send ev:end-game-message set-label
-        (string-join (list "Player"
-                            player
-                           "Has Won!")))
-  (send ev:end-game-dialog show #t)
-  (cleanup-thunk))
 
 
 (define (clear-player-channel)
@@ -153,49 +111,53 @@
   (channel-get computer-player-channel))
 
 
-(define (event-loop init-state player-choice-fn)
+(define (event-loop init-state client-updater player-choice-fn)
   (let loop ([state init-state])
     (cond
       ((g:player-lost? state)
-       (r:toggle-player (g:turn-player state)))         ;; toggle to return winning player
+       ;; toggle to return winning player
+       (r:toggle-player (g:turn-player state)))
       (else
        (loop
-        (handle-tile-click state
-                           (player-choice-fn state)))))))
+        (client-updater (handle-player-action state
+                               (player-choice-fn state))))))))
 
 
-(define (single-player-init-turn init-state)
-  (let* ([second-turn
-         (handle-tile-click init-state
-                            (channel-get gui-player-channel))]
-         [second-player (g:turn-player second-turn)])
-    (event-loop second-turn
+;; Starts and runs a single player game.
+;; Returns when the game is won
+(define (single-player-start-game init-state)
+  (let ([update-ui (gu:ui-updater gui-player-channel init-state)])
+    (event-loop init-state
+                update-ui
                 (lambda (state)
-                  (if (eq? (g:turn-player state ) second-player)
-                      (get-computer-choice state)
-                      (get-human-choice))))))
+                 (if (eq? (g:turn-player state )
+                          (g:turn-first-player state))
+                     ;; as of now ai goes second
+                     (get-human-choice)
+                     (get-computer-choice state))))))
 
 
-(define (multi-player-init-turn init-state)
-  (let ([event-result
-         (handle-tile-click init-state
-                            (channel-get gui-player-channel))])
-    (event-loop event-result
+;; Starts and runs a multi player game
+;; Finishes when the game is won
+(define (multi-player-start-game init-state)
+  (let ([update-ui (gu:ui-updater gui-player-channel init-state)])
+    (event-loop init-state
+                update-ui
                 (lambda (_)
                   (get-human-choice)))))
 
 
 (define (local-multi-player)
- (thread
-  (lambda ()
-    (player-won (multi-player-init-turn init-turn)
-                void))))
+  (thread
+   (lambda ()
+     (gu:finish-game (multi-player-start-game (init-turn))
+                  void))))
 
 (define (local-single-player [difficulty 'easy])
   (thread
    (lambda ()
      (ai:start-ai computer-player-channel difficulty)
-     (player-won (single-player-init-turn init-turn)
-                 (lambda ()
-                   (channel-put computer-player-channel
-                                #f))))))
+     (gu:finish-game (single-player-start-game (init-turn))
+                  (lambda ()
+                    (channel-put computer-player-channel
+                                 #f))))))

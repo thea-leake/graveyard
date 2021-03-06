@@ -1,4 +1,4 @@
-;; Copyright 2019 Thea Leake
+;; Copyright 2019-2021 Thea Leake
 
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@
        [callback (lambda (button event)
                    (send ai-difficulty-dialog show #f)
                    (send v:game-window show #t)
-                   (ctrl:single-player 'easy))]))
+                   (ctrl:local-single-player 'easy))]))
 
 
 (define medium-button
@@ -53,4 +53,4 @@
        [callback (lambda (button event)
                    (send ai-difficulty-dialog show #f)
                    (send v:game-window show #t)
-                   (ctrl:single-player 'medium))]))
+                   (ctrl:local-single-player 'medium))]))

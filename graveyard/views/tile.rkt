@@ -1,4 +1,4 @@
-;; Copyright 2019 Thea Leake
+;; Copyright 2019-2021 Thea Leake
 
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@
                   inherit)
          (only-in racket/gui/base
                   canvas%)
-         (prefix-in g: "../models/graveyard.rkt")
          (prefix-in c: "colors.rkt")
          (prefix-in i: "images.rkt")
          (prefix-in s: "image_settings.rkt"))
@@ -69,7 +68,7 @@
           0
           0)))
 
-(define (make-tile parent callback piece coords)
+(define (make-tile parent callback coords)
   (let* ([image (i:hidden-tile-label coords)]
          [new-tile (new tile-canvas%
                          [parent parent]

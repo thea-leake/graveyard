@@ -1,4 +1,4 @@
-;; Copyright 2019 Thea Leake
+;; Copyright 2019-2021 Thea Leake
 
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -53,6 +53,7 @@
 (struct turn
   ([board : (Listof r:cell)]
    [player : r:Player]
+   [first-player : r:Player]
    [message : String]
    [first? : Boolean]
    [captured : (U r:cell False)]
@@ -71,6 +72,7 @@
 (: gen-init-turn (-> String turn))
 (define (gen-init-turn message)
   (turn (b:gen-board)   ;; board
+        "Undecided"     ;; player
         "Undecided"     ;; player
         message         ;; message
         #t              ;; first-turn
@@ -465,21 +467,30 @@
   (not
    (actions-available? (valid-player-turns state))))
 
+(: set-first-turn-fields (-> turn r:Player turn))
+(define (set-first-turn-fields state current-player)
+  (if (turn-first? state)
+      (struct-copy turn state
+                   [first-player current-player]
+                   [first? #f])
+      state))
+
 
 (: player-flip-location (-> turn b:Position turn))
 (define (player-flip-location state coords)
-  (let ([next-player (if (turn-first? state)
-                         (r:toggle-player (player-at-location coords
-                                                            (turn-board state)))
-                         (r:toggle-player (turn-player state)))])
+  (let* ([current-player (if (turn-first? state)
+                             (player-at-location coords
+                                                 (turn-board state))
+                             (turn-player state))]
+         [next-player (r:toggle-player current-player)]
+         [state-started-game (set-first-turn-fields state current-player)])
     (struct-copy turn state
                  [board (flip-coordinates coords
-                                          (turn-board state))]
+                                          (turn-board state-started-game))]
                  [player next-player]
                  [message (role-at-location coords
-                                            (turn-board state))]
-                 [src-coords b:none-position]
-                 [first? #f])))
+                                            (turn-board state-started-game))]
+                 [src-coords b:none-position])))
 
 
 (: player-move (-> turn b:Position turn))
