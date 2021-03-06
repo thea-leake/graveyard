@@ -175,6 +175,7 @@
          [before-flip
           (g:turn piece-hidden-board
                   player1
+                  player1
                   "some message"
                   #f
                   r:none-role
@@ -184,6 +185,7 @@
          [after-flip
           (g:turn piece-revealed-board
                   player2
+                  player1
                   "Zombie"
                   #f
                   r:none-role
@@ -211,6 +213,7 @@
          [selected-turn
           (g:turn test-board
                   player1
+                  player1
                   ""
                   #f
                   r:none-role
@@ -219,6 +222,7 @@
 
          [unselected-turn
           (g:turn test-board
+                  player1
                   player1
                   ""
                   #f
@@ -293,6 +297,7 @@
          [before-move-to-none-role-state
           (g:turn move-to-none-role
                   player1
+                  player1
                   ""
                   #f
                   r:none-role
@@ -302,6 +307,7 @@
          [after-move-to-none-role-state
           (g:turn moved-to-none-role
                   player2
+                  player1
                   "Valid move."
                   #f
                   r:none-role
@@ -317,6 +323,7 @@
          [before-move-to-same-player-occupied-location-state
           (g:turn move-to-same-player-occupied-location
                   player1
+                  player2
                   ""
                   #f
                   r:none-role
@@ -325,6 +332,7 @@
          [after-move-to-same-player-occupied-location-state
           (g:turn move-to-same-player-occupied-location
                   player1
+                  player2
                   "Cannot capture your own piece"
                   #f
                   r:none-role
@@ -376,6 +384,7 @@
          [all-player2-pieces-captured-state
           (g:turn all-player2-pieces-captured
                   player2
+                  player2
                   "skeleton captured.."
                   #f
                   player2-skeleton
@@ -384,6 +393,7 @@
 
          [player2-unable-to-move-state
           (g:turn player2-unable-to-move
+                  player2
                   player2
                   "skeleton captured.."
                   #f
@@ -394,6 +404,7 @@
          [player2-flip-available-state
           (g:turn player2-flip-available
                   player2
+                  player2
                   "skeleton captured.."
                   #f
                   player2-skeleton
@@ -402,6 +413,7 @@
 
          [player2-move-available-state
           (g:turn player2-move-available
+                  player2
                   player2
                   "skeleton captured.."
                   #f
@@ -461,6 +473,7 @@
          [all-player2-pieces-captured-state
           (g:turn all-player2-pieces-captured
                   player2
+                  player2
                   "skeleton captured.."
                   #f
                   player2-skeleton
@@ -469,6 +482,7 @@
 
          [player2-unable-to-move-state
           (g:turn player2-unable-to-move
+                  player2
                   player2
                   "skeleton captured.."
                   #f
@@ -479,6 +493,7 @@
          [player2-flip-available-state
           (g:turn player2-flip-available
                   player2
+                  player2
                   "skeleton captured.."
                   #f
                   player2-skeleton
@@ -488,6 +503,7 @@
          [player2-move-available-state
           (g:turn player2-move-available
                   player2
+                  player2
                   "skeleton captured.."
                   #f
                   player2-skeleton
@@ -495,6 +511,7 @@
                   #t)]
          [player2-captures-available-state
           (g:turn player2-captures-available
+                  player2
                   player2
                   "skeleton captured.."
                   #f
@@ -577,6 +594,7 @@
          [game-state-safe-capture
           (g:turn move-with-safe-capture
                   player2
+                  player2
                   "" #f #f #f #f)]
 
          [move-with-unsafe-capture
@@ -589,6 +607,7 @@
          [game-state-unsafe-capture
           (g:turn move-with-unsafe-capture
                   player2
+                  player2
                   "" #f #f #f #f)]
 
          [move-with-unsafe-capture-by-cannon
@@ -600,6 +619,7 @@
 
          [game-state-unsafe-capture-by-cannon
           (g:turn move-with-unsafe-capture-by-cannon
+                  player2
                   player2
                   "" #f #f #f #f)]
 
