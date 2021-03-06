@@ -38,7 +38,7 @@
          (prefix-in g: "../models/graveyard.rkt")
          (prefix-in r: "../models/roles.rkt")
          (prefix-in c: "colors.rkt")
-         (prefix-in i: "inlined_images.rkt")
+         (prefix-in i: "assets/inlined_images.rkt")
          (prefix-in s: "image_settings.rkt"))
 
 
