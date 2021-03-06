@@ -484,7 +484,7 @@
                              (turn-player state))]
          [next-player (r:toggle-player current-player)]
          [state-started-game (set-first-turn-fields state current-player)])
-    (struct-copy turn state
+    (struct-copy turn state-started-game
                  [board (flip-coordinates coords
                                           (turn-board state-started-game))]
                  [player next-player]

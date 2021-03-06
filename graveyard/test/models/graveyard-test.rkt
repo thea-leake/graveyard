@@ -190,12 +190,27 @@
                   #f
                   r:none-role
                   b:none-position
-                  #t)])
+                  #t)]
+         [before-first-turn
+          (g:turn piece-hidden-board
+                  "Undecided"
+                  "Undecided"
+                  "some message"
+                  #t ;; first turn
+                  r:none-role
+                  b:none-position
+                  #t)]
+         )
 
     (test-case "Flipping a hidden piece reveals that piece and toggles the player"
       (check-equal? (g:player-flip-location before-flip
                                             coords-to-flip)
-                    after-flip))))
+                    after-flip))
+    (let ([second-turn (g:player-flip-location before-first-turn
+                                               coords-to-flip)])
+      (test-case "First turn sets first player and first turn fields"
+        (check-equal? (g:turn-first-player second-turn) player1)
+        (check-equal? (g:turn-first? second-turn) #f)))))
 
 (run-tests test-player-flip-location)
 
@@ -252,6 +267,10 @@
 
     (test-case "player set to undecided"
       (check-equal? (g:turn-player init-turn)
+                    "Undecided"))
+
+    (test-case "first player set to undecided"
+      (check-equal? (g:turn-first-player init-turn)
                     "Undecided"))
 
     (test-case "first turn is set to true"
