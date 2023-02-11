@@ -107,19 +107,19 @@
                         chosen-dest))))))                              ;; next turn dest
 
 
-(define (ai-player chnl ai-logic)
-  (let loop ([message (channel-get chnl)]
+(define (ai-player chnl-in chnl-out ai-logic)
+  (let loop ([message (channel-get chnl-in)]
              [ai-prev-turn (ai-state #f
                                      #f)])
     (when message
       (sleep turn-wait-time)
       (let ([ai-decision (ai-logic message ai-prev-turn)])
-        (channel-put chnl
+        (channel-put chnl-out
                      (ai-state-turn-response ai-decision))
-        (loop (channel-get chnl)
+        (loop (channel-get chnl-in)
               ai-decision)))))
 
-(define (start-ai chnl difficulty)
+(define (start-ai chnl-in chnl-out difficulty)
   (let ([ai-logic
          (ai-builder
           (case difficulty
@@ -127,4 +127,4 @@
             ('medium choose-locations-medium)))])
     (thread
      (lambda ()
-       (ai-player chnl ai-logic)))))
+       (ai-player chnl-in chnl-out ai-logic)))))

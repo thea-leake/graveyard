@@ -34,16 +34,18 @@
 (define init-turn
   (g:gen-init-turn "First Necromancer: pick a corpse to raise!"))
 
-(define human-player-channel (make-channel))
+(define ui-input-channel (make-channel))
+;; for computer player proc, or possibly nw client in future etc
+(define proc-choice-channel (make-channel))
 
-(define computer-player-channel (make-channel))
+(define proc-inform-channel (make-channel))
 
 
 (define tile-list
   (map (lambda (piece coords)
          (t:make-tile v:board-table
                       (lambda ()
-                        (channel-put human-player-channel coords))
+                        (channel-put ui-input-channel coords))
                       piece
                       coords))
        (g:turn-board init-turn)
@@ -142,17 +144,17 @@
 
 
 (define (clear-player-channel)
-  (when (channel-try-get human-player-channel)
+  (when (channel-try-get ui-input-channel)
     (clear-player-channel)))
 
 (define (get-human-choice)
   (clear-player-channel)
-  (channel-get human-player-channel))
+  (channel-get ui-input-channel))
 
 
 (define (get-computer-choice state)
-  (channel-put computer-player-channel state)
-  (channel-get computer-player-channel))
+  (channel-put proc-inform-channel state)
+  (channel-get proc-choice-channel))
 
 
 (define (event-loop init-state player-choice-fn)
@@ -169,7 +171,7 @@
 (define (single-player-init-turn init-state)
   (let* ([second-turn
          (handle-tile-click init-state
-                            (channel-get human-player-channel))]
+                            (channel-get ui-input-channel))]
          [second-player (g:turn-player second-turn)])
     (event-loop second-turn
                 (lambda (state)
@@ -181,7 +183,7 @@
 (define (multi-player-init-turn init-state)
   (let ([event-result
          (handle-tile-click init-state
-                            (channel-get human-player-channel))])
+                            (channel-get ui-input-channel))])
     (event-loop event-result
                 (lambda (_)
                   (get-human-choice)))))
@@ -197,8 +199,8 @@
 (define (single-player [difficulty 'easy])
   (thread
    (lambda ()
-     (ai:start-ai computer-player-channel difficulty)
+     (ai:start-ai proc-inform-channel proc-choice-channel difficulty)
      (player-won (single-player-init-turn init-turn)
                  (lambda ()
-                   (channel-put computer-player-channel
+                   (channel-put proc-inform-channel
                                 #f))))))
