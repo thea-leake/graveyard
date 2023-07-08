@@ -1,12 +1,12 @@
 name: CI
 on:
   push:
-    branches: [ "main", "switch-to-actions" ]
+    branches: [ "main"]
   pull_request:
     branches: [ "main" ]
 
 jobs:
-  Build_Test:
+  build_and_test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
