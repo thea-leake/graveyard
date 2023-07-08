@@ -133,8 +133,8 @@
 (define welcome-bitmap
   (compiled-bitmap
    (pict->bitmap
-    (text/font "Welcome to Queen of the Graveyard!"
-               27
+    (text/font "### Graveyard ###"
+               20
                "Goldenrod"
                "Courier"
                'decorative

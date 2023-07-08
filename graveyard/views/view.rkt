@@ -47,7 +47,9 @@
 
 (define game-window
   (new frame%
-       [label "Graveyard"]))
+       [label "Graveyard"]
+       [stretchable-width #f]
+       [stretchable-height #f]))
 
 (define game-pane
   (new pane%
@@ -62,10 +64,11 @@
 (define board-container vert-arranger)
 
 
+
 (define welcome-message
   (new canvas%
        [parent board-container]
-       [min-height 50]
+       [min-height 20]
        [paint-callback (lambda (me dc)
                          (send dc
                                draw-bitmap
@@ -80,8 +83,8 @@
   (new table-panel%
        [parent board-container]
        [dimensions '(1 2)]
-       [column-stretchability #t]
-       [row-stretchability #t]
+       [column-stretchability #f]
+       [row-stretchability #f]
        [alignment (list 'center 'top)]))
 
 
@@ -103,6 +106,8 @@
   (new table-panel%
        [parent board-container]
        [border 2]
+       [stretchable-width #f]
+       [stretchable-height #f]
        [dimensions (list b:board-rows b:board-columns)]
        [alignment (list 'center 'bottom)]))
 
